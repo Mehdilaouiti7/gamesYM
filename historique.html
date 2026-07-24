@@ -139,6 +139,11 @@
       <p class="muted" id="tm-summary"></p>
       <div class="history-list" id="tm-list"></div>
     </div>
+    <div class="card hidden" id="sec-cb">
+      <h2>🃏 Chkobba</h2>
+      <div class="totals-row" id="cb-totals"></div>
+      <div class="history-list" id="cb-list"></div>
+    </div>
   </div>
 </div>
 
@@ -187,6 +192,22 @@ function skWinsForPair(rows, a, b){
   });
   return {w1, w2};
 }
+function cbSides(row, a, b){
+  const namesA = (row.side_a_names||[]).map(n=>n.trim().toLowerCase());
+  const namesB = (row.side_b_names||[]).map(n=>n.trim().toLowerCase());
+  const aSide = namesA.includes(a) ? 'a' : (namesB.includes(a) ? 'b' : null);
+  const bSide = namesA.includes(b) ? 'a' : (namesB.includes(b) ? 'b' : null);
+  return { aSide, bSide };
+}
+function cbWinsForPair(rows, a, b){
+  let w1 = 0, w2 = 0;
+  rows.forEach(r=>{
+    const { aSide, bSide } = cbSides(r, a, b);
+    if(!aSide || !bSide || aSide===bSide) return;
+    if(r.winner_side===aSide) w1++; else if(r.winner_side===bSide) w2++;
+  });
+  return {w1, w2};
+}
 
 async function search(){
   const n1 = $('name1').value.trim();
@@ -196,14 +217,15 @@ async function search(){
   $('btn-search').disabled = true;
 
   const a = n1.toLowerCase(), b = n2.toLowerCase();
-  const [vt, sk, tm] = await Promise.all([fetchResults('vt_results'), fetchResults('sk_results'), fetchResults('tm_results')]);
+  const [vt, sk, tm, cb] = await Promise.all([fetchResults('vt_results'), fetchResults('sk_results'), fetchResults('tm_results'), fetchResults('cb_results')]);
   $('btn-search').disabled = false;
 
   const vtRows = vt.filter(r => matchesPair(r, a, b)).map(r => Object.assign({}, r, {game:'vt'}));
   const skRows = sk.filter(r => matchesTeam(r, a, b)).map(r => Object.assign({}, r, {game:'sk'}));
   const tmRows = tm.filter(r => matchesTeam(r, a, b)).map(r => Object.assign({}, r, {game:'tm'}));
+  const cbRows = cb.filter(r => matchesTeam(r, a, b)).map(r => Object.assign({}, r, {game:'cb'}));
 
-  renderResults(n1, n2, vtRows, skRows, tmRows);
+  renderResults(n1, n2, vtRows, skRows, tmRows, cbRows);
 }
 
 function historyRowHtml(dateIso, label, rightText){
@@ -217,9 +239,9 @@ function totalsRowHtml(n1, w1, n2, w2, count){
     '<div class="side"><div class="n">'+w2+'</div><div class="nm">'+esc(n2)+'</div></div>';
 }
 
-function renderResults(n1, n2, vtRows, skRows, tmRows){
+function renderResults(n1, n2, vtRows, skRows, tmRows, cbRows){
   $('results').classList.remove('hidden');
-  const anyData = vtRows.length || skRows.length || tmRows.length;
+  const anyData = vtRows.length || skRows.length || tmRows.length || cbRows.length;
   $('sec-empty').classList.toggle('hidden', !!anyData);
   if(!anyData){
     $('empty-text').textContent = "Aucune partie trouvée entre "+esc(n1)+" et "+esc(n2)+" pour l'instant. Jouez une partie pour commencer l'historique !";
@@ -254,6 +276,21 @@ function renderResults(n1, n2, vtRows, skRows, tmRows){
     $('tm-list').innerHTML = tmRows.map(r=>{
       const result = r.won ? '✅ victoire' : '❌ niveau '+r.level_reached;
       return historyRowHtml(r.finished_at, '🧠 The Mind ('+r.max_players+' joueurs)', result);
+    }).join('');
+  }
+
+  $('sec-cb').classList.toggle('hidden', cbRows.length===0);
+  if(cbRows.length){
+    const a = n1.toLowerCase(), b = n2.toLowerCase();
+    const cbPair = cbWinsForPair(cbRows, a, b);
+    $('cb-totals').innerHTML = totalsRowHtml(n1, cbPair.w1, n2, cbPair.w2, cbRows.length);
+    $('cb-list').innerHTML = cbRows.map(r=>{
+      const sideANames = (r.side_a_names||[]).join(' & ');
+      const sideBNames = (r.side_b_names||[]).join(' & ');
+      const winnerNames = r.winner_side==='a' ? sideANames : sideBNames;
+      const groupStr = r.max_players>2 ? ' ('+r.max_players+' joueurs)' : '';
+      const label = '🃏 Chkobba'+groupStr+' · '+r.side_a_score+'–'+r.side_b_score;
+      return historyRowHtml(r.finished_at, label, '🏆 '+esc(winnerNames));
     }).join('');
   }
 }

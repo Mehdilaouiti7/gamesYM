@@ -179,8 +179,8 @@
     <div class="card">
       <h2>Règles</h2>
       <p class="muted">Chacun reçoit des cartes numérotées (1 à 100), cachées aux autres. Sans parler ni se signaler, l'équipe doit jouer toutes les cartes de tous les joueurs dans l'ordre croissant, une à une.<br>
-      Tu ne peux jouer que ta carte la plus basse. Si quelqu'un d'autre avait une carte plus petite que toi, c'est une erreur : vous perdez une vie et toutes les cartes plus petites sont révélées.<br>
-      Videz toutes vos mains pour passer au niveau suivant. Plus de vies = défaite. Dernier niveau franchi = victoire d'équipe !</p>
+      Tu ne peux jouer que ta carte la plus basse. Si quelqu'un d'autre avait une carte plus petite que toi, c'est une erreur : vous perdez une vie.<br>
+      Videz toutes vos mains sans erreur pour passer au niveau suivant. En cas d'erreur, vous retentez le même niveau (si vous avez encore des vies). Plus de vies = défaite. Dernier niveau franchi = victoire d'équipe !</p>
     </div>
   </div>
 
@@ -247,7 +247,7 @@
       <div class="big" id="level-panel-emoji">🎉</div>
       <h2 id="level-panel-title">Niveau terminé !</h2>
       <p class="muted" id="level-panel-reward"></p>
-      <button class="btn-main" onclick="continueLevel()">Niveau suivant</button>
+      <button class="btn-main" id="level-panel-btn" onclick="continueLevel()">Niveau suivant</button>
     </div>
 
     <p class="muted" style="text-align:center;margin-top:10px">Code de la partie : <b id="game-code-label"></b></p>
@@ -338,7 +338,7 @@ function setupLevel(st, level){
   st.hands = hands;
   st.pile = [];
   st.level = level;
-  st.levelComplete = false;
+  st.levelResult = null;
   st.lastEvent = null;
 }
 function checkLevelComplete(st){
@@ -346,9 +346,11 @@ function checkLevelComplete(st){
   if(allEmpty){
     const reward = REWARD_LEVELS.has(st.level) ? 'life' : null;
     if(reward==='life') st.lives += 1;
-    st.lastEvent = Object.assign({}, st.lastEvent, {reward});
-    if(st.level >= st.maxLevel){ st.status='finished'; st.won=true; }
-    else { st.levelComplete = true; }
+    if(st.level >= st.maxLevel){
+      st.status='finished'; st.won=true;
+    } else {
+      st.levelResult = { type:'success', level: st.level, reward };
+    }
   }
 }
 function attemptPlay(st, actor){
@@ -364,17 +366,12 @@ function attemptPlay(st, actor){
     checkLevelComplete(st);
   } else {
     st.lives -= 1;
-    const revealed = [];
-    st.hands.forEach(h=>{
-      while(h.length && h[0] < myCard){ revealed.push(h.shift()); }
-    });
-    hand.shift();
-    revealed.push(myCard);
-    revealed.sort((a,b)=>a-b);
-    st.pile.push(...revealed);
-    st.lastEvent = {type:'mistake', by:actor, card:myCard, revealedCount:revealed.length};
-    if(st.lives<=0){ st.status='finished'; st.won=false; return; }
-    checkLevelComplete(st);
+    st.lastEvent = {type:'mistake', by:actor, card:myCard};
+    if(st.lives<=0){
+      st.status='finished'; st.won=false;
+    } else {
+      st.levelResult = { type:'fail', level: st.level, livesLeft: st.lives };
+    }
   }
 }
 /* ---------- create / join ---------- */
@@ -479,20 +476,21 @@ async function finalizeAction(st){
   renderCurrent();
 }
 async function playCard(){
-  if(busy || !state || state.status!=='playing' || state.levelComplete) return;
+  if(busy || !state || state.status!=='playing' || state.levelResult) return;
   if(!state.hands[me] || !state.hands[me].length) return;
   busy = true;
   let st = await loadState(code) || state;
-  if(st.status!=='playing' || st.levelComplete || !st.hands[me] || !st.hands[me].length){ state=st; busy=false; renderCurrent(); return; }
+  if(st.status!=='playing' || st.levelResult || !st.hands[me] || !st.hands[me].length){ state=st; busy=false; renderCurrent(); return; }
   attemptPlay(st, me);
   await finalizeAction(st);
 }
 async function continueLevel(){
-  if(busy || !state || !state.levelComplete) return;
+  if(busy || !state || !state.levelResult) return;
   busy = true;
   let st = await loadState(code) || state;
-  if(!st.levelComplete){ state=st; busy=false; renderCurrent(); return; }
-  setupLevel(st, st.level+1);
+  if(!st.levelResult){ state=st; busy=false; renderCurrent(); return; }
+  const nextLevel = st.levelResult.type==='success' ? st.level + 1 : st.level;
+  setupLevel(st, nextLevel);
   await finalizeAction(st);
 }
 
@@ -510,7 +508,7 @@ function renderBoard(){
     banner.textContent = (state.players[ev.by]?state.players[ev.by].name:'?') + " a joué " + ev.card + (ev.reward ? " · récompense : ❤️ vie" : "");
   } else if(ev.type==='mistake'){
     banner.className = "event-banner mistake";
-    banner.textContent = "❌ " + (state.players[ev.by]?state.players[ev.by].name:'?') + " a joué "+ev.card+" trop tôt — "+ev.revealedCount+" carte(s) révélée(s), 1 vie perdue";
+    banner.textContent = "❌ " + (state.players[ev.by]?state.players[ev.by].name:'?') + " a joué "+ev.card+" trop tôt — 1 vie perdue";
   }
 
   const others = $('others-row');
@@ -531,17 +529,26 @@ function renderBoard(){
   const handRow = $('hand-row');
   handRow.innerHTML = myHand.map((v,i) => '<span class="hand-chip'+(i===0?' lowest':'')+'">'+v+'</span>').join('') || '<span class="muted">Ta main est vide</span>';
 
-  const canAct = state.status==='playing' && !state.levelComplete;
+  const canAct = state.status==='playing' && !state.levelResult;
   $('btn-play').disabled = !canAct || myHand.length===0;
 
   const panel = $('level-panel');
-  if(state.levelComplete){
+  const lr = state.levelResult;
+  if(lr){
     panel.classList.remove('hidden');
-    const reward = state.lastEvent && state.lastEvent.reward;
-    $('level-panel-title').textContent = "Niveau " + state.level + " terminé !";
-    $('level-panel-reward').textContent = reward
-      ? "Récompense : ❤️ une vie en plus"
-      : "Pas de récompense à ce niveau.";
+    if(lr.type==='success'){
+      $('level-panel-emoji').textContent = "🎉";
+      $('level-panel-title').textContent = "Niveau " + lr.level + " terminé !";
+      $('level-panel-reward').textContent = lr.reward
+        ? "Récompense : ❤️ une vie en plus"
+        : "Pas de récompense à ce niveau.";
+      $('level-panel-btn').textContent = "Niveau suivant";
+    } else {
+      $('level-panel-emoji').textContent = "❌";
+      $('level-panel-title').textContent = "Niveau " + lr.level + " raté !";
+      $('level-panel-reward').textContent = "Il vous reste ❤️ " + lr.livesLeft + " vie" + (lr.livesLeft>1?'s':'') + ". On retente le même niveau !";
+      $('level-panel-btn').textContent = "Retenter le niveau";
+    }
   } else {
     panel.classList.add('hidden');
   }
