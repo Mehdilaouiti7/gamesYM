@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vache &amp; Taureau — à deux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board:#24382e;
+    --board-deep:#1b2c24;
+    --chalk:#f3efe4;
+    --chalk-dim:#c9c4b4;
+    --butter:#e9c46a;
+    --red-chalk:#e76f51;
+    --blue-chalk:#8ecae6;
+    --line:rgba(243,239,228,.18);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Fredoka',system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(233,196,106,.07), transparent 60%),
+      linear-gradient(var(--board), var(--board-deep));
+    color:var(--chalk);
+    min-height:100dvh;
+    display:flex;flex-direction:column;align-items:center;
+    padding:20px 16px 40px;
+  }
+  .frame{width:100%;max-width:430px}
+  header{text-align:center;margin-bottom:18px}
+  h1{font-weight:700;font-size:1.9rem;letter-spacing:.5px}
+  h1 .emo{font-size:1.5rem;vertical-align:-2px}
+  .tagline{color:var(--chalk-dim);font-size:.9rem;margin-top:2px}
+  .card{
+    background:rgba(255,255,255,.045);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px 16px;
+    margin-bottom:14px;
+  }
+  .card h2{font-size:1.05rem;font-weight:600;margin-bottom:10px}
+  label{display:block;font-size:.85rem;color:var(--chalk-dim);margin:10px 0 4px}
+  input[type=text],input[type=tel]{
+    width:100%;
+    background:rgba(0,0,0,.25);
+    border:1.5px dashed var(--line);
+    border-radius:10px;
+    color:var(--chalk);
+    font-family:'Space Mono',monospace;
+    font-size:1.15rem;
+    padding:11px 12px;
+    letter-spacing:.25em;
+    outline:none;
+  }
+  input:focus{border-color:var(--butter)}
+  input.name-input{font-family:'Fredoka',sans-serif;letter-spacing:normal;font-size:1rem}
+  button{
+    font-family:'Fredoka',sans-serif;
+    font-weight:600;font-size:1rem;
+    border:none;border-radius:12px;
+    padding:13px 16px;width:100%;
+    cursor:pointer;margin-top:12px;
+    transition:transform .08s ease, opacity .15s;
+  }
+  button:active{transform:scale(.98)}
+  button:disabled{opacity:.45;cursor:default}
+  .btn-main{background:var(--butter);color:#3a2c10}
+  .btn-ghost{background:transparent;color:var(--chalk);border:1.5px solid var(--line)}
+  .btn-small{width:auto;padding:8px 14px;font-size:.85rem;margin-top:0}
+  .muted{color:var(--chalk-dim);font-size:.85rem;line-height:1.45}
+  .error{color:var(--red-chalk);font-size:.85rem;margin-top:8px;min-height:1.2em}
+  .hidden{display:none !important}
+
+  .code-big{
+    font-family:'Space Mono',monospace;
+    font-size:2.4rem;font-weight:700;
+    letter-spacing:.35em;text-align:center;
+    color:var(--butter);
+    padding:10px 0 4px;
+    text-indent:.35em;
+  }
+  .pulse{animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+  .status-bar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .status-pill{
+    background:rgba(0,0,0,.28);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:7px 14px;font-size:.85rem;
+    flex:1;text-align:center;
+  }
+  .status-pill.mine{border-color:var(--butter);color:var(--butter)}
+  .legend{display:flex;gap:14px;justify-content:center;font-size:.8rem;color:var(--chalk-dim);margin-bottom:10px}
+  .history{
+    max-height:42dvh;overflow-y:auto;
+    display:flex;flex-direction:column;gap:6px;
+    padding:4px 2px;
+  }
+  .row{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 10px;border-radius:10px;
+    background:rgba(0,0,0,.18);
+    border-left:3px solid transparent;
+    font-size:.95rem;
+  }
+  .row.me{border-left-color:var(--butter)}
+  .row.them{border-left-color:var(--blue-chalk)}
+  .row .who{font-size:.72rem;color:var(--chalk-dim);width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .row .g{font-family:'Space Mono',monospace;font-weight:700;letter-spacing:.22em;flex:1}
+  .row .res{font-size:.9rem;white-space:nowrap}
+  .guess-line{display:flex;gap:8px;margin-top:4px}
+  .guess-line input{flex:1}
+  .guess-line button{width:auto;margin-top:0;padding:0 18px}
+  .win-card{text-align:center}
+  .win-card .big{font-size:2.6rem;margin:6px 0}
+
+  .scoreboard{
+    display:flex;align-items:center;justify-content:center;gap:14px;
+    margin:14px 0 4px;
+  }
+  .score-side{text-align:center;flex:1}
+  .score-side .n{font-family:'Space Mono',monospace;font-size:2.2rem;font-weight:700;color:var(--butter)}
+  .score-side .nm{font-size:.85rem;color:var(--chalk-dim);max-width:110px;margin:0 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .score-vs{color:var(--chalk-dim);font-size:.9rem}
+  ::-webkit-scrollbar{width:6px}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="frame">
+  <header>
+    <h1><span class="emo">🐄</span> Vache &amp; Taureau <span class="emo">🐂</span></h1>
+    <div class="tagline">Devine le nombre secret de ton adversaire</div>
+  </header>
+
+  <div id="screen-home">
+    <div class="card">
+      <h2>Nouvelle partie</h2>
+      <p class="muted">Crée une partie et envoie le code à ton amie.</p>
+      <button class="btn-main" onclick="show('create')">Créer une partie</button>
+    </div>
+    <div class="card">
+      <h2>Rejoindre</h2>
+      <p class="muted">Tu as reçu un code ? Entre-le ici.</p>
+      <button class="btn-ghost" onclick="show('join')">Rejoindre avec un code</button>
+    </div>
+    <div class="card">
+      <h2>Règles</h2>
+      <p class="muted">Chacune choisit un nombre secret de 4 chiffres <b>tous différents</b>. À tour de rôle, on devine le nombre de l'autre.<br>
+      🐂 <b>Taureau</b> : bon chiffre, bien placé.<br>
+      🐄 <b>Vache</b> : bon chiffre, mal placé.<br>
+      La première à faire 4 taureaux gagne !</p>
+    </div>
+  </div>
+
+  <div id="screen-create" class="hidden">
+    <div class="card">
+      <h2>Créer une partie</h2>
+      <label>Ton prénom (toujours le même pour garder ton score !)</label>
+      <input type="text" id="create-name" class="name-input" maxlength="12" placeholder="Ex. Léa">
+      <label>Ton nombre secret (4 chiffres différents)</label>
+      <input type="tel" id="create-secret" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
+      <div class="error" id="create-err"></div>
+      <button class="btn-main" id="btn-create" onclick="createGame()">Créer et obtenir le code</button>
+      <button class="btn-ghost" onclick="show('home')">Retour</button>
+    </div>
+  </div>
+
+  <div id="screen-join" class="hidden">
+    <div class="card">
+      <h2>Rejoindre une partie</h2>
+      <label>Code de la partie</label>
+      <input type="text" id="join-code" maxlength="4" placeholder="ABCD" style="text-transform:uppercase">
+      <label>Ton prénom (toujours le même pour garder ton score !)</label>
+      <input type="text" id="join-name" class="name-input" maxlength="12" placeholder="Ex. Emma">
+      <label>Ton nombre secret (4 chiffres différents)</label>
+      <input type="tel" id="join-secret" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
+      <div class="error" id="join-err"></div>
+      <button class="btn-main" id="btn-join" onclick="joinGame()">Rejoindre</button>
+      <button class="btn-ghost" onclick="show('home')">Retour</button>
+    </div>
+  </div>
+
+  <div id="screen-wait" class="hidden">
+    <div class="card" style="text-align:center">
+      <h2>Partie créée !</h2>
+      <p class="muted">Envoie ce code à ton amie :</p>
+      <div class="code-big" id="wait-code">····</div>
+      <button class="btn-ghost btn-small" onclick="copyCode()" id="copy-btn">Copier le code</button>
+      <p class="muted pulse" style="margin-top:16px">En attente de ton adversaire…</p>
+    </div>
+  </div>
+
+  <div id="screen-game" class="hidden">
+    <div class="status-bar">
+      <div class="status-pill" id="turn-pill">…</div>
+    </div>
+    <div class="legend"><span>🐂 bien placé</span><span>🐄 mal placé</span></div>
+    <div class="card">
+      <div class="history" id="history"></div>
+      <div id="guess-zone">
+        <label>Ta proposition</label>
+        <div class="guess-line">
+          <input type="tel" id="guess-input" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
+          <button class="btn-main" id="btn-guess" onclick="submitGuess()">Jouer</button>
+        </div>
+        <div class="error" id="guess-err"></div>
+      </div>
+    </div>
+    <p class="muted" style="text-align:center">Code de la partie : <b id="game-code-label"></b></p>
+  </div>
+
+  <div id="screen-end" class="hidden">
+    <div class="card win-card">
+      <div class="big" id="end-emoji">🏆</div>
+      <h2 id="end-title">…</h2>
+      <p class="muted" id="end-detail"></p>
+      <div class="scoreboard" id="scoreboard">
+        <div class="score-side"><div class="n" id="sc-n1">–</div><div class="nm" id="sc-nm1"></div></div>
+        <div class="score-vs">victoires</div>
+        <div class="score-side"><div class="n" id="sc-n2">–</div><div class="nm" id="sc-nm2"></div></div>
+      </div>
+      <p class="muted" id="score-note"></p>
+      <button class="btn-main" onclick="location.reload()">Nouvelle partie</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
+const HEADERS = {
+  "apikey": SB_KEY,
+  "Authorization": "Bearer " + SB_KEY,
+  "Content-Type": "application/json"
+};
+
+let code = null, me = null, state = null, pollTimer = null, busy = false;
+
+const $ = id => document.getElementById(id);
+const screens = ['home','create','join','wait','game','end'];
+function show(name){ screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name)); }
+
+function validSecret(s){
+  if(!/^[0-9]{4}$/.test(s)) return "Il faut exactement 4 chiffres.";
+  if(new Set(s).size !== 4) return "Les 4 chiffres doivent être différents.";
+  return null;
+}
+function score(secret, guess){
+  let t=0, v=0;
+  for(let i=0;i<4;i++){
+    if(guess[i]===secret[i]) t++;
+    else if(secret.includes(guess[i])) v++;
+  }
+  return {t,v};
+}
+function genCode(){
+  const letters="ABCDEFGHJKMNPQRSTUVWXYZ";
+  let c="";
+  for(let i=0;i<4;i++) c += letters[Math.floor(Math.random()*letters.length)];
+  return c;
+}
+
+async function loadState(c){
+  try{
+    const r = await fetch(SB_URL+"/rest/v1/vt_games?code=eq."+encodeURIComponent(c)+"&select=state", {headers:HEADERS});
+    if(!r.ok) return null;
+    const rows = await r.json();
+    return rows.length ? rows[0].state : null;
+  }catch(e){ return null; }
+}
+async function saveState(st){
+  try{
+    const r = await fetch(SB_URL+"/rest/v1/vt_games", {
+      method:"POST",
+      headers:{...HEADERS, "Prefer":"resolution=merge-duplicates"},
+      body: JSON.stringify({code:st.code, state:st, updated_at:new Date().toISOString()})
+    });
+    return r.ok;
+  }catch(e){ return false; }
+}
+async function saveResult(st){
+  try{
+    await fetch(SB_URL+"/rest/v1/vt_results", {
+      method:"POST", headers:HEADERS,
+      body: JSON.stringify({
+        code: st.code,
+        p1_name: st.players.p1.name,
+        p2_name: st.players.p2.name,
+        winner_name: st.players[st.winner].name
+      })
+    });
+  }catch(e){}
+}
+async function headToHead(n1, n2){
+  try{
+    const r = await fetch(SB_URL+"/rest/v1/vt_results?select=p1_name,p2_name,winner_name&order=finished_at.desc&limit=500", {headers:HEADERS});
+    if(!r.ok) return null;
+    const rows = await r.json();
+    const a = n1.trim().toLowerCase(), b = n2.trim().toLowerCase();
+    let w1=0, w2=0;
+    rows.forEach(row=>{
+      const p1 = row.p1_name.trim().toLowerCase(), p2 = row.p2_name.trim().toLowerCase();
+      const pair = (p1===a && p2===b) || (p1===b && p2===a);
+      if(!pair) return;
+      const w = row.winner_name.trim().toLowerCase();
+      if(w===a) w1++; else if(w===b) w2++;
+    });
+    return {w1, w2};
+  }catch(e){ return null; }
+}
+function saveRole(c, role){ try{ localStorage.setItem('vt-role-'+c, role); }catch(e){} }
+function loadRole(c){ try{ return localStorage.getItem('vt-role-'+c); }catch(e){ return null; } }
+
+async function createGame(){
+  const name = $('create-name').value.trim() || "Joueuse 1";
+  const secret = $('create-secret').value.trim();
+  const err = validSecret(secret);
+  if(err){ $('create-err').textContent = err; return; }
+  $('create-err').textContent = "";
+  $('btn-create').disabled = true; busy = true;
+
+  code = genCode();
+  state = {
+    v:3, code,
+    status:'waiting',
+    players:{ p1:{name, secret}, p2:null },
+    turn:'p1', winner:null,
+    guesses:[]
+  };
+  const ok = await saveState(state);
+  busy = false; $('btn-create').disabled = false;
+  if(!ok){ $('create-err').textContent = "Connexion impossible. Vérifie ton réseau et réessaie."; return; }
+  me = 'p1';
+  saveRole(code,'p1');
+  $('wait-code').textContent = code;
+  show('wait');
+  startPolling();
+}
+
+async function joinGame(){
+  const c = $('join-code').value.trim().toUpperCase();
+  const name = $('join-name').value.trim() || "Joueuse 2";
+  const secret = $('join-secret').value.trim();
+  if(!/^[A-Z]{4}$/.test(c)){ $('join-err').textContent = "Le code fait 4 lettres."; return; }
+  const errS = validSecret(secret);
+  if(errS){ $('join-err').textContent = errS; return; }
+  $('join-err').textContent = "";
+  $('btn-join').disabled = true; busy = true;
+
+  const st = await loadState(c);
+  if(!st){
+    $('join-err').textContent = "Partie introuvable. Vérifie le code.";
+    $('btn-join').disabled = false; busy = false; return;
+  }
+  const existing = loadRole(c);
+  if(existing && st.players[existing]){
+    code = c; me = existing; state = st;
+    busy = false; $('btn-join').disabled = false;
+    if(st.status==='finished'){ renderEnd(); } else { enterGame(); startPolling(); }
+    return;
+  }
+  if(st.players.p2){
+    $('join-err').textContent = "Cette partie a déjà deux joueuses.";
+    $('btn-join').disabled = false; busy = false; return;
+  }
+  st.players.p2 = {name, secret};
+  st.status = 'playing';
+  const ok = await saveState(st);
+  busy = false; $('btn-join').disabled = false;
+  if(!ok){ $('join-err').textContent = "Erreur d'enregistrement. Réessaie."; return; }
+  code = c; me = 'p2'; state = st;
+  saveRole(c,'p2');
+  enterGame(); startPolling();
+}
+
+function startPolling(){
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(refresh, 2500);
+}
+async function refresh(){
+  if(busy || !code) return;
+  const st = await loadState(code);
+  if(!st) return;
+  state = st;
+  if(st.status==='playing'){
+    if($('screen-game').classList.contains('hidden')) enterGame();
+    renderGame();
+  } else if(st.status==='finished'){
+    renderEnd();
+  }
+}
+
+function enterGame(){
+  $('game-code-label').textContent = code;
+  show('game');
+  renderGame();
+}
+function opp(){ return me==='p1' ? 'p2' : 'p1'; }
+
+function renderGame(){
+  const myTurn = state.turn === me;
+  const oppName = state.players[opp()] ? state.players[opp()].name : "…";
+  const pill = $('turn-pill');
+  pill.textContent = myTurn ? "🎯 À toi de jouer !" : "⏳ Au tour de "+oppName+"…";
+  pill.classList.toggle('mine', myTurn);
+  $('btn-guess').disabled = !myTurn;
+  $('guess-input').disabled = !myTurn;
+
+  const h = $('history');
+  h.innerHTML = "";
+  if(state.guesses.length===0){
+    const starter = state.players[state.turn] ? state.players[state.turn].name : "…";
+    h.innerHTML = '<p class="muted" style="text-align:center;padding:10px 0">Aucune proposition pour l’instant.<br>'+esc(starter)+' commence.</p>';
+  }
+  state.guesses.forEach(g=>{
+    const div = document.createElement('div');
+    div.className = 'row ' + (g.by===me ? 'me' : 'them');
+    const who = state.players[g.by] ? state.players[g.by].name : g.by;
+    div.innerHTML =
+      '<span class="who">'+esc(who)+'</span>'+
+      '<span class="g">'+g.guess+'</span>'+
+      '<span class="res">'+g.t+' 🐂 · '+g.v+' 🐄</span>';
+    h.appendChild(div);
+  });
+  h.scrollTop = h.scrollHeight;
+}
+
+async function submitGuess(){
+  if(!state || state.turn !== me) return;
+  const guess = $('guess-input').value.trim();
+  const err = validSecret(guess);
+  if(err){ $('guess-err').textContent = err; return; }
+  $('guess-err').textContent = "";
+  busy = true; $('btn-guess').disabled = true;
+
+  const st = await loadState(code) || state;
+  if(st.turn !== me || st.status!=='playing'){ busy=false; state=st; renderGame(); return; }
+
+  const secretOpp = st.players[opp()].secret;
+  const res = score(secretOpp, guess);
+  st.guesses.push({by:me, guess, t:res.t, v:res.v});
+  if(res.t===4){ st.status='finished'; st.winner=me; }
+  else{ st.turn = opp(); }
+  const ok = await saveState(st);
+  if(!ok){ busy=false; $('guess-err').textContent = "Erreur réseau, réessaie."; $('btn-guess').disabled=false; return; }
+  state = st;
+  $('guess-input').value = "";
+  if(st.status==='finished'){
+    await saveResult(st);
+    busy = false;
+    renderEnd();
+  } else {
+    busy = false;
+    renderGame();
+  }
+}
+
+async function renderEnd(){
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  if(!$('screen-end').classList.contains('hidden')) return;
+  const iWon = state.winner === me;
+  const winName = state.players[state.winner].name;
+  const loser = state.winner==='p1' ? 'p2' : 'p1';
+  $('end-emoji').textContent = iWon ? "🏆" : "🐄";
+  $('end-title').textContent = iWon ? "Bravo "+winName+", tu as gagné !" : winName+" a gagné !";
+  $('end-detail').textContent = "Le nombre secret de "+state.players[loser].name+" était "+state.players[loser].secret+
+    " — et celui de "+winName+" était "+state.players[state.winner].secret+".";
+  show('end');
+
+  const n1 = state.players.p1.name, n2 = state.players.p2.name;
+  $('sc-nm1').textContent = n1; $('sc-nm2').textContent = n2;
+  $('score-note').textContent = "Chargement du score…";
+  const h2h = await headToHead(n1, n2);
+  if(h2h){
+    $('sc-n1').textContent = h2h.w1;
+    $('sc-n2').textContent = h2h.w2;
+    $('score-note').textContent = "Total de vos duels (avec les mêmes prénoms).";
+  } else {
+    $('score-note').textContent = "Score indisponible pour le moment.";
+  }
+}
+
+function copyCode(){
+  navigator.clipboard && navigator.clipboard.writeText(code).then(()=>{
+    $('copy-btn').textContent = "Copié ✓";
+    setTimeout(()=>$('copy-btn').textContent="Copier le code", 1500);
+  });
+}
+function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
+
+document.addEventListener('keydown', e=>{
+  if(e.key!=='Enter') return;
+  if(!$('screen-game').classList.contains('hidden')) submitGuess();
+  else if(!$('screen-create').classList.contains('hidden')) createGame();
+  else if(!$('screen-join').classList.contains('hidden')) joinGame();
+});
+</script>
+</body>
+</html>
