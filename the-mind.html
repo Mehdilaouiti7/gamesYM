@@ -111,12 +111,10 @@
     padding:6px 12px;font-size:.82rem;
   }
   .status-pill.lives{color:var(--red-chalk)}
-  .status-pill.stars{color:var(--butter)}
 
   .event-banner{text-align:center;font-size:.85rem;color:var(--chalk-dim);min-height:1.3em;margin-bottom:8px}
   .event-banner.mistake{color:var(--red-chalk)}
   .event-banner.ok{color:var(--blue-chalk)}
-  .event-banner.star{color:var(--butter)}
 
   .others{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
   .other-chip{
@@ -149,7 +147,6 @@
 
   .actions-row{display:flex;gap:8px}
   .actions-row button{margin-top:0}
-  .btn-star{background:transparent;border:1.5px solid var(--butter);color:var(--butter)}
 
   .level-panel{text-align:center}
   .level-panel .big{font-size:2.2rem;margin:6px 0}
@@ -183,7 +180,6 @@
       <h2>Règles</h2>
       <p class="muted">Chacun reçoit des cartes numérotées (1 à 100), cachées aux autres. Sans parler ni se signaler, l'équipe doit jouer toutes les cartes de tous les joueurs dans l'ordre croissant, une à une.<br>
       Tu ne peux jouer que ta carte la plus basse. Si quelqu'un d'autre avait une carte plus petite que toi, c'est une erreur : vous perdez une vie et toutes les cartes plus petites sont révélées.<br>
-      Une étoile ⭐ permet de révéler la carte la plus basse de chacun sans risque.<br>
       Videz toutes vos mains pour passer au niveau suivant. Plus de vies = défaite. Dernier niveau franchi = victoire d'équipe !</p>
     </div>
   </div>
@@ -233,7 +229,6 @@
     <div class="status-bar">
       <div class="status-pill" id="level-pill">Niveau 1</div>
       <div class="status-pill lives" id="lives-pill">❤️ 0</div>
-      <div class="status-pill stars" id="stars-pill">⭐ 0</div>
     </div>
     <div class="event-banner" id="event-banner"></div>
 
@@ -246,7 +241,6 @@
 
     <div class="actions-row">
       <button class="btn-main" id="btn-play" onclick="playCard()">Jouer</button>
-      <button class="btn-star" id="btn-star" onclick="useStarAction()">⭐ Étoile</button>
     </div>
 
     <div class="card level-panel hidden" id="level-panel">
@@ -270,6 +264,7 @@
   </div>
 </div>
 
+<script src="realtime.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -278,7 +273,7 @@ const HEADERS = {
   "Authorization": "Bearer " + SB_KEY,
   "Content-Type": "application/json"
 };
-const REWARD = {2:'star', 3:'life', 5:'star', 6:'life', 8:'life', 9:'star'};
+const REWARD_LEVELS = new Set([2,3,5,6,8,9]);
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
 
@@ -349,9 +344,8 @@ function setupLevel(st, level){
 function checkLevelComplete(st){
   const allEmpty = st.hands.every(h=>h.length===0);
   if(allEmpty){
-    const reward = REWARD[st.level] || null;
-    if(reward==='star') st.stars += 1;
-    else if(reward==='life') st.lives += 1;
+    const reward = REWARD_LEVELS.has(st.level) ? 'life' : null;
+    if(reward==='life') st.lives += 1;
     st.lastEvent = Object.assign({}, st.lastEvent, {reward});
     if(st.level >= st.maxLevel){ st.status='finished'; st.won=true; }
     else { st.levelComplete = true; }
@@ -383,18 +377,6 @@ function attemptPlay(st, actor){
     checkLevelComplete(st);
   }
 }
-function useStar(st){
-  if(st.stars<=0) return;
-  const mins = [];
-  st.hands.forEach(h=>{ if(h.length) mins.push(h.shift()); });
-  if(mins.length===0) return;
-  mins.sort((a,b)=>a-b);
-  st.pile.push(...mins);
-  st.stars -= 1;
-  st.lastEvent = {type:'star', revealedCount:mins.length};
-  checkLevelComplete(st);
-}
-
 /* ---------- create / join ---------- */
 async function createGame(){
   const name = $('create-name').value.trim() || "Joueur 1";
@@ -406,7 +388,7 @@ async function createGame(){
   state = {
     v:1, code, status:'waiting', maxPlayers:n,
     maxLevel: n===2?12 : n===3?10 : 8,
-    players, lives:n, stars:1, level:0
+    players, lives:n, level:0
   };
   const ok = await saveState(state);
   busy = false; $('btn-create').disabled = false;
@@ -457,16 +439,20 @@ async function joinGame(){
 
 function startPolling(){
   if(pollTimer) clearInterval(pollTimer);
-  pollTimer = setInterval(refresh, 2500);
+  pollTimer = setInterval(refresh, 2000);
+  window.GYMRealtime.subscribe(SB_URL, SB_KEY, 'tm_games', code, applyIncomingState);
 }
-async function refresh(){
-  if(busy || !code) return;
-  const st = await loadState(code);
-  if(!st) return;
+function applyIncomingState(st){
+  if(busy || !st) return;
   state = st;
   if(st.status==='waiting'){ renderWait(); return; }
   if($('screen-game').classList.contains('hidden') && $('screen-end').classList.contains('hidden')) enterGame();
   renderCurrent();
+}
+async function refresh(){
+  if(busy || !code) return;
+  const st = await loadState(code);
+  applyIncomingState(st);
 }
 function renderWait(){
   const joined = state.players.filter(Boolean).map(p=>p.name);
@@ -501,14 +487,6 @@ async function playCard(){
   attemptPlay(st, me);
   await finalizeAction(st);
 }
-async function useStarAction(){
-  if(busy || !state || state.status!=='playing' || state.levelComplete || state.stars<=0) return;
-  busy = true;
-  let st = await loadState(code) || state;
-  if(st.status!=='playing' || st.levelComplete || st.stars<=0){ state=st; busy=false; renderCurrent(); return; }
-  useStar(st);
-  await finalizeAction(st);
-}
 async function continueLevel(){
   if(busy || !state || !state.levelComplete) return;
   busy = true;
@@ -523,20 +501,16 @@ function renderBoard(){
   if(!state || state.status!=='playing') return;
   $('level-pill').textContent = "Niveau " + state.level + "/" + state.maxLevel;
   $('lives-pill').textContent = "❤️ " + state.lives;
-  $('stars-pill').textContent = "⭐ " + state.stars;
 
   const ev = state.lastEvent;
   const banner = $('event-banner');
   if(!ev){ banner.textContent = ""; banner.className = "event-banner"; }
   else if(ev.type==='ok'){
     banner.className = "event-banner ok";
-    banner.textContent = (state.players[ev.by]?state.players[ev.by].name:'?') + " a joué " + ev.card + (ev.reward ? " · récompense : "+(ev.reward==='star'?'⭐ étoile':'❤️ vie') : "");
+    banner.textContent = (state.players[ev.by]?state.players[ev.by].name:'?') + " a joué " + ev.card + (ev.reward ? " · récompense : ❤️ vie" : "");
   } else if(ev.type==='mistake'){
     banner.className = "event-banner mistake";
     banner.textContent = "❌ " + (state.players[ev.by]?state.players[ev.by].name:'?') + " a joué "+ev.card+" trop tôt — "+ev.revealedCount+" carte(s) révélée(s), 1 vie perdue";
-  } else if(ev.type==='star'){
-    banner.className = "event-banner star";
-    banner.textContent = "⭐ Étoile utilisée — "+ev.revealedCount+" carte(s) révélée(s)" + (ev.reward ? " · récompense : "+(ev.reward==='star'?'⭐ étoile':'❤️ vie') : "");
   }
 
   const others = $('others-row');
@@ -559,7 +533,6 @@ function renderBoard(){
 
   const canAct = state.status==='playing' && !state.levelComplete;
   $('btn-play').disabled = !canAct || myHand.length===0;
-  $('btn-star').disabled = !canAct || state.stars<=0;
 
   const panel = $('level-panel');
   if(state.levelComplete){
@@ -567,7 +540,7 @@ function renderBoard(){
     const reward = state.lastEvent && state.lastEvent.reward;
     $('level-panel-title').textContent = "Niveau " + state.level + " terminé !";
     $('level-panel-reward').textContent = reward
-      ? "Récompense : " + (reward==='star' ? "⭐ une étoile en plus" : "❤️ une vie en plus")
+      ? "Récompense : ❤️ une vie en plus"
       : "Pas de récompense à ce niveau.";
   } else {
     panel.classList.add('hidden');
@@ -575,6 +548,7 @@ function renderBoard(){
 }
 async function renderEnd(){
   if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
   if(!$('screen-end').classList.contains('hidden')) return;
   $('end-emoji').textContent = state.won ? "🏆" : "💔";
   $('end-title').textContent = state.won ? "Victoire d'équipe !" : "Défaite…";

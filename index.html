@@ -185,6 +185,20 @@
   .win-card{text-align:center}
   .win-card .big{font-size:2.6rem;margin:6px 0}
 
+  .pcount-row{display:flex;gap:8px;margin-top:6px}
+  .pcount-opt{flex:1}
+  .pcount-opt input{display:none}
+  .pcount-opt span{
+    display:block;text-align:center;padding:11px 0;border-radius:10px;
+    border:1.5px dashed var(--line);color:var(--chalk-dim);cursor:pointer;font-weight:600;
+  }
+  .pcount-opt input:checked + span{border-color:var(--butter);border-style:solid;color:var(--butter);background:rgba(233,196,106,.1)}
+
+  .match-score{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;font-size:.85rem;color:var(--chalk-dim)}
+  .match-score b{color:var(--butter);font-family:'Space Mono',monospace}
+  .round-result{text-align:center;padding:6px 0 2px}
+  .round-result .big{font-size:2rem;margin:4px 0}
+
   .scoreboard{
     display:flex;align-items:center;justify-content:center;gap:14px;
     margin:14px 0 4px;
@@ -257,6 +271,13 @@
   <div id="screen-create" class="hidden">
     <div class="card">
       <h2>Créer une partie</h2>
+      <label>Nombre de manches</label>
+      <div class="pcount-row">
+        <label class="pcount-opt"><input type="radio" name="mrounds" value="1"><span>1</span></label>
+        <label class="pcount-opt"><input type="radio" name="mrounds" value="3" checked><span>3</span></label>
+        <label class="pcount-opt"><input type="radio" name="mrounds" value="5"><span>5</span></label>
+        <label class="pcount-opt"><input type="radio" name="mrounds" value="7"><span>7</span></label>
+      </div>
       <label>Ton prénom (toujours le même pour garder ton score !)</label>
       <input type="text" id="create-name" class="name-input" maxlength="12" placeholder="Ex. Léa">
       <label>Ton nombre secret (4 chiffres différents)</label>
@@ -293,28 +314,48 @@
   </div>
 
   <div id="screen-game" class="hidden">
-    <div class="status-bar">
-      <div class="status-pill" id="turn-pill">…</div>
-    </div>
-    <div class="legend"><span>🐂 bien placé</span><span>🐄 mal placé</span></div>
-    <div class="card">
-      <div class="history-split">
-        <div class="history-col">
-          <div class="history-col-label">Toi</div>
-          <div class="history-list" id="history-me"></div>
-        </div>
-        <div class="history-col">
-          <div class="history-col-label" id="history-opp-label">Adversaire</div>
-          <div class="history-list" id="history-opp"></div>
-        </div>
+    <div class="match-score hidden" id="match-score"></div>
+
+    <div id="round-result-zone" class="hidden">
+      <div class="card round-result">
+        <div class="big" id="rr-emoji">🏁</div>
+        <h2 id="rr-title">Manche terminée</h2>
+        <p class="muted" id="rr-detail"></p>
       </div>
-      <div id="guess-zone">
-        <label>Ta proposition</label>
-        <div class="guess-line">
-          <input type="tel" id="guess-input" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
-          <button class="btn-main" id="btn-guess" onclick="submitGuess()">Jouer</button>
+      <div class="card" id="rr-secret-form">
+        <h2>Nouveau nombre secret</h2>
+        <p class="muted">Choisis un nouveau nombre secret de 4 chiffres différents pour la manche suivante.</p>
+        <input type="tel" id="round-secret-input" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
+        <div class="error" id="round-secret-err"></div>
+        <button class="btn-main" onclick="submitRoundSecret()">Valider mon secret</button>
+      </div>
+      <p class="muted pulse hidden" id="rr-waiting" style="text-align:center">En attente de ton adversaire…</p>
+    </div>
+
+    <div id="duel-zone" class="hidden">
+      <div class="status-bar">
+        <div class="status-pill" id="turn-pill">…</div>
+      </div>
+      <div class="legend"><span>🐂 bien placé</span><span>🐄 mal placé</span></div>
+      <div class="card">
+        <div class="history-split">
+          <div class="history-col">
+            <div class="history-col-label">Toi</div>
+            <div class="history-list" id="history-me"></div>
+          </div>
+          <div class="history-col">
+            <div class="history-col-label" id="history-opp-label">Adversaire</div>
+            <div class="history-list" id="history-opp"></div>
+          </div>
         </div>
-        <div class="error" id="guess-err"></div>
+        <div id="guess-zone">
+          <label>Ta proposition</label>
+          <div class="guess-line">
+            <input type="tel" id="guess-input" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
+            <button class="btn-main" id="btn-guess" onclick="submitGuess()">Jouer</button>
+          </div>
+          <div class="error" id="guess-err"></div>
+        </div>
       </div>
     </div>
     <p class="muted" style="text-align:center">Code de la partie : <b id="game-code-label"></b></p>
@@ -325,6 +366,7 @@
       <div class="big" id="end-emoji">🏆</div>
       <h2 id="end-title">…</h2>
       <p class="muted" id="end-detail"></p>
+      <p class="muted" id="match-final-score" style="font-weight:600"></p>
       <div class="scoreboard" id="scoreboard">
         <div class="score-side"><div class="n" id="sc-n1">–</div><div class="nm" id="sc-nm1"></div></div>
         <div class="score-vs">victoires</div>
@@ -336,6 +378,7 @@
   </div>
 </div>
 
+<script src="realtime.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -406,7 +449,7 @@ async function saveResult(st){
         code: st.code,
         p1_name: st.players.p1.name,
         p2_name: st.players.p2.name,
-        winner_name: st.players[st.winner].name
+        winner_name: st.players[st.matchWinner].name
       })
     });
   }catch(e){}
@@ -436,16 +479,20 @@ async function createGame(){
   const secret = $('create-secret').value.trim();
   const err = validSecret(secret);
   if(err){ $('create-err').textContent = err; return; }
+  const mrEl = document.querySelector('input[name=mrounds]:checked');
+  const matchRounds = mrEl ? parseInt(mrEl.value, 10) : 3;
   $('create-err').textContent = "";
   $('btn-create').disabled = true; busy = true;
 
   code = genCode();
   state = {
-    v:3, code,
+    v:4, code,
     status:'waiting',
+    matchRounds, roundIndex:1, score:{p1:0,p2:0},
     players:{ p1:{name, secret}, p2:null },
-    turn:'p1', winner:null,
-    guesses:[]
+    roundPhase:'duel',
+    turn:'p1', winner:null, matchWinner:null,
+    guesses:[], lastRoundResult:null
   };
   const ok = await saveState(state);
   busy = false; $('btn-create').disabled = false;
@@ -495,12 +542,11 @@ async function joinGame(){
 
 function startPolling(){
   if(pollTimer) clearInterval(pollTimer);
-  pollTimer = setInterval(refresh, 2500);
+  pollTimer = setInterval(refresh, 2000);
+  window.GYMRealtime.subscribe(SB_URL, SB_KEY, 'vt_games', code, applyIncomingState);
 }
-async function refresh(){
-  if(busy || !code) return;
-  const st = await loadState(code);
-  if(!st) return;
+function applyIncomingState(st){
+  if(busy || !st) return;
   state = st;
   if(st.status==='playing'){
     if($('screen-game').classList.contains('hidden')) enterGame();
@@ -508,6 +554,11 @@ async function refresh(){
   } else if(st.status==='finished'){
     renderEnd();
   }
+}
+async function refresh(){
+  if(busy || !code) return;
+  const st = await loadState(code);
+  applyIncomingState(st);
 }
 
 function enterGame(){
@@ -518,6 +569,24 @@ function enterGame(){
 function opp(){ return me==='p1' ? 'p2' : 'p1'; }
 
 function renderGame(){
+  const matchScoreEl = $('match-score');
+  if(state.matchRounds > 1){
+    matchScoreEl.classList.remove('hidden');
+    const p2Name = state.players.p2 ? state.players.p2.name : "…";
+    matchScoreEl.innerHTML = "Manche "+state.roundIndex+"/"+state.matchRounds+" · <b>"+state.score.p1+"</b> "+esc(state.players.p1.name)+" — "+esc(p2Name)+" <b>"+state.score.p2+"</b>";
+  } else {
+    matchScoreEl.classList.add('hidden');
+  }
+
+  if(state.roundPhase==='secrets'){
+    $('round-result-zone').classList.remove('hidden');
+    $('duel-zone').classList.add('hidden');
+    renderRoundResult();
+    return;
+  }
+  $('round-result-zone').classList.add('hidden');
+  $('duel-zone').classList.remove('hidden');
+
   const myTurn = state.turn === me;
   const oppName = state.players[opp()] ? state.players[opp()].name : "…";
   const pill = $('turn-pill');
@@ -529,6 +598,39 @@ function renderGame(){
   $('history-opp-label').textContent = oppName;
   renderHistoryCol('history-me', state.guesses.filter(g=>g.by===me), 'me');
   renderHistoryCol('history-opp', state.guesses.filter(g=>g.by!==me), 'them');
+}
+function renderRoundResult(){
+  const lr = state.lastRoundResult;
+  const oppName = state.players[opp()] ? state.players[opp()].name : "…";
+  if(lr){
+    const iWonRound = lr.winner === me;
+    $('rr-emoji').textContent = iWonRound ? "🎉" : "🐄";
+    $('rr-title').textContent = "Manche "+lr.roundIndex+" : "+(iWonRound ? "tu as gagné !" : state.players[lr.winner].name+" a gagné !");
+    $('rr-detail').textContent = "Score : "+state.players.p1.name+" "+state.score.p1+" — "+state.score.p2+" "+state.players.p2.name;
+  }
+  const mySecretSet = !!state.players[me].secret;
+  $('rr-secret-form').classList.toggle('hidden', mySecretSet);
+  $('rr-waiting').classList.toggle('hidden', !mySecretSet);
+  if(mySecretSet) $('rr-waiting').textContent = "En attente de "+oppName+"…";
+}
+async function submitRoundSecret(){
+  if(busy || !state || state.roundPhase!=='secrets') return;
+  const secret = $('round-secret-input').value.trim();
+  const err = validSecret(secret);
+  if(err){ $('round-secret-err').textContent = err; return; }
+  $('round-secret-err').textContent = "";
+  busy = true;
+
+  const st = await loadState(code) || state;
+  if(st.roundPhase!=='secrets' || st.players[me].secret){ state=st; busy=false; renderGame(); return; }
+  st.players[me].secret = secret;
+  if(st.players.p1.secret && st.players.p2.secret){ st.roundPhase = 'duel'; }
+  const ok = await saveState(st);
+  busy = false;
+  if(!ok){ $('round-secret-err').textContent = "Erreur réseau, réessaie."; return; }
+  state = st;
+  $('round-secret-input').value = "";
+  renderGame();
 }
 function renderHistoryCol(elId, list, cls){
   const el = $(elId);
@@ -543,7 +645,7 @@ function renderHistoryCol(elId, list, cls){
 }
 
 async function submitGuess(){
-  if(!state || state.turn !== me) return;
+  if(!state || state.roundPhase!=='duel' || state.turn !== me) return;
   const guess = $('guess-input').value.trim();
   const err = validSecret(guess);
   if(err){ $('guess-err').textContent = err; return; }
@@ -551,37 +653,63 @@ async function submitGuess(){
   busy = true; $('btn-guess').disabled = true;
 
   const st = await loadState(code) || state;
-  if(st.turn !== me || st.status!=='playing'){ busy=false; state=st; renderGame(); return; }
+  if(st.roundPhase!=='duel' || st.turn !== me || st.status!=='playing'){ busy=false; state=st; renderGame(); return; }
 
   const secretOpp = st.players[opp()].secret;
   const res = score(secretOpp, guess);
   st.guesses.push({by:me, guess, t:res.t, v:res.v});
-  if(res.t===4){ st.status='finished'; st.winner=me; }
-  else{ st.turn = opp(); }
+  if(res.t===4){
+    const winner = me;
+    st.winner = winner;
+    st.score[winner] += 1;
+    const majority = Math.floor(st.matchRounds/2) + 1;
+    if(st.score[winner] >= majority || st.roundIndex >= st.matchRounds){
+      st.status = 'finished';
+      st.matchWinner = winner;
+    } else {
+      st.lastRoundResult = {
+        winner,
+        secretP1: st.players.p1.secret,
+        secretP2: st.players.p2.secret,
+        roundIndex: st.roundIndex
+      };
+      st.roundIndex += 1;
+      st.players.p1.secret = null;
+      st.players.p2.secret = null;
+      st.roundPhase = 'secrets';
+      st.guesses = [];
+      st.turn = (st.roundIndex % 2 === 1) ? 'p1' : 'p2';
+    }
+  } else {
+    st.turn = opp();
+  }
   const ok = await saveState(st);
   if(!ok){ busy=false; $('guess-err').textContent = "Erreur réseau, réessaie."; $('btn-guess').disabled=false; return; }
   state = st;
   $('guess-input').value = "";
+  busy = false;
   if(st.status==='finished'){
     await saveResult(st);
-    busy = false;
     renderEnd();
   } else {
-    busy = false;
     renderGame();
   }
 }
 
 async function renderEnd(){
   if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
   if(!$('screen-end').classList.contains('hidden')) return;
-  const iWon = state.winner === me;
-  const winName = state.players[state.winner].name;
-  const loser = state.winner==='p1' ? 'p2' : 'p1';
+  const iWon = state.matchWinner === me;
+  const winName = state.players[state.matchWinner].name;
+  const loser = state.matchWinner==='p1' ? 'p2' : 'p1';
   $('end-emoji').textContent = iWon ? "🏆" : "🐄";
   $('end-title').textContent = iWon ? "Bravo "+winName+", tu as gagné !" : winName+" a gagné !";
   $('end-detail').textContent = "Le nombre secret de "+state.players[loser].name+" était "+state.players[loser].secret+
-    " — et celui de "+winName+" était "+state.players[state.winner].secret+".";
+    " — et celui de "+winName+" était "+state.players[state.matchWinner].secret+".";
+  $('match-final-score').textContent = state.matchRounds > 1
+    ? "Score final : "+state.players.p1.name+" "+state.score.p1+" — "+state.score.p2+" "+state.players.p2.name
+    : "";
   show('end');
 
   const n1 = state.players.p1.name, n2 = state.players.p2.name;

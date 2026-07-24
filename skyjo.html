@@ -326,6 +326,7 @@
   </div>
 </div>
 
+<script src="realtime.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -546,16 +547,20 @@ async function joinGame(){
 
 function startPolling(){
   if(pollTimer) clearInterval(pollTimer);
-  pollTimer = setInterval(refresh, 2500);
+  pollTimer = setInterval(refresh, 2000);
+  window.GYMRealtime.subscribe(SB_URL, SB_KEY, 'sk_games', code, applyIncomingState);
 }
-async function refresh(){
-  if(busy || !code) return;
-  const st = await loadState(code);
-  if(!st) return;
+function applyIncomingState(st){
+  if(busy || !st) return;
   state = st;
   if(st.status==='waiting'){ renderWait(); return; }
   if($('screen-game').classList.contains('hidden') && $('screen-end').classList.contains('hidden')) enterGame();
   renderCurrent();
+}
+async function refresh(){
+  if(busy || !code) return;
+  const st = await loadState(code);
+  applyIncomingState(st);
 }
 function renderWait(){
   const joined = state.players.filter(Boolean).map(p=>p.name);
@@ -778,6 +783,7 @@ function renderBoard(){
 }
 async function renderEnd(){
   if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
   if(!$('screen-end').classList.contains('hidden')) return;
   const iWon = state.winner===me;
   const winName = state.players[state.winner].name;

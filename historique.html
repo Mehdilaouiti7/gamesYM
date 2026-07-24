@@ -121,10 +121,23 @@
   </div>
 
   <div id="results" class="hidden">
-    <div class="card" id="summary"></div>
-    <div class="card">
-      <h2>Parties récentes</h2>
-      <div class="history-list" id="history-list"></div>
+    <div class="card hidden" id="sec-empty">
+      <p class="muted" id="empty-text"></p>
+    </div>
+    <div class="card hidden" id="sec-vt">
+      <h2>🐄 Vache &amp; Taureau</h2>
+      <div class="totals-row" id="vt-totals"></div>
+      <div class="history-list" id="vt-list"></div>
+    </div>
+    <div class="card hidden" id="sec-sk">
+      <h2>🎴 Skyjo</h2>
+      <div class="totals-row" id="sk-totals"></div>
+      <div class="history-list" id="sk-list"></div>
+    </div>
+    <div class="card hidden" id="sec-tm">
+      <h2>🧠 The Mind</h2>
+      <p class="muted" id="tm-summary"></p>
+      <div class="history-list" id="tm-list"></div>
     </div>
   </div>
 </div>
@@ -189,50 +202,60 @@ async function search(){
   const vtRows = vt.filter(r => matchesPair(r, a, b)).map(r => Object.assign({}, r, {game:'vt'}));
   const skRows = sk.filter(r => matchesTeam(r, a, b)).map(r => Object.assign({}, r, {game:'sk'}));
   const tmRows = tm.filter(r => matchesTeam(r, a, b)).map(r => Object.assign({}, r, {game:'tm'}));
-  const all = vtRows.concat(skRows, tmRows).sort((x, y) => new Date(y.finished_at) - new Date(x.finished_at));
 
-  renderResults(n1, n2, all, vtRows, skRows, tmRows);
+  renderResults(n1, n2, vtRows, skRows, tmRows);
 }
 
-function renderResults(n1, n2, all, vtRows, skRows, tmRows){
+function historyRowHtml(dateIso, label, rightText){
+  const date = new Date(dateIso);
+  const dateStr = date.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'}) + ' ' + date.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  return '<div class="hrow"><span class="hdate">'+dateStr+'</span><span class="hgame">'+label+'</span><span class="hwin">'+rightText+'</span></div>';
+}
+function totalsRowHtml(n1, w1, n2, w2, count){
+  return '<div class="side"><div class="n">'+w1+'</div><div class="nm">'+esc(n1)+'</div></div>'+
+    '<div class="vs">victoires<br>'+count+' partie'+(count>1?'s':'')+'</div>'+
+    '<div class="side"><div class="n">'+w2+'</div><div class="nm">'+esc(n2)+'</div></div>';
+}
+
+function renderResults(n1, n2, vtRows, skRows, tmRows){
   $('results').classList.remove('hidden');
-  if(all.length===0){
-    $('summary').innerHTML = '<p class="muted">Aucune partie trouvée entre '+esc(n1)+' et '+esc(n2)+' pour l\'instant. Jouez une partie pour commencer l\'historique !</p>';
-    $('history-list').innerHTML = "";
-    return;
+  const anyData = vtRows.length || skRows.length || tmRows.length;
+  $('sec-empty').classList.toggle('hidden', !!anyData);
+  if(!anyData){
+    $('empty-text').textContent = "Aucune partie trouvée entre "+esc(n1)+" et "+esc(n2)+" pour l'instant. Jouez une partie pour commencer l'historique !";
   }
-  const vtW1 = winsFor(vtRows, n1), vtW2 = winsFor(vtRows, n2);
-  const skPair = skWinsForPair(skRows, n1.toLowerCase(), n2.toLowerCase());
-  const skW1 = skPair.w1, skW2 = skPair.w2;
-  const totalW1 = vtW1 + skW1, totalW2 = vtW2 + skW2;
-  const tmWins = tmRows.filter(r => r.won).length;
 
-  $('summary').innerHTML =
-    '<h2>Score total</h2>'+
-    '<div class="totals-row">'+
-      '<div class="side"><div class="n">'+totalW1+'</div><div class="nm">'+esc(n1)+'</div></div>'+
-      '<div class="vs">victoires<br>'+all.length+' partie'+(all.length>1?'s':'')+'</div>'+
-      '<div class="side"><div class="n">'+totalW2+'</div><div class="nm">'+esc(n2)+'</div></div>'+
-    '</div>'+
-    '<div class="sub-row"><span>🐄 Vache &amp; Taureau : '+vtW1+' – '+vtW2+'</span><span>🎴 Skyjo : '+skW1+' – '+skW2+'</span>'+
-    (tmRows.length ? '<span>🧠 The Mind (équipe) : '+tmWins+' victoire'+(tmWins>1?'s':'')+' / '+tmRows.length+' partie'+(tmRows.length>1?'s':'')+'</span>' : '')+
-    '</div>';
+  $('sec-vt').classList.toggle('hidden', vtRows.length===0);
+  if(vtRows.length){
+    const vtW1 = winsFor(vtRows, n1), vtW2 = winsFor(vtRows, n2);
+    $('vt-totals').innerHTML = totalsRowHtml(n1, vtW1, n2, vtW2, vtRows.length);
+    $('vt-list').innerHTML = vtRows.map(r =>
+      historyRowHtml(r.finished_at, '🐄 Vache &amp; Taureau', '🏆 '+esc(r.winner_name))
+    ).join('');
+  }
 
-  $('history-list').innerHTML = all.map(r=>{
-    const date = new Date(r.finished_at);
-    const dateStr = date.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'}) + ' ' + date.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-    if(r.game==='tm'){
-      const result = r.won ? '✅ victoire' : '❌ niveau '+r.level_reached;
-      return '<div class="hrow"><span class="hdate">'+dateStr+'</span><span class="hgame">🧠 The Mind ('+r.max_players+' joueurs)</span><span class="hwin">'+result+'</span></div>';
-    }
-    if(r.game==='sk'){
-      const ps = skPairScores(r, n1.toLowerCase(), n2.toLowerCase());
+  $('sec-sk').classList.toggle('hidden', skRows.length===0);
+  if(skRows.length){
+    const a = n1.toLowerCase(), b = n2.toLowerCase();
+    const skPair = skWinsForPair(skRows, a, b);
+    $('sk-totals').innerHTML = totalsRowHtml(n1, skPair.w1, n2, skPair.w2, skRows.length);
+    $('sk-list').innerHTML = skRows.map(r=>{
+      const ps = skPairScores(r, a, b);
       const scoreStr = ps ? ' · '+ps.scoreA+'–'+ps.scoreB : '';
       const groupStr = r.max_players>2 ? ' ('+r.max_players+' joueurs)' : '';
-      return '<div class="hrow"><span class="hdate">'+dateStr+'</span><span class="hgame">🎴 Skyjo'+groupStr+scoreStr+'</span><span class="hwin">🏆 '+esc(r.winner_name)+'</span></div>';
-    }
-    return '<div class="hrow"><span class="hdate">'+dateStr+'</span><span class="hgame">🐄 Vache &amp; Taureau</span><span class="hwin">🏆 '+esc(r.winner_name)+'</span></div>';
-  }).join('');
+      return historyRowHtml(r.finished_at, '🎴 Skyjo'+groupStr+scoreStr, '🏆 '+esc(r.winner_name));
+    }).join('');
+  }
+
+  $('sec-tm').classList.toggle('hidden', tmRows.length===0);
+  if(tmRows.length){
+    const tmWins = tmRows.filter(r => r.won).length;
+    $('tm-summary').textContent = tmWins+' victoire'+(tmWins>1?'s':'')+" d'équipe sur "+tmRows.length+' partie'+(tmRows.length>1?'s':'')+' jouées ensemble.';
+    $('tm-list').innerHTML = tmRows.map(r=>{
+      const result = r.won ? '✅ victoire' : '❌ niveau '+r.level_reached;
+      return historyRowHtml(r.finished_at, '🧠 The Mind ('+r.max_players+' joueurs)', result);
+    }).join('');
+  }
 }
 
 document.addEventListener('keydown', e=>{
