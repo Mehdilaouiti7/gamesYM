@@ -149,6 +149,21 @@ function winsFor(rows, name){
   const n = name.trim().toLowerCase();
   return rows.filter(r => r.winner_name.trim().toLowerCase()===n).length;
 }
+function skPairScores(row, a, b){
+  const names = (row.players||[]).map(n => n.trim().toLowerCase());
+  const ia = names.indexOf(a), ib = names.indexOf(b);
+  if(ia===-1 || ib===-1 || !row.scores) return null;
+  return { scoreA: row.scores[ia], scoreB: row.scores[ib] };
+}
+function skWinsForPair(rows, a, b){
+  let w1 = 0, w2 = 0;
+  rows.forEach(r=>{
+    const ps = skPairScores(r, a, b);
+    if(!ps) return;
+    if(ps.scoreA < ps.scoreB) w1++; else if(ps.scoreB < ps.scoreA) w2++;
+  });
+  return {w1, w2};
+}
 
 async function search(){
   const n1 = $('name1').value.trim();
@@ -162,7 +177,7 @@ async function search(){
   $('btn-search').disabled = false;
 
   const vtRows = vt.filter(r => matchesPair(r, a, b)).map(r => Object.assign({}, r, {game:'vt'}));
-  const skRows = sk.filter(r => matchesPair(r, a, b)).map(r => Object.assign({}, r, {game:'sk'}));
+  const skRows = sk.filter(r => matchesTeam(r, a, b)).map(r => Object.assign({}, r, {game:'sk'}));
   const tmRows = tm.filter(r => matchesTeam(r, a, b)).map(r => Object.assign({}, r, {game:'tm'}));
   const all = vtRows.concat(skRows, tmRows).sort((x, y) => new Date(y.finished_at) - new Date(x.finished_at));
 
@@ -177,7 +192,8 @@ function renderResults(n1, n2, all, vtRows, skRows, tmRows){
     return;
   }
   const vtW1 = winsFor(vtRows, n1), vtW2 = winsFor(vtRows, n2);
-  const skW1 = winsFor(skRows, n1), skW2 = winsFor(skRows, n2);
+  const skPair = skWinsForPair(skRows, n1.toLowerCase(), n2.toLowerCase());
+  const skW1 = skPair.w1, skW2 = skPair.w2;
   const totalW1 = vtW1 + skW1, totalW2 = vtW2 + skW2;
   const tmWins = tmRows.filter(r => r.won).length;
 
@@ -199,10 +215,13 @@ function renderResults(n1, n2, all, vtRows, skRows, tmRows){
       const result = r.won ? '✅ victoire' : '❌ niveau '+r.level_reached;
       return '<div class="hrow"><span class="hdate">'+dateStr+'</span><span class="hgame">🧠 The Mind ('+r.max_players+' joueurs)</span><span class="hwin">'+result+'</span></div>';
     }
-    const icon = r.game==='vt' ? '🐄' : '🎴';
-    const label = r.game==='vt' ? 'Vache & Taureau' : 'Skyjo';
-    const scoreStr = r.game==='sk' ? ' · '+r.p1_score+'–'+r.p2_score : '';
-    return '<div class="hrow"><span class="hdate">'+dateStr+'</span><span class="hgame">'+icon+' '+label+scoreStr+'</span><span class="hwin">🏆 '+esc(r.winner_name)+'</span></div>';
+    if(r.game==='sk'){
+      const ps = skPairScores(r, n1.toLowerCase(), n2.toLowerCase());
+      const scoreStr = ps ? ' · '+ps.scoreA+'–'+ps.scoreB : '';
+      const groupStr = r.max_players>2 ? ' ('+r.max_players+' joueurs)' : '';
+      return '<div class="hrow"><span class="hdate">'+dateStr+'</span><span class="hgame">🎴 Skyjo'+groupStr+scoreStr+'</span><span class="hwin">🏆 '+esc(r.winner_name)+'</span></div>';
+    }
+    return '<div class="hrow"><span class="hdate">'+dateStr+'</span><span class="hgame">🐄 Vache &amp; Taureau</span><span class="hwin">🏆 '+esc(r.winner_name)+'</span></div>';
   }).join('');
 }
 
