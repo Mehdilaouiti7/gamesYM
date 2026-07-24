@@ -121,7 +121,12 @@
 
   .table-label,.hand-label{text-align:center;font-size:.8rem;color:var(--chalk-dim);margin:10px 0 6px}
   .table-row,.hand-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:64px}
-  .selection-hint{text-align:center;font-size:.8rem;color:var(--butter);min-height:1.2em;margin:4px 0}
+  .capture-option{
+    font-family:'Space Mono',monospace;font-weight:700;font-size:1rem;
+    border:1.5px solid var(--butter);color:var(--butter);background:rgba(233,196,106,.08);
+    border-radius:12px;padding:12px 16px;width:100%;margin-top:8px;cursor:pointer;
+  }
+  .capture-option:active{transform:scale(.97);background:rgba(233,196,106,.16)}
 
   .card-chip{
     font-family:'Space Mono',monospace;font-weight:700;
@@ -177,7 +182,7 @@
     <div class="card">
       <h2>Règles</h2>
       <p class="muted">Chacun reçoit 3 cartes, 4 cartes sont posées sur la table. À ton tour, joue une carte de ta main.<br>
-      Si sa valeur correspond à une carte de la table, tu la captures (s'il y a plusieurs cartes de cette valeur, tu les prends toutes). Sinon tu peux capturer une combinaison de cartes dont la somme égale ta carte : sélectionne-les sur la table avant de jouer ta carte. Sans capture possible, ta carte reste sur la table.<br>
+      Si sa valeur correspond à une carte de la table, tu la captures (s'il y a plusieurs cartes de cette valeur, tu les prends toutes). Sinon, si une ou plusieurs combinaisons de cartes de la table font la même somme, l'appli te propose de choisir laquelle prendre. Sans capture possible, ta carte reste sur la table.<br>
       Vider la table d'un coup = <b>chkobba</b> (+1 point) !<br>
       À 4, on joue en équipe (toi et le joueur d'en face contre les deux autres).<br>
       Quand toutes les mains sont vides, on redistribue 3 cartes chacun jusqu'à épuiser le paquet. À la fin de la manche : le plus de cartes, le plus de carreaux ♦, le 7 de carreau et le plus de 7 rapportent chacun 1 point. Premier à 21 points gagne !</p>
@@ -235,7 +240,12 @@
 
     <div class="table-label">Table</div>
     <div class="table-row" id="table-row"></div>
-    <div class="selection-hint" id="selection-hint"></div>
+
+    <div class="card hidden" id="capture-choice-panel">
+      <h2>Que veux-tu capturer ?</h2>
+      <div id="capture-options"></div>
+      <button class="btn-ghost btn-small" onclick="cancelChoice()">Annuler</button>
+    </div>
 
     <div class="hand-label">Ta main</div>
     <div class="hand-row" id="hand-row"></div>
@@ -275,7 +285,7 @@ const SUIT_SYMBOL = ['♦','♥','♣','♠'];
 const SUIT_CLASS = ['red','red','dark','dark'];
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
-let mySelection = [];
+let pendingHandIdx = null, pendingOptions = [];
 
 const $ = id => document.getElementById(id);
 const screens = ['home','create','join','wait','game','end'];
@@ -358,21 +368,27 @@ function newHand(st){
   st.lastEvent = null;
   st.hand = (st.hand || 0) + 1;
 }
-function playCard(st, actor, handCardIndex, selectedIdx){
+function classifyPlay(table, rank){
+  const directIdx = table.map((c,i)=>i).filter(i => table[i].r === rank);
+  if(directIdx.length > 0) return { type:'direct', idxs: directIdx };
+  const n = table.length;
+  const combos = [];
+  for(let mask=1; mask<(1<<n); mask++){
+    const idxs = []; let sum = 0;
+    for(let i=0;i<n;i++){ if(mask & (1<<i)){ idxs.push(i); sum += table[i].r; } }
+    if(idxs.length >= 2 && sum === rank) combos.push(idxs);
+  }
+  if(combos.length === 0) return { type:'none' };
+  if(combos.length === 1) return { type:'single', idxs: combos[0] };
+  return { type:'choice', options: combos };
+}
+function playCard(st, actor, handCardIndex, capturedIdx){
   const hand = st.hands[actor];
   const card = hand[handCardIndex];
   if(!card) return false;
   const side = sideOf(st, actor);
-  const directIdx = st.table.map((c,i)=>i).filter(i => st.table[i].r === card.r);
-  let capturedIdx;
-  if(directIdx.length > 0){
-    capturedIdx = directIdx;
-  } else {
-    const sum = selectedIdx.reduce((s,i)=> s + (st.table[i] ? st.table[i].r : 0), 0);
-    capturedIdx = (selectedIdx.length > 0 && sum === card.r) ? selectedIdx : null;
-  }
   hand.splice(handCardIndex, 1);
-  if(capturedIdx){
+  if(capturedIdx && capturedIdx.length){
     const capturedCards = capturedIdx.map(i => st.table[i]).concat([card]);
     capturedIdx.slice().sort((a,b)=>b-a).forEach(i => st.table.splice(i,1));
     st.sideCaptures[side].push(...capturedCards);
@@ -495,7 +511,7 @@ function startPolling(){
 function applyIncomingState(st){
   if(busy || !st) return;
   state = st;
-  mySelection = [];
+  if(state.turn!==me || state.phase!=='playing'){ pendingHandIdx = null; pendingOptions = []; }
   if(st.status==='waiting'){ renderWait(); return; }
   if($('screen-game').classList.contains('hidden') && $('screen-end').classList.contains('hidden')) enterGame();
   renderCurrent();
@@ -522,28 +538,45 @@ function renderCurrent(){
 }
 
 /* ---------- actions ---------- */
-function toggleSelect(idx){
-  if(!state || state.turn!==me || state.phase!=='playing') return;
-  const pos = mySelection.indexOf(idx);
-  if(pos===-1) mySelection.push(idx); else mySelection.splice(pos,1);
-  renderBoard();
-}
 async function finalizeAction(st){
   const ok = await saveState(st);
   if(!ok){ busy = false; renderCurrent(); return; }
   state = st;
-  mySelection = [];
+  pendingHandIdx = null; pendingOptions = [];
   busy = false;
   if(st.status==='finished'){ await saveResult(st); }
   renderCurrent();
 }
-async function playFromHand(handIdx){
+function playFromHand(handIdx){
   if(busy || !state || state.turn!==me || state.phase!=='playing') return;
+  const card = state.hands[me][handIdx];
+  if(!card) return;
+  const cls = classifyPlay(state.table, card.r);
+  if(cls.type==='choice'){
+    pendingHandIdx = handIdx;
+    pendingOptions = cls.options;
+    renderBoard();
+    return;
+  }
+  const capturedIdx = (cls.type==='direct' || cls.type==='single') ? cls.idxs : [];
+  commitPlay(handIdx, capturedIdx);
+}
+function chooseCapture(optionIdx){
+  if(busy || pendingHandIdx===null) return;
+  const handIdx = pendingHandIdx;
+  const idxs = pendingOptions[optionIdx];
+  pendingHandIdx = null; pendingOptions = [];
+  commitPlay(handIdx, idxs);
+}
+function cancelChoice(){
+  pendingHandIdx = null; pendingOptions = [];
+  renderBoard();
+}
+async function commitPlay(handIdx, capturedIdx){
   busy = true;
-  const selection = mySelection.slice();
   let st = await loadState(code) || state;
-  if(st.turn!==me || st.phase!=='playing' || !st.hands[me] || !st.hands[me][handIdx]){ state=st; busy=false; mySelection=[]; renderCurrent(); return; }
-  playCard(st, me, handIdx, selection);
+  if(st.turn!==me || st.phase!=='playing' || !st.hands[me] || !st.hands[me][handIdx]){ state=st; busy=false; pendingHandIdx=null; pendingOptions=[]; renderCurrent(); return; }
+  playCard(st, me, handIdx, capturedIdx);
   await finalizeAction(st);
 }
 async function nextHand(){
@@ -587,26 +620,26 @@ function renderBoard(){
   }).join('');
 
   const tableRow = $('table-row');
-  const canSelect = myTurn;
-  tableRow.innerHTML = state.table.map((c, i) => {
-    const selected = mySelection.includes(i);
-    const cls = (selected?'selected ':'') + (canSelect?'':'readonly');
-    const click = canSelect ? ' onclick="toggleSelect('+i+')"' : '';
-    return cardChipHtml(c, cls, click);
-  }).join('') || '<span class="muted">Table vide</span>';
+  tableRow.innerHTML = state.table.map((c) => cardChipHtml(c, 'readonly', '')).join('') || '<span class="muted">Table vide</span>';
 
-  if(mySelection.length){
-    const sum = mySelection.reduce((s,i)=> s + (state.table[i]?state.table[i].r:0), 0);
-    $('selection-hint').textContent = "Sélection : " + mySelection.map(i=>rankLabel(state.table[i].r)).join(' + ') + " = " + sum;
+  const choosing = pendingOptions.length > 0;
+  const choicePanel = $('capture-choice-panel');
+  if(choosing){
+    choicePanel.classList.remove('hidden');
+    $('capture-options').innerHTML = pendingOptions.map((idxs, oi) => {
+      const label = idxs.map(i => rankLabel(state.table[i].r)+SUIT_SYMBOL[state.table[i].s]).join(' + ');
+      return '<button class="capture-option" onclick="chooseCapture('+oi+')">'+label+'</button>';
+    }).join('');
   } else {
-    $('selection-hint').textContent = myTurn ? "Sélectionne des cartes de la table pour tenter une capture par somme (facultatif)." : "";
+    choicePanel.classList.add('hidden');
   }
 
   const myHand = state.hands[me] || [];
   const handRow = $('hand-row');
+  const handClickable = myTurn && !choosing;
   handRow.innerHTML = myHand.map((c, i) => {
-    const click = myTurn ? ' onclick="playFromHand('+i+')"' : '';
-    return cardChipHtml(c, myTurn?'':'readonly', click);
+    const click = handClickable ? ' onclick="playFromHand('+i+')"' : '';
+    return cardChipHtml(c, handClickable?'':'readonly', click);
   }).join('') || '<span class="muted">Ta main est vide</span>';
 
   const ev = state.lastEvent;
