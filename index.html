@@ -2,8 +2,15 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vache &amp; Taureau — à deux</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Games YM</title>
+<meta name="theme-color" content="#233a2f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Games YM">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -15,36 +22,91 @@
     --butter:#e9c46a;
     --red-chalk:#e76f51;
     --blue-chalk:#8ecae6;
+    --glass-a:#3fa389;
     --line:rgba(243,239,228,.18);
-    --radius:14px;
+    --radius:16px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
   body{
     font-family:'Fredoka',system-ui,sans-serif;
     background:
-      radial-gradient(1200px 600px at 50% -10%, rgba(233,196,106,.07), transparent 60%),
+      radial-gradient(1000px 520px at 15% -8%, rgba(233,196,106,.09), transparent 55%),
+      radial-gradient(900px 500px at 100% 10%, rgba(63,163,137,.10), transparent 55%),
       linear-gradient(var(--board), var(--board-deep));
+    background-attachment:fixed;
     color:var(--chalk);
     min-height:100dvh;
     display:flex;flex-direction:column;align-items:center;
-    padding:20px 16px 40px;
+    padding:calc(20px + env(safe-area-inset-top)) 16px 40px;
   }
   .frame{width:100%;max-width:430px}
-  header{text-align:center;margin-bottom:18px}
+  header{text-align:center;margin-bottom:18px;position:relative}
   .section-label{font-size:.78rem;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 8px;padding-left:2px}
   .section-label:first-of-type{margin-top:0}
   .back-link{display:inline-block;margin-bottom:14px;color:var(--chalk-dim);font-size:.82rem;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
   h1{font-weight:700;font-size:1.9rem;letter-spacing:.5px}
   h1 .emo{font-size:1.5rem;vertical-align:-2px}
   .tagline{color:var(--chalk-dim);font-size:.9rem;margin-top:2px}
-  .card{
-    background:rgba(255,255,255,.045);
+
+  .menu-btn{
+    position:absolute;top:0;right:0;
+    width:38px;height:38px;border-radius:12px;margin:0;padding:0;
+    background:rgba(255,255,255,.07);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
     border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.05rem;cursor:pointer;
+  }
+  .menu-btn:active{transform:scale(.94)}
+  .menu-overlay{
+    position:fixed;inset:0;z-index:40;background:transparent;
+    opacity:0;pointer-events:none;transition:opacity .2s ease;
+  }
+  .menu-overlay.open{opacity:1;pointer-events:auto}
+  .menu-panel{
+    position:absolute;top:44px;right:0;z-index:41;width:230px;
+    background:rgba(36,56,46,.75);
+    backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
+    border:1px solid rgba(243,239,228,.16);
+    border-radius:16px;
+    padding:8px;
+    box-shadow:0 14px 34px rgba(0,0,0,.35);
+    opacity:0;transform:translateY(-6px) scale(.97);pointer-events:none;
+    transition:opacity .18s ease, transform .18s cubic-bezier(.22,1,.36,1);
+  }
+  .menu-panel.open{opacity:1;transform:none;pointer-events:auto}
+  .menu-item{
+    display:flex;align-items:center;gap:10px;width:100%;
+    background:transparent;border:none;border-radius:10px;
+    padding:11px 10px;font-family:'Fredoka',sans-serif;font-size:.92rem;
+    color:var(--chalk);text-align:left;cursor:pointer;
+  }
+  .menu-item:active{background:rgba(255,255,255,.08)}
+
+  .card{
+    background:linear-gradient(160deg, rgba(255,255,255,.075), rgba(255,255,255,.02));
+    backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+    border:1px solid rgba(243,239,228,.13);
     border-radius:var(--radius);
     padding:18px 16px;
     margin-bottom:14px;
+    box-shadow:0 10px 26px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.05);
   }
+  @media (prefers-reduced-motion: no-preference){
+    #screen-home .card{animation:cardIn .5s cubic-bezier(.22,1,.36,1) both}
+    #screen-home .card:nth-of-type(1){animation-delay:.02s}
+    #screen-home .card:nth-of-type(2){animation-delay:.08s}
+    #screen-home .card:nth-of-type(3){animation-delay:.14s}
+  }
+  @keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .card-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .card-icon{
+    width:38px;height:38px;border-radius:11px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:1.15rem;
+    background:rgba(233,196,106,.13);border:1px solid rgba(233,196,106,.22);
+  }
+  .card-head h2{margin-bottom:0}
   .card h2{font-size:1.05rem;font-weight:600;margin-bottom:10px}
   label{display:block;font-size:.85rem;color:var(--chalk-dim);margin:10px 0 4px}
   input[type=text],input[type=tel]{
@@ -64,15 +126,15 @@
   button{
     font-family:'Fredoka',sans-serif;
     font-weight:600;font-size:1rem;
-    border:none;border-radius:12px;
+    border:none;border-radius:13px;
     padding:13px 16px;width:100%;
     cursor:pointer;margin-top:12px;
-    transition:transform .08s ease, opacity .15s;
+    transition:transform .12s cubic-bezier(.22,1,.36,1), filter .15s, opacity .15s;
   }
-  button:active{transform:scale(.98)}
+  button:active{transform:scale(.97);filter:brightness(.96)}
   button:disabled{opacity:.45;cursor:default}
-  .btn-main{background:var(--butter);color:#3a2c10}
-  .btn-ghost{background:transparent;color:var(--chalk);border:1.5px solid var(--line)}
+  .btn-main{background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;box-shadow:0 6px 16px rgba(233,196,106,.18)}
+  .btn-ghost{background:rgba(255,255,255,.04);color:var(--chalk);border:1.5px solid var(--line)}
   .btn-small{width:auto;padding:8px 14px;font-size:.85rem;margin-top:0}
   .muted{color:var(--chalk-dim);font-size:.85rem;line-height:1.45}
   .error{color:var(--red-chalk);font-size:.85rem;margin-top:8px;min-height:1.2em}
@@ -138,8 +200,14 @@
 <body>
 <div class="frame">
   <header>
-    <h1><span class="emo">🐄</span> Vache &amp; Taureau <span class="emo">🐂</span></h1>
-    <div class="tagline">Devine le nombre secret de ton adversaire</div>
+    <button class="menu-btn" id="menu-btn" aria-label="Menu" onclick="toggleMenu()">⚙️</button>
+    <div class="menu-overlay" id="menu-overlay" onclick="closeMenu()"></div>
+    <div class="menu-panel" id="menu-panel">
+      <button class="menu-item" onclick="location.href='historique.html'">📊 Historique</button>
+      <button class="menu-item" onclick="closeMenu(); window.showInstallTutorial && window.showInstallTutorial();">📲 Installer l'app</button>
+    </div>
+    <h1><span class="emo">🎲</span> Games YM</h1>
+    <div class="tagline">Des jeux à partager, à deux ou en groupe</div>
   </header>
 
   <div id="screen-home">
@@ -147,28 +215,21 @@
 
     <div class="section-label">🎯 En tête-à-tête</div>
     <div class="card">
-      <h2>🐄 Vache &amp; Taureau</h2>
+      <div class="card-head"><span class="card-icon">🐄</span><h2>Vache &amp; Taureau</h2></div>
       <p class="muted">Devine le nombre secret à 4 chiffres de ton adversaire. À deux uniquement.</p>
       <button class="btn-main" onclick="show('vt-home')">Jouer à Vache &amp; Taureau</button>
     </div>
 
     <div class="section-label">👥 En groupe (2 à 6 joueurs)</div>
     <div class="card">
-      <h2>🎴 Skyjo</h2>
+      <div class="card-head"><span class="card-icon">🎴</span><h2>Skyjo</h2></div>
       <p class="muted">Le jeu de cartes, de 2 à 6 joueurs. Retourne, échange, fais le score le plus bas !</p>
       <button class="btn-main" onclick="location.href='skyjo.html'">Jouer à Skyjo</button>
     </div>
     <div class="card">
-      <h2>🧠 The Mind</h2>
+      <div class="card-head"><span class="card-icon">🧠</span><h2>The Mind</h2></div>
       <p class="muted">De 2 à 4 joueurs, en équipe. Jouez vos cartes dans l'ordre, sans parler ni se signaler !</p>
       <button class="btn-main" onclick="location.href='the-mind.html'">Jouer à The Mind</button>
-    </div>
-
-    <div class="section-label">📊 Suivi</div>
-    <div class="card">
-      <h2>Historique</h2>
-      <p class="muted">Retrouve le score de vos duels, toutes parties confondues.</p>
-      <button class="btn-ghost" onclick="location.href='historique.html'">Voir l'historique</button>
     </div>
   </div>
 
@@ -289,6 +350,15 @@ let code = null, me = null, state = null, pollTimer = null, busy = false;
 const $ = id => document.getElementById(id);
 const screens = ['home','vt-home','create','join','wait','game','end'];
 function show(name){ screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name)); }
+
+function toggleMenu(){
+  $('menu-panel').classList.toggle('open');
+  $('menu-overlay').classList.toggle('open');
+}
+function closeMenu(){
+  $('menu-panel').classList.remove('open');
+  $('menu-overlay').classList.remove('open');
+}
 
 function validSecret(s){
   if(!/^[0-9]{4}$/.test(s)) return "Il faut exactement 4 chiffres.";
@@ -542,5 +612,6 @@ document.addEventListener('keydown', e=>{
   else if(!$('screen-join').classList.contains('hidden')) joinGame();
 });
 </script>
+<script src="install-tutorial.js" defer></script>
 </body>
 </html>
