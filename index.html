@@ -32,6 +32,9 @@
   }
   .frame{width:100%;max-width:430px}
   header{text-align:center;margin-bottom:18px}
+  .section-label{font-size:.78rem;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 8px;padding-left:2px}
+  .section-label:first-of-type{margin-top:0}
+  .back-link{display:inline-block;margin-bottom:14px;color:var(--chalk-dim);font-size:.82rem;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
   h1{font-weight:700;font-size:1.9rem;letter-spacing:.5px}
   h1 .emo{font-size:1.5rem;vertical-align:-2px}
   .tagline{color:var(--chalk-dim);font-size:.9rem;margin-top:2px}
@@ -140,6 +143,37 @@
   </header>
 
   <div id="screen-home">
+    <p class="muted" style="text-align:center;margin-bottom:6px">Choisis un jeu, seul·e ou avec tes ami·e·s.</p>
+
+    <div class="section-label">🎲 Jeux à deux</div>
+    <div class="card">
+      <h2>🐄 Vache &amp; Taureau</h2>
+      <p class="muted">Devine le nombre secret à 4 chiffres de ton adversaire.</p>
+      <button class="btn-main" onclick="show('vt-home')">Jouer à Vache &amp; Taureau</button>
+    </div>
+    <div class="card">
+      <h2>🎴 Skyjo</h2>
+      <p class="muted">Le jeu de cartes à deux, en ligne. Retourne, échange, fais le score le plus bas !</p>
+      <button class="btn-main" onclick="location.href='skyjo.html'">Jouer à Skyjo</button>
+    </div>
+
+    <div class="section-label">👥 Jeux en groupe</div>
+    <div class="card">
+      <h2>🧠 The Mind</h2>
+      <p class="muted">De 2 à 4 joueurs, en équipe. Jouez vos cartes dans l'ordre, sans parler ni se signaler !</p>
+      <button class="btn-main" onclick="location.href='the-mind.html'">Jouer à The Mind</button>
+    </div>
+
+    <div class="section-label">📊 Suivi</div>
+    <div class="card">
+      <h2>Historique</h2>
+      <p class="muted">Retrouve le score de vos duels, toutes parties confondues.</p>
+      <button class="btn-ghost" onclick="location.href='historique.html'">Voir l'historique</button>
+    </div>
+  </div>
+
+  <div id="screen-vt-home" class="hidden">
+    <a class="back-link" href="#" onclick="show('home');return false;">← Retour à l'accueil</a>
     <div class="card">
       <h2>Nouvelle partie</h2>
       <p class="muted">Crée une partie et envoie le code à ton amie.</p>
@@ -149,21 +183,6 @@
       <h2>Rejoindre</h2>
       <p class="muted">Tu as reçu un code ? Entre-le ici.</p>
       <button class="btn-ghost" onclick="show('join')">Rejoindre avec un code</button>
-    </div>
-    <div class="card">
-      <h2>🎴 Skyjo</h2>
-      <p class="muted">Le jeu de cartes à deux, en ligne. Retourne, échange, fais le score le plus bas !</p>
-      <button class="btn-main" onclick="location.href='skyjo.html'">Jouer à Skyjo</button>
-    </div>
-    <div class="card">
-      <h2>🧠 The Mind</h2>
-      <p class="muted">De 2 à 4 joueurs, en équipe. Jouez vos cartes dans l'ordre, sans parler ni se signaler !</p>
-      <button class="btn-main" onclick="location.href='the-mind.html'">Jouer à The Mind</button>
-    </div>
-    <div class="card">
-      <h2>📊 Historique</h2>
-      <p class="muted">Retrouve le score de vos duels, toutes parties confondues.</p>
-      <button class="btn-ghost" onclick="location.href='historique.html'">Voir l'historique</button>
     </div>
     <div class="card">
       <h2>Règles</h2>
@@ -183,7 +202,7 @@
       <input type="tel" id="create-secret" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
       <div class="error" id="create-err"></div>
       <button class="btn-main" id="btn-create" onclick="createGame()">Créer et obtenir le code</button>
-      <button class="btn-ghost" onclick="show('home')">Retour</button>
+      <button class="btn-ghost" onclick="show('vt-home')">Retour</button>
     </div>
   </div>
 
@@ -198,7 +217,7 @@
       <input type="tel" id="join-secret" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
       <div class="error" id="join-err"></div>
       <button class="btn-main" id="btn-join" onclick="joinGame()">Rejoindre</button>
-      <button class="btn-ghost" onclick="show('home')">Retour</button>
+      <button class="btn-ghost" onclick="show('vt-home')">Retour</button>
     </div>
   </div>
 
@@ -268,7 +287,7 @@ const HEADERS = {
 let code = null, me = null, state = null, pollTimer = null, busy = false;
 
 const $ = id => document.getElementById(id);
-const screens = ['home','create','join','wait','game','end'];
+const screens = ['home','vt-home','create','join','wait','game','end'];
 function show(name){ screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name)); }
 
 function validSecret(s){
