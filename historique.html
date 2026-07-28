@@ -38,10 +38,14 @@
     padding:20px 16px 40px;
   }
   .frame{width:100%;max-width:460px}
-  header{text-align:center;margin-bottom:14px}
+  header{text-align:center;margin-bottom:14px;position:relative}
   h1{font-weight:700;font-size:1.9rem;letter-spacing:.5px}
   .tagline{color:var(--chalk-dim);font-size:.9rem;margin-top:2px}
   .back-link{display:inline-block;margin-top:8px;color:var(--chalk-dim);font-size:.82rem;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+  .refresh-btn{position:absolute;top:0;right:0;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:999px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;cursor:pointer}
+  .refresh-btn:active{transform:scale(.92)}
+  .refresh-btn.spin{animation:spin .7s linear}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
   .card{
     background:linear-gradient(160deg, rgba(255,255,255,.075), rgba(255,255,255,.02));
     backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
@@ -51,105 +55,50 @@
     margin-bottom:14px;
     box-shadow:0 10px 26px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.05);
   }
-  .card h2{font-size:1.05rem;font-weight:600;margin-bottom:10px}
-  label{display:block;font-size:.85rem;color:var(--chalk-dim);margin:10px 0 4px}
-  input[type=text]{
-    width:100%;
-    background:rgba(0,0,0,.25);
-    border:1.5px dashed var(--line);
-    border-radius:10px;
-    color:var(--chalk);
-    font-family:'Fredoka',sans-serif;
-    font-size:1rem;
-    padding:11px 12px;
-    outline:none;
-  }
-  input:focus{border-color:var(--butter)}
-  button{
-    font-family:'Fredoka',sans-serif;
-    font-weight:600;font-size:1rem;
-    border:none;border-radius:13px;
-    padding:13px 16px;width:100%;
-    cursor:pointer;margin-top:12px;
-    background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;
-    box-shadow:0 6px 16px rgba(233,196,106,.18);
-    transition:transform .12s cubic-bezier(.22,1,.36,1), filter .15s, opacity .15s;
-  }
-  button:active{transform:scale(.97);filter:brightness(.96)}
-  button:disabled{opacity:.45;cursor:default}
-  .muted{color:var(--chalk-dim);font-size:.85rem;line-height:1.45}
-  .error{color:var(--red-chalk);font-size:.85rem;margin-top:8px;min-height:1.2em}
+  .muted{color:var(--chalk-dim);font-size:.85rem;line-height:1.45;text-align:center}
   .hidden{display:none !important}
 
-  .totals-row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:10px}
-  .totals-row .side{text-align:center;flex:1}
-  .totals-row .n{font-family:'Space Mono',monospace;font-size:2.1rem;font-weight:700;color:var(--butter)}
-  .totals-row .nm{font-size:.9rem;color:var(--chalk-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .totals-row .vs{color:var(--chalk-dim);font-size:.78rem;text-align:center}
-  .sub-row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:.82rem;color:var(--chalk-dim);border-top:1px solid var(--line);padding-top:10px;margin-top:4px}
+  .filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:14px}
+  .filter-row::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:.82rem;cursor:pointer;white-space:nowrap;transition:filter .15s}
+  .chip.active{background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;border-color:transparent;font-weight:600}
+  .chip:active{filter:brightness(.94)}
 
-  .history-list{display:flex;flex-direction:column;gap:6px;max-height:48dvh;overflow-y:auto;padding:2px}
+  .day-header{font-size:.78rem;color:var(--butter);text-transform:uppercase;letter-spacing:.05em;margin:18px 2px 8px}
+  .day-header:first-child{margin-top:0}
+
   .hrow{
-    display:flex;align-items:center;gap:8px;
-    padding:9px 10px;border-radius:10px;
+    display:flex;align-items:flex-start;gap:10px;
+    padding:10px 12px;border-radius:10px;
     background:rgba(0,0,0,.18);
-    font-size:.85rem;
+    margin-bottom:6px;
   }
-  .hdate{color:var(--chalk-dim);font-size:.75rem;width:70px;flex-shrink:0}
-  .hgame{flex:1}
-  .hwin{font-weight:600;white-space:nowrap}
-  ::-webkit-scrollbar{width:6px}
-  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+  .htime{color:var(--chalk-dim);font-size:.72rem;width:36px;flex-shrink:0;padding-top:2px;font-family:'Space Mono',monospace}
+  .hbody{flex:1;min-width:0}
+  .htitle{font-weight:600;font-size:.9rem}
+  .hdetail{color:var(--chalk-dim);font-size:.78rem;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hresult{font-weight:600;font-size:.82rem;margin-top:4px;color:var(--butter)}
 </style>
 </head>
 <body>
 <div class="frame">
   <header>
     <h1>📊 Historique</h1>
-    <div class="tagline">Le score de vos duels, toutes parties confondues</div>
+    <div class="tagline">Toutes les parties, tous les jours</div>
     <a class="back-link" href="index.html">← Retour à l'accueil</a>
+    <div class="refresh-btn" id="refresh-btn" onclick="loadAll(true)">🔄</div>
   </header>
 
-  <div class="card">
-    <h2>Vos prénoms</h2>
-    <label>Ton prénom</label>
-    <input type="text" id="name1" maxlength="12" placeholder="Ex. Léa">
-    <label>Prénom de ton ami·e</label>
-    <input type="text" id="name2" maxlength="12" placeholder="Ex. Emma">
-    <div class="error" id="search-err"></div>
-    <button id="btn-search" onclick="search()">Voir l'historique</button>
+  <div class="filter-row" id="filter-row"></div>
+
+  <div class="card hidden" id="sec-loading">
+    <p class="muted">Chargement…</p>
+  </div>
+  <div class="card hidden" id="sec-empty">
+    <p class="muted" id="empty-text">Aucune partie jouée pour l'instant. Lancez une partie pour commencer l'historique !</p>
   </div>
 
-  <div id="results" class="hidden">
-    <div class="card hidden" id="sec-empty">
-      <p class="muted" id="empty-text"></p>
-    </div>
-    <div class="card hidden" id="sec-vt">
-      <h2>🐄 Vache &amp; Taureau</h2>
-      <div class="totals-row" id="vt-totals"></div>
-      <div class="history-list" id="vt-list"></div>
-    </div>
-    <div class="card hidden" id="sec-sk">
-      <h2>🎴 Skyjo</h2>
-      <div class="totals-row" id="sk-totals"></div>
-      <div class="history-list" id="sk-list"></div>
-    </div>
-    <div class="card hidden" id="sec-tm">
-      <h2>🧠 The Mind</h2>
-      <p class="muted" id="tm-summary"></p>
-      <div class="history-list" id="tm-list"></div>
-    </div>
-    <div class="card hidden" id="sec-cb">
-      <h2>🃏 Chkobba</h2>
-      <div class="totals-row" id="cb-totals"></div>
-      <div class="history-list" id="cb-list"></div>
-    </div>
-    <div class="card hidden" id="sec-bw">
-      <h2>📖 Bent Walad</h2>
-      <div class="totals-row" id="bw-totals"></div>
-      <div class="history-list" id="bw-list"></div>
-    </div>
-  </div>
+  <div id="list"></div>
 </div>
 
 <script>
@@ -163,6 +112,17 @@ const HEADERS = {
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
 
+const GAME_FILTERS = [
+  {key:'all', label:'Tous'},
+  {key:'vt', label:'🐄 Vache & Taureau'},
+  {key:'sk', label:'🎴 Skyjo'},
+  {key:'tm', label:'🧠 The Mind'},
+  {key:'cb', label:'🃏 Chkobba'},
+  {key:'bw', label:'📖 Bent Walad'}
+];
+let activeFilter = 'all';
+let allEntries = [];
+
 async function fetchResults(table){
   try{
     const r = await fetch(SB_URL+"/rest/v1/"+table+"?select=*&order=finished_at.desc&limit=500", {headers:HEADERS});
@@ -170,162 +130,101 @@ async function fetchResults(table){
     return await r.json();
   }catch(e){ return []; }
 }
-function matchesPair(row, a, b){
-  const p1 = row.p1_name.trim().toLowerCase(), p2 = row.p2_name.trim().toLowerCase();
-  return (p1===a && p2===b) || (p1===b && p2===a);
-}
-function matchesTeam(row, a, b){
-  const names = (row.players||[]).map(n => n.trim().toLowerCase());
-  return names.includes(a) && names.includes(b);
-}
-function winsFor(rows, name){
-  const n = name.trim().toLowerCase();
-  return rows.filter(r => r.winner_name.trim().toLowerCase()===n).length;
-}
-function skPairScores(row, a, b){
-  const names = (row.players||[]).map(n => n.trim().toLowerCase());
-  const ia = names.indexOf(a), ib = names.indexOf(b);
-  if(ia===-1 || ib===-1 || !row.scores) return null;
-  return { scoreA: row.scores[ia], scoreB: row.scores[ib] };
-}
-function skWinsForPair(rows, a, b){
-  let w1 = 0, w2 = 0;
-  rows.forEach(r=>{
-    const ps = skPairScores(r, a, b);
-    if(!ps) return;
-    if(ps.scoreA < ps.scoreB) w1++; else if(ps.scoreB < ps.scoreA) w2++;
+
+function buildEntries(vt, sk, tm, cb, bw){
+  const entries = [];
+  vt.forEach(r => entries.push({
+    ts: r.finished_at, game:'vt', emoji:'🐄', title:'Vache &amp; Taureau',
+    detail: esc(r.p1_name)+' vs '+esc(r.p2_name),
+    result: '🏆 '+esc(r.winner_name)
+  }));
+  sk.forEach(r => entries.push({
+    ts: r.finished_at, game:'sk', emoji:'🎴', title:'Skyjo'+(r.max_players>2?' · '+r.max_players+' joueurs':''),
+    detail: (r.players||[]).map(esc).join(', '),
+    result: '🏆 '+esc(r.winner_name)
+  }));
+  tm.forEach(r => entries.push({
+    ts: r.finished_at, game:'tm', emoji:'🧠', title:'The Mind · '+r.max_players+' joueurs',
+    detail: (r.players||[]).map(esc).join(', '),
+    result: r.won ? '✅ Niveau '+r.level_reached+' (gagné)' : '❌ Niveau '+r.level_reached
+  }));
+  cb.forEach(r => {
+    const aNames = (r.side_a_names||[]).map(esc).join(' & ');
+    const bNames = (r.side_b_names||[]).map(esc).join(' & ');
+    const winNames = r.winner_side==='a' ? aNames : bNames;
+    entries.push({
+      ts: r.finished_at, game:'cb', emoji:'🃏', title:'Chkobba'+(r.max_players>2?' · '+r.max_players+' joueurs':''),
+      detail: aNames+' vs '+bNames,
+      result: '🏆 '+winNames+' · '+r.side_a_score+'–'+r.side_b_score
+    });
   });
-  return {w1, w2};
+  bw.forEach(r => entries.push({
+    ts: r.finished_at, game:'bw', emoji:'📖', title:'Bent Walad'+((r.players||[]).length>2?' · '+r.players.length+' joueurs':''),
+    detail: (r.players||[]).map(esc).join(', '),
+    result: '🏆 '+esc(r.winner_name)
+  }));
+  entries.sort((a,b) => new Date(b.ts) - new Date(a.ts));
+  return entries;
 }
-function cbSides(row, a, b){
-  const namesA = (row.side_a_names||[]).map(n=>n.trim().toLowerCase());
-  const namesB = (row.side_b_names||[]).map(n=>n.trim().toLowerCase());
-  const aSide = namesA.includes(a) ? 'a' : (namesB.includes(a) ? 'b' : null);
-  const bSide = namesA.includes(b) ? 'a' : (namesB.includes(b) ? 'b' : null);
-  return { aSide, bSide };
+
+function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+function dayLabel(d){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const yesterday = new Date(today); yesterday.setDate(today.getDate()-1);
+  const dd = new Date(d); dd.setHours(0,0,0,0);
+  if(dd.getTime()===today.getTime()) return "Aujourd'hui";
+  if(dd.getTime()===yesterday.getTime()) return "Hier";
+  return capitalize(d.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'}));
 }
-function cbWinsForPair(rows, a, b){
-  let w1 = 0, w2 = 0;
-  rows.forEach(r=>{
-    const { aSide, bSide } = cbSides(r, a, b);
-    if(!aSide || !bSide || aSide===bSide) return;
-    if(r.winner_side===aSide) w1++; else if(r.winner_side===bSide) w2++;
+
+function renderChips(){
+  $('filter-row').innerHTML = GAME_FILTERS.map(f =>
+    '<div class="chip'+(f.key===activeFilter?' active':'')+'" onclick="setFilter(\''+f.key+'\')">'+f.label+'</div>'
+  ).join('');
+}
+function setFilter(key){ activeFilter = key; renderChips(); renderList(); }
+
+function renderList(){
+  const entries = activeFilter==='all' ? allEntries : allEntries.filter(e => e.game===activeFilter);
+  $('sec-loading').classList.add('hidden');
+  if(!entries.length){
+    $('list').innerHTML = '';
+    $('sec-empty').classList.remove('hidden');
+    return;
+  }
+  $('sec-empty').classList.add('hidden');
+  let html = '';
+  let lastDay = null;
+  entries.forEach(e => {
+    const d = new Date(e.ts);
+    const label = dayLabel(d);
+    if(label !== lastDay){
+      html += '<div class="day-header">'+label+'</div>';
+      lastDay = label;
+    }
+    const time = d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    html += '<div class="hrow"><span class="htime">'+time+'</span>'+
+      '<div class="hbody"><div class="htitle">'+e.emoji+' '+e.title+'</div>'+
+      '<div class="hdetail">'+e.detail+'</div>'+
+      '<div class="hresult">'+e.result+'</div></div></div>';
   });
-  return {w1, w2};
-}
-function bwWinsForPair(rows, a, b){
-  let w1 = 0, w2 = 0;
-  rows.forEach(r=>{
-    const ps = skPairScores(r, a, b);
-    if(!ps) return;
-    if(ps.scoreA > ps.scoreB) w1++; else if(ps.scoreB > ps.scoreA) w2++;
-  });
-  return {w1, w2};
+  $('list').innerHTML = html;
 }
 
-async function search(){
-  const n1 = $('name1').value.trim();
-  const n2 = $('name2').value.trim();
-  if(!n1 || !n2){ $('search-err').textContent = "Entre les deux prénoms."; return; }
-  $('search-err').textContent = "";
-  $('btn-search').disabled = true;
-
-  const a = n1.toLowerCase(), b = n2.toLowerCase();
-  const [vt, sk, tm, cb, bw] = await Promise.all([fetchResults('vt_results'), fetchResults('sk_results'), fetchResults('tm_results'), fetchResults('cb_results'), fetchResults('bw_results')]);
-  $('btn-search').disabled = false;
-
-  const vtRows = vt.filter(r => matchesPair(r, a, b)).map(r => Object.assign({}, r, {game:'vt'}));
-  const skRows = sk.filter(r => matchesTeam(r, a, b)).map(r => Object.assign({}, r, {game:'sk'}));
-  const tmRows = tm.filter(r => matchesTeam(r, a, b)).map(r => Object.assign({}, r, {game:'tm'}));
-  const cbRows = cb.filter(r => matchesTeam(r, a, b)).map(r => Object.assign({}, r, {game:'cb'}));
-  const bwRows = bw.filter(r => matchesTeam(r, a, b)).map(r => Object.assign({}, r, {game:'bw'}));
-
-  renderResults(n1, n2, vtRows, skRows, tmRows, cbRows, bwRows);
+async function loadAll(isRefresh){
+  if(isRefresh) $('refresh-btn').classList.add('spin');
+  if(!allEntries.length) $('sec-loading').classList.remove('hidden');
+  const [vt, sk, tm, cb, bw] = await Promise.all([
+    fetchResults('vt_results'), fetchResults('sk_results'), fetchResults('tm_results'),
+    fetchResults('cb_results'), fetchResults('bw_results')
+  ]);
+  allEntries = buildEntries(vt, sk, tm, cb, bw);
+  renderChips();
+  renderList();
+  if(isRefresh) setTimeout(()=>$('refresh-btn').classList.remove('spin'), 700);
 }
 
-function historyRowHtml(dateIso, label, rightText){
-  const date = new Date(dateIso);
-  const dateStr = date.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'}) + ' ' + date.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-  return '<div class="hrow"><span class="hdate">'+dateStr+'</span><span class="hgame">'+label+'</span><span class="hwin">'+rightText+'</span></div>';
-}
-function totalsRowHtml(n1, w1, n2, w2, count){
-  return '<div class="side"><div class="n">'+w1+'</div><div class="nm">'+esc(n1)+'</div></div>'+
-    '<div class="vs">victoires<br>'+count+' partie'+(count>1?'s':'')+'</div>'+
-    '<div class="side"><div class="n">'+w2+'</div><div class="nm">'+esc(n2)+'</div></div>';
-}
-
-function renderResults(n1, n2, vtRows, skRows, tmRows, cbRows, bwRows){
-  $('results').classList.remove('hidden');
-  const anyData = vtRows.length || skRows.length || tmRows.length || cbRows.length || bwRows.length;
-  $('sec-empty').classList.toggle('hidden', !!anyData);
-  if(!anyData){
-    $('empty-text').textContent = "Aucune partie trouvée entre "+esc(n1)+" et "+esc(n2)+" pour l'instant. Jouez une partie pour commencer l'historique !";
-  }
-
-  $('sec-vt').classList.toggle('hidden', vtRows.length===0);
-  if(vtRows.length){
-    const vtW1 = winsFor(vtRows, n1), vtW2 = winsFor(vtRows, n2);
-    $('vt-totals').innerHTML = totalsRowHtml(n1, vtW1, n2, vtW2, vtRows.length);
-    $('vt-list').innerHTML = vtRows.map(r =>
-      historyRowHtml(r.finished_at, '🐄 Vache &amp; Taureau', '🏆 '+esc(r.winner_name))
-    ).join('');
-  }
-
-  $('sec-sk').classList.toggle('hidden', skRows.length===0);
-  if(skRows.length){
-    const a = n1.toLowerCase(), b = n2.toLowerCase();
-    const skPair = skWinsForPair(skRows, a, b);
-    $('sk-totals').innerHTML = totalsRowHtml(n1, skPair.w1, n2, skPair.w2, skRows.length);
-    $('sk-list').innerHTML = skRows.map(r=>{
-      const ps = skPairScores(r, a, b);
-      const scoreStr = ps ? ' · '+ps.scoreA+'–'+ps.scoreB : '';
-      const groupStr = r.max_players>2 ? ' ('+r.max_players+' joueurs)' : '';
-      return historyRowHtml(r.finished_at, '🎴 Skyjo'+groupStr+scoreStr, '🏆 '+esc(r.winner_name));
-    }).join('');
-  }
-
-  $('sec-tm').classList.toggle('hidden', tmRows.length===0);
-  if(tmRows.length){
-    const tmWins = tmRows.filter(r => r.won).length;
-    $('tm-summary').textContent = tmWins+' victoire'+(tmWins>1?'s':'')+" d'équipe sur "+tmRows.length+' partie'+(tmRows.length>1?'s':'')+' jouées ensemble.';
-    $('tm-list').innerHTML = tmRows.map(r=>{
-      const result = r.won ? '✅ victoire' : '❌ niveau '+r.level_reached;
-      return historyRowHtml(r.finished_at, '🧠 The Mind ('+r.max_players+' joueurs)', result);
-    }).join('');
-  }
-
-  $('sec-cb').classList.toggle('hidden', cbRows.length===0);
-  if(cbRows.length){
-    const a = n1.toLowerCase(), b = n2.toLowerCase();
-    const cbPair = cbWinsForPair(cbRows, a, b);
-    $('cb-totals').innerHTML = totalsRowHtml(n1, cbPair.w1, n2, cbPair.w2, cbRows.length);
-    $('cb-list').innerHTML = cbRows.map(r=>{
-      const sideANames = (r.side_a_names||[]).join(' & ');
-      const sideBNames = (r.side_b_names||[]).join(' & ');
-      const winnerNames = r.winner_side==='a' ? sideANames : sideBNames;
-      const groupStr = r.max_players>2 ? ' ('+r.max_players+' joueurs)' : '';
-      const label = '🃏 Chkobba'+groupStr+' · '+r.side_a_score+'–'+r.side_b_score;
-      return historyRowHtml(r.finished_at, label, '🏆 '+esc(winnerNames));
-    }).join('');
-  }
-
-  $('sec-bw').classList.toggle('hidden', bwRows.length===0);
-  if(bwRows.length){
-    const a = n1.toLowerCase(), b = n2.toLowerCase();
-    const bwPair = bwWinsForPair(bwRows, a, b);
-    $('bw-totals').innerHTML = totalsRowHtml(n1, bwPair.w1, n2, bwPair.w2, bwRows.length);
-    $('bw-list').innerHTML = bwRows.map(r=>{
-      const ps = skPairScores(r, a, b);
-      const scoreStr = ps ? ' · '+ps.scoreA+'–'+ps.scoreB : '';
-      const groupStr = r.players.length>2 ? ' ('+r.players.length+' joueurs)' : '';
-      return historyRowHtml(r.finished_at, '📖 Bent Walad'+groupStr+scoreStr, '🏆 '+esc(r.winner_name));
-    }).join('');
-  }
-}
-
-document.addEventListener('keydown', e=>{
-  if(e.key==='Enter') search();
-});
+loadAll(false);
 </script>
 <script src="install-tutorial.js" defer></script>
 </body>
