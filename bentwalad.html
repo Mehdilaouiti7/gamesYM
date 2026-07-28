@@ -179,7 +179,7 @@
     </div>
     <div class="card">
       <h2>Règles</h2>
-      <p class="muted">Une lettre arabe est tirée au hasard, jamais deux fois la même dans une partie (avec son équivalent en alphabet latin affiché en indice, tu tapes normalement avec ton clavier français). Chacun remplit, le plus vite possible, un mot commençant par cette lettre pour chaque catégorie : <span lang="ar" dir="rtl">بنت</span> (prénom fille), <span lang="ar" dir="rtl">ولد</span> (prénom garçon), <span lang="ar" dir="rtl">بلاد</span> (pays), <span lang="ar" dir="rtl">مدينة</span> (ville), <span lang="ar" dir="rtl">حيوان</span> (animal), <span lang="ar" dir="rtl">نبتة/فاكهة</span> (plante ou fruit), <span lang="ar" dir="rtl">شخصية مشهورة</span> (personnalité connue), <span lang="ar" dir="rtl">جماد</span> (objet).<br>
+      <p class="muted">Une lettre arabe est tirée au hasard, jamais deux fois la même dans une partie (tu tapes normalement avec ton clavier français). Chacun remplit, le plus vite possible, un mot commençant par cette lettre pour chaque catégorie : <span lang="ar" dir="rtl">بنت</span> (prénom fille), <span lang="ar" dir="rtl">ولد</span> (prénom garçon), <span lang="ar" dir="rtl">بلاد</span> (pays), <span lang="ar" dir="rtl">مدينة</span> (ville), <span lang="ar" dir="rtl">حيوان</span> (animal), <span lang="ar" dir="rtl">نبتة/فاكهة</span> (plante ou fruit), <span lang="ar" dir="rtl">شخصية مشهورة</span> (personnalité connue), <span lang="ar" dir="rtl">جماد</span> (objet).<br>
       Dès que quelqu'un appuie sur <b>STOP !</b>, tout le monde envoie ses réponses telles quelles.<br>
       À chaque manche, un joueur est tiré au sort pour valider les réponses de tout le monde (jamais deux fois de suite la même personne) : c'est lui seul qui décide ce qui compte, en cochant les réponses valides — tout le monde voit ses choix en direct.<br>
       Score par catégorie : réponse cochée = <b>1 pt</b>, vide ou non cochée = <b>0 pt</b>.</p>
@@ -228,7 +228,6 @@
       <div class="status-text">
         <div class="rnd" id="round-label">Manche 1</div>
         <div class="ph" id="phase-label">…</div>
-        <div class="rnd" id="letter-hint"></div>
       </div>
     </div>
     <div class="scoreboard-row" id="scoreboard-row"></div>
@@ -287,14 +286,6 @@ const HEADERS = {
   "Content-Type": "application/json"
 };
 const LETTERS = ['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
-const ARABIC_LATIN = {
-  'ا':['a'], 'ب':['b'], 'ت':['t'], 'ث':['th'], 'ج':['j','g'],
-  'ح':['h','7'], 'خ':['kh','5','k'], 'د':['d'], 'ذ':['dh','z','th'], 'ر':['r'],
-  'ز':['z'], 'س':['s'], 'ش':['ch','sh'], 'ص':['s','9'], 'ض':['dh','9'],
-  'ط':['t','6'], 'ظ':['dh','6','z'], 'ع':['3','a'], 'غ':['gh','8'], 'ف':['f'],
-  'ق':['9','k','q'], 'ك':['k'], 'ل':['l'], 'م':['m'], 'ن':['n'],
-  'ه':['h'], 'و':['w','ou'], 'ي':['y','i']
-};
 const CATEGORIES = [
   {key:'bent', label:'بنت'},
   {key:'walad', label:'ولد'},
@@ -320,7 +311,6 @@ function genCode(){
   for(let i=0;i<4;i++) c += letters[Math.floor(Math.random()*letters.length)];
   return c;
 }
-function latinHint(letter){ return (ARABIC_LATIN[letter]||[]).map(v=>v.toUpperCase()).join('/'); }
 function saveRole(c, idx){ try{ localStorage.setItem('bw-role-'+c, String(idx)); }catch(e){} }
 function loadRole(c){ try{ const v=localStorage.getItem('bw-role-'+c); return v===null?null:parseInt(v,10); }catch(e){ return null; } }
 
@@ -624,7 +614,6 @@ function renderBoard(){
     state.phase==='writing' ? "✍️ Remplis tes catégories !" :
     state.phase==='reveal_pending' ? "⏳ Fin du temps…" :
     state.phase==='judging' ? "🧐 Validation en cours…" : "🏁 Résultats";
-  $('letter-hint').textContent = state.letter ? "Tape avec : " + latinHint(state.letter) : "";
 
   $('scoreboard-row').innerHTML = state.players.map((p, idx) =>
     '<div class="sb-chip'+(idx===me?' me':'')+'"><div class="nm">'+esc(p.name)+'</div><div class="n">'+state.totals[idx]+'</div></div>'
@@ -636,10 +625,9 @@ function renderBoard(){
     $('judging-zone').classList.add('hidden');
     $('reveal-zone').classList.add('hidden');
     if(renderedRound !== state.round){
-      const hint = latinHint(state.letter);
       $('cat-form').innerHTML = CATEGORIES.map(cat =>
         '<div class="cat-row"><label lang="ar" dir="rtl">'+esc(cat.label)+'</label>'+
-        '<input type="text" id="inp-'+cat.key+'" lang="fr" autocomplete="off" placeholder="'+hint+'…"></div>'
+        '<input type="text" id="inp-'+cat.key+'" lang="fr" autocomplete="off"></div>'
       ).join('');
       renderedRound = state.round;
     }
