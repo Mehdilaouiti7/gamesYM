@@ -144,6 +144,11 @@
       <div class="totals-row" id="cb-totals"></div>
       <div class="history-list" id="cb-list"></div>
     </div>
+    <div class="card hidden" id="sec-bw">
+      <h2>📖 Bent Walad</h2>
+      <div class="totals-row" id="bw-totals"></div>
+      <div class="history-list" id="bw-list"></div>
+    </div>
   </div>
 </div>
 
@@ -208,6 +213,15 @@ function cbWinsForPair(rows, a, b){
   });
   return {w1, w2};
 }
+function bwWinsForPair(rows, a, b){
+  let w1 = 0, w2 = 0;
+  rows.forEach(r=>{
+    const ps = skPairScores(r, a, b);
+    if(!ps) return;
+    if(ps.scoreA > ps.scoreB) w1++; else if(ps.scoreB > ps.scoreA) w2++;
+  });
+  return {w1, w2};
+}
 
 async function search(){
   const n1 = $('name1').value.trim();
@@ -217,15 +231,16 @@ async function search(){
   $('btn-search').disabled = true;
 
   const a = n1.toLowerCase(), b = n2.toLowerCase();
-  const [vt, sk, tm, cb] = await Promise.all([fetchResults('vt_results'), fetchResults('sk_results'), fetchResults('tm_results'), fetchResults('cb_results')]);
+  const [vt, sk, tm, cb, bw] = await Promise.all([fetchResults('vt_results'), fetchResults('sk_results'), fetchResults('tm_results'), fetchResults('cb_results'), fetchResults('bw_results')]);
   $('btn-search').disabled = false;
 
   const vtRows = vt.filter(r => matchesPair(r, a, b)).map(r => Object.assign({}, r, {game:'vt'}));
   const skRows = sk.filter(r => matchesTeam(r, a, b)).map(r => Object.assign({}, r, {game:'sk'}));
   const tmRows = tm.filter(r => matchesTeam(r, a, b)).map(r => Object.assign({}, r, {game:'tm'}));
   const cbRows = cb.filter(r => matchesTeam(r, a, b)).map(r => Object.assign({}, r, {game:'cb'}));
+  const bwRows = bw.filter(r => matchesTeam(r, a, b)).map(r => Object.assign({}, r, {game:'bw'}));
 
-  renderResults(n1, n2, vtRows, skRows, tmRows, cbRows);
+  renderResults(n1, n2, vtRows, skRows, tmRows, cbRows, bwRows);
 }
 
 function historyRowHtml(dateIso, label, rightText){
@@ -239,9 +254,9 @@ function totalsRowHtml(n1, w1, n2, w2, count){
     '<div class="side"><div class="n">'+w2+'</div><div class="nm">'+esc(n2)+'</div></div>';
 }
 
-function renderResults(n1, n2, vtRows, skRows, tmRows, cbRows){
+function renderResults(n1, n2, vtRows, skRows, tmRows, cbRows, bwRows){
   $('results').classList.remove('hidden');
-  const anyData = vtRows.length || skRows.length || tmRows.length || cbRows.length;
+  const anyData = vtRows.length || skRows.length || tmRows.length || cbRows.length || bwRows.length;
   $('sec-empty').classList.toggle('hidden', !!anyData);
   if(!anyData){
     $('empty-text').textContent = "Aucune partie trouvée entre "+esc(n1)+" et "+esc(n2)+" pour l'instant. Jouez une partie pour commencer l'historique !";
@@ -291,6 +306,19 @@ function renderResults(n1, n2, vtRows, skRows, tmRows, cbRows){
       const groupStr = r.max_players>2 ? ' ('+r.max_players+' joueurs)' : '';
       const label = '🃏 Chkobba'+groupStr+' · '+r.side_a_score+'–'+r.side_b_score;
       return historyRowHtml(r.finished_at, label, '🏆 '+esc(winnerNames));
+    }).join('');
+  }
+
+  $('sec-bw').classList.toggle('hidden', bwRows.length===0);
+  if(bwRows.length){
+    const a = n1.toLowerCase(), b = n2.toLowerCase();
+    const bwPair = bwWinsForPair(bwRows, a, b);
+    $('bw-totals').innerHTML = totalsRowHtml(n1, bwPair.w1, n2, bwPair.w2, bwRows.length);
+    $('bw-list').innerHTML = bwRows.map(r=>{
+      const ps = skPairScores(r, a, b);
+      const scoreStr = ps ? ' · '+ps.scoreA+'–'+ps.scoreB : '';
+      const groupStr = r.players.length>2 ? ' ('+r.players.length+' joueurs)' : '';
+      return historyRowHtml(r.finished_at, '📖 Bent Walad'+groupStr+scoreStr, '🏆 '+esc(r.winner_name));
     }).join('');
   }
 }
