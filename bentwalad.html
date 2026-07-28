@@ -181,8 +181,8 @@
       <h2>Règles</h2>
       <p class="muted">Une lettre arabe est tirée au hasard, jamais deux fois la même dans une partie (avec son équivalent en alphabet latin affiché en indice, tu tapes normalement avec ton clavier français). Chacun remplit, le plus vite possible, un mot commençant par cette lettre pour chaque catégorie : <span lang="ar" dir="rtl">بنت</span> (prénom fille), <span lang="ar" dir="rtl">ولد</span> (prénom garçon), <span lang="ar" dir="rtl">بلاد</span> (pays), <span lang="ar" dir="rtl">مدينة</span> (ville), <span lang="ar" dir="rtl">حيوان</span> (animal), <span lang="ar" dir="rtl">نبتة/فاكهة</span> (plante ou fruit), <span lang="ar" dir="rtl">شخصية مشهورة</span> (personnalité connue), <span lang="ar" dir="rtl">جماد</span> (objet).<br>
       Dès que quelqu'un appuie sur <b>STOP !</b>, tout le monde envoie ses réponses telles quelles.<br>
-      À chaque manche, un joueur est tiré au sort pour valider les réponses de tout le monde (jamais deux fois de suite la même personne) — tout le monde voit les réponses des autres pendant ce temps.<br>
-      Score par catégorie : réponse validée = <b>1 pt</b>, vide ou refusée = <b>0 pt</b>.</p>
+      À chaque manche, un joueur est tiré au sort pour valider les réponses de tout le monde (jamais deux fois de suite la même personne) : c'est lui seul qui décide ce qui compte, en cochant les réponses valides — tout le monde voit ses choix en direct.<br>
+      Score par catégorie : réponse cochée = <b>1 pt</b>, vide ou non cochée = <b>0 pt</b>.</p>
     </div>
   </div>
 
@@ -309,7 +309,6 @@ const MAX_PLAYERS = 10;
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
 let renderedRound = -1;
-let judgeState = null, judgingRound = -1;
 
 const $ = id => document.getElementById(id);
 const screens = ['home','create','join','wait','game','end'];
@@ -322,12 +321,6 @@ function genCode(){
   return c;
 }
 function latinHint(letter){ return (ARABIC_LATIN[letter]||[]).map(v=>v.toUpperCase()).join('/'); }
-function answerMatchesLetter(text, letter){
-  const t = String(text||'').trim().toLowerCase();
-  if(!t) return false;
-  const variants = ARABIC_LATIN[letter] || [];
-  return variants.some(v => t.startsWith(v));
-}
 function saveRole(c, idx){ try{ localStorage.setItem('bw-role-'+c, String(idx)); }catch(e){} }
 function loadRole(c){ try{ const v=localStorage.getItem('bw-role-'+c); return v===null?null:parseInt(v,10); }catch(e){ return null; } }
 
@@ -392,13 +385,10 @@ function startRound(st, roundNum){
   st.submitted = [];
   st.roundResult = null;
 }
-function buildDefaultValidity(st){
+function buildEmptyValidity(st){
   const validity = {};
   CATEGORIES.forEach(cat => {
-    validity[cat.key] = st.players.map((p, idx) => {
-      const text = (st.answers[idx] && st.answers[idx][cat.key]) ? String(st.answers[idx][cat.key]).trim() : '';
-      return answerMatchesLetter(text, st.letter);
-    });
+    validity[cat.key] = st.players.map(() => false);
   });
   return validity;
 }
@@ -573,6 +563,7 @@ async function autoSubmitMine(){
   st.submitted.push(me);
   if(st.submitted.length >= st.players.length && !st.roundResult){
     st.phase = 'judging';
+    st.judgeValidity = buildEmptyValidity(st);
   }
   await finalizeAction(st);
 }
@@ -583,22 +574,27 @@ async function forceReveal(){
   if(st.phase!=='reveal_pending' || st.roundResult){ state=st; busy=false; renderCurrent(); return; }
   st.players.forEach((p, idx) => { if(!st.submitted.includes(idx)){ st.answers[idx] = st.answers[idx] || {}; st.submitted.push(idx); } });
   st.phase = 'judging';
+  st.judgeValidity = buildEmptyValidity(st);
   await finalizeAction(st);
 }
 async function confirmScores(){
-  if(busy || !state || state.phase!=='judging' || me!==state.judgeIdx || !judgeState) return;
+  if(busy || !state || state.phase!=='judging' || me!==state.judgeIdx) return;
   busy = true;
   let st = await loadState(code) || state;
   if(st.phase!=='judging' || st.roundResult){ state=st; busy=false; renderCurrent(); return; }
-  const res = computeRoundScores(st, judgeState);
+  const res = computeRoundScores(st, st.judgeValidity);
   st.roundResult = res;
   st.totals = st.totals.map((t,i)=> t + res.scores[i]);
   st.phase = 'reveal';
   await finalizeAction(st);
 }
-function toggleValidity(catKey, idx, checked){
-  if(!judgeState) return;
-  judgeState[catKey][idx] = checked;
+async function toggleValidity(catKey, idx, checked){
+  if(busy || !state || state.phase!=='judging' || me!==state.judgeIdx) return;
+  busy = true;
+  state.judgeValidity[catKey][idx] = checked;
+  const ok = await saveState(state);
+  busy = false;
+  if(!ok) renderCurrent();
 }
 async function nextRound(){
   if(busy || !state || state.phase!=='reveal') return;
@@ -671,27 +667,22 @@ function renderJudging(){
   const judgeName = state.players[state.judgeIdx].name;
   $('judge-title').textContent = isJudge ? "🧐 À toi de valider !" : "🧐 Validation en cours";
   $('judge-subtitle').textContent = isJudge
-    ? "Décoche les réponses que tu juges invalides ou mal orthographiées."
-    : "⏳ " + esc(judgeName) + " valide les réponses…";
+    ? "Coche les réponses que tu juges valides."
+    : "⏳ " + esc(judgeName) + " valide les réponses, en direct…";
   $('judge-confirm-btn').classList.toggle('hidden', !isJudge);
 
-  if(judgingRound !== state.round){
-    judgeState = buildDefaultValidity(state);
-    judgingRound = state.round;
-  }
   $('judge-form').innerHTML = CATEGORIES.map(cat => {
     const rows = state.players.map((p, idx) => {
       const text = (state.answers[idx] && state.answers[idx][cat.key]) ? String(state.answers[idx][cat.key]).trim() : '';
       const ans = text ? esc(text) : '(vide)';
       const acls = text ? '' : 'empty';
+      const isOk = !!(text && state.judgeValidity[cat.key][idx]);
       if(isJudge){
-        const checked = (text && judgeState[cat.key][idx]) ? 'checked' : '';
         const disabled = text ? '' : 'disabled';
-        return '<div class="judge-row"><input type="checkbox" '+checked+' '+disabled+
+        return '<div class="judge-row"><input type="checkbox" '+(isOk?'checked':'')+' '+disabled+
           ' onchange="toggleValidity(\''+cat.key+'\','+idx+',this.checked)">'+
           '<span class="nm">'+esc(p.name)+'</span><span class="ans '+acls+'">'+ans+'</span></div>';
       }
-      const isOk = !!(text && judgeState[cat.key][idx]);
       return '<div class="judge-row read-only"><span class="mark '+(isOk?'ok':'no')+'">'+(isOk?'✓':'·')+'</span>'+
         '<span class="nm">'+esc(p.name)+'</span><span class="ans '+acls+'">'+ans+'</span></div>';
     }).join('');
