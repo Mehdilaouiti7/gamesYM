@@ -58,14 +58,33 @@
   .muted{color:var(--chalk-dim);font-size:.85rem;line-height:1.45;text-align:center}
   .hidden{display:none !important}
 
+  .date-row{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+  .date-nav{flex:0 0 auto;width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--chalk);font-size:1.15rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .date-nav:active{filter:brightness(.9)}
+  .date-picker-wrap{flex:1;position:relative}
+  input[type=date]{
+    width:100%;
+    background:rgba(0,0,0,.25);
+    border:1.5px dashed var(--line);
+    border-radius:10px;
+    color:var(--chalk);
+    font-family:'Fredoka',sans-serif;
+    font-size:.92rem;
+    padding:9px 10px;
+    outline:none;
+    color-scheme: dark;
+  }
+  input[type=date]:focus{border-color:var(--butter)}
+  .date-today-btn{flex:0 0 auto;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:999px;padding:0 12px;height:36px;font-size:.78rem;color:var(--chalk-dim);cursor:pointer;white-space:nowrap}
+  .date-today-btn:active{filter:brightness(.9)}
+
   .filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:14px}
   .filter-row::-webkit-scrollbar{display:none}
   .chip{flex:0 0 auto;background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:.82rem;cursor:pointer;white-space:nowrap;transition:filter .15s}
   .chip.active{background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;border-color:transparent;font-weight:600}
   .chip:active{filter:brightness(.94)}
 
-  .day-header{font-size:.78rem;color:var(--butter);text-transform:uppercase;letter-spacing:.05em;margin:18px 2px 8px}
-  .day-header:first-child{margin-top:0}
+  .day-header{font-size:.9rem;font-weight:600;color:var(--butter);margin:2px 2px 10px}
 
   .hrow{
     display:flex;align-items:flex-start;gap:10px;
@@ -89,13 +108,24 @@
     <div class="refresh-btn" id="refresh-btn" onclick="loadAll(true)">🔄</div>
   </header>
 
+  <div class="date-row">
+    <div class="date-nav" onclick="shiftDate(-1)">‹</div>
+    <div class="date-picker-wrap">
+      <input type="date" id="date-picker" onchange="onDateChange()">
+    </div>
+    <div class="date-nav" onclick="shiftDate(1)">›</div>
+    <div class="date-today-btn" onclick="jumpToday()">Aujourd'hui</div>
+  </div>
+
   <div class="filter-row" id="filter-row"></div>
+
+  <div class="day-header" id="day-title"></div>
 
   <div class="card hidden" id="sec-loading">
     <p class="muted">Chargement…</p>
   </div>
   <div class="card hidden" id="sec-empty">
-    <p class="muted" id="empty-text">Aucune partie jouée pour l'instant. Lancez une partie pour commencer l'historique !</p>
+    <p class="muted" id="empty-text">Aucune partie ce jour-là.</p>
   </div>
 
   <div id="list"></div>
@@ -122,6 +152,7 @@ const GAME_FILTERS = [
 ];
 let activeFilter = 'all';
 let allEntries = [];
+let selectedDate = new Date();
 
 async function fetchResults(table){
   try{
@@ -168,12 +199,18 @@ function buildEntries(vt, sk, tm, cb, bw){
 }
 
 function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+function dateKey(d){
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
 function dayLabel(d){
   const today = new Date(); today.setHours(0,0,0,0);
   const yesterday = new Date(today); yesterday.setDate(today.getDate()-1);
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
   const dd = new Date(d); dd.setHours(0,0,0,0);
   if(dd.getTime()===today.getTime()) return "Aujourd'hui";
   if(dd.getTime()===yesterday.getTime()) return "Hier";
+  if(dd.getTime()===tomorrow.getTime()) return "Demain";
   return capitalize(d.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'}));
 }
 
@@ -184,8 +221,23 @@ function renderChips(){
 }
 function setFilter(key){ activeFilter = key; renderChips(); renderList(); }
 
+function jumpToday(){ selectedDate = new Date(); syncDatePicker(); renderList(); }
+function shiftDate(delta){ selectedDate.setDate(selectedDate.getDate()+delta); syncDatePicker(); renderList(); }
+function onDateChange(){
+  const v = $('date-picker').value;
+  if(v){
+    const [y,m,d] = v.split('-').map(Number);
+    selectedDate = new Date(y, m-1, d);
+  }
+  renderList();
+}
+function syncDatePicker(){ $('date-picker').value = dateKey(selectedDate); }
+
 function renderList(){
-  const entries = activeFilter==='all' ? allEntries : allEntries.filter(e => e.game===activeFilter);
+  $('day-title').textContent = dayLabel(selectedDate);
+  const dk = dateKey(selectedDate);
+  const dayEntries = allEntries.filter(e => dateKey(new Date(e.ts)) === dk);
+  const entries = activeFilter==='all' ? dayEntries : dayEntries.filter(e => e.game===activeFilter);
   $('sec-loading').classList.add('hidden');
   if(!entries.length){
     $('list').innerHTML = '';
@@ -193,22 +245,13 @@ function renderList(){
     return;
   }
   $('sec-empty').classList.add('hidden');
-  let html = '';
-  let lastDay = null;
-  entries.forEach(e => {
-    const d = new Date(e.ts);
-    const label = dayLabel(d);
-    if(label !== lastDay){
-      html += '<div class="day-header">'+label+'</div>';
-      lastDay = label;
-    }
-    const time = d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-    html += '<div class="hrow"><span class="htime">'+time+'</span>'+
+  $('list').innerHTML = entries.map(e => {
+    const time = new Date(e.ts).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    return '<div class="hrow"><span class="htime">'+time+'</span>'+
       '<div class="hbody"><div class="htitle">'+e.emoji+' '+e.title+'</div>'+
       '<div class="hdetail">'+e.detail+'</div>'+
       '<div class="hresult">'+e.result+'</div></div></div>';
-  });
-  $('list').innerHTML = html;
+  }).join('');
 }
 
 async function loadAll(isRefresh){
@@ -224,6 +267,7 @@ async function loadAll(isRefresh){
   if(isRefresh) setTimeout(()=>$('refresh-btn').classList.remove('spin'), 700);
 }
 
+syncDatePicker();
 loadAll(false);
 </script>
 <script src="install-tutorial.js" defer></script>

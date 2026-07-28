@@ -170,15 +170,15 @@
     padding:4px 2px;
   }
   .h-row{
-    padding:8px 6px;border-radius:10px;
+    padding:8px 10px;border-radius:10px;
     background:rgba(0,0,0,.18);
     border-left:3px solid transparent;
-    text-align:center;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
   }
   .h-row.me{border-left-color:var(--butter)}
   .h-row.them{border-left-color:var(--blue-chalk)}
-  .h-row .g{display:block;font-family:'Space Mono',monospace;font-weight:700;letter-spacing:.18em;font-size:.95rem}
-  .h-row .res{display:block;font-size:.78rem;margin-top:2px;color:var(--chalk-dim)}
+  .h-row .g{font-family:'Space Mono',monospace;font-weight:700;letter-spacing:.18em;font-size:.95rem;flex-shrink:0}
+  .h-row .res{font-size:.78rem;color:var(--chalk-dim);white-space:nowrap;text-align:right}
   .guess-line{display:flex;gap:8px;margin-top:4px}
   .guess-line input{flex:1}
   .guess-line button{width:auto;margin-top:0;padding:0 18px}
