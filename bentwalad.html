@@ -169,7 +169,7 @@
     </div>
     <div class="card">
       <h2>Règles</h2>
-      <p class="muted">Une lettre est tirée au hasard. Chacun remplit, le plus vite possible, un mot commençant par cette lettre pour chaque catégorie : Bent (prénom fille), Walad (prénom garçon), Balad (pays), Mdina (ville), Hayawan (animal), Nabta/Fekha (plante ou fruit), Lawn (couleur), Grabetha (objet).<br>
+      <p class="muted">Une lettre arabe est tirée au hasard (avec son équivalent en alphabet latin affiché en indice, tu tapes normalement avec ton clavier français). Chacun remplit, le plus vite possible, un mot commençant par cette lettre pour chaque catégorie : <span lang="ar" dir="rtl">بنت</span> (prénom fille), <span lang="ar" dir="rtl">ولد</span> (prénom garçon), <span lang="ar" dir="rtl">بلاد</span> (pays), <span lang="ar" dir="rtl">مدينة</span> (ville), <span lang="ar" dir="rtl">حيوان</span> (animal), <span lang="ar" dir="rtl">نبتة/فاكهة</span> (plante ou fruit), <span lang="ar" dir="rtl">لون</span> (couleur), <span lang="ar" dir="rtl">جماد</span> (objet).<br>
       Dès que quelqu'un appuie sur <b>STOP !</b>, tout le monde envoie ses réponses telles quelles.<br>
       Score par catégorie : réponse valide et unique = <b>10 pts</b>, valide mais partagée avec un autre joueur = <b>5 pts</b>, vide ou fausse lettre = <b>0 pt</b>.</p>
     </div>
@@ -213,10 +213,11 @@
 
   <div id="screen-game" class="hidden">
     <div class="status-bar">
-      <div class="letter-badge" id="letter-badge">?</div>
+      <div class="letter-badge" id="letter-badge" lang="ar" dir="rtl">?</div>
       <div class="status-text">
         <div class="rnd" id="round-label">Manche 1</div>
         <div class="ph" id="phase-label">…</div>
+        <div class="rnd" id="letter-hint"></div>
       </div>
     </div>
     <div class="scoreboard-row" id="scoreboard-row"></div>
@@ -235,7 +236,7 @@
 
     <div id="reveal-zone" class="hidden">
       <div class="card">
-        <h2>Résultats — Manche <span id="reveal-round"></span> (lettre <span id="reveal-letter"></span>)</h2>
+        <h2>Résultats — Manche <span id="reveal-round"></span> (lettre <span id="reveal-letter" lang="ar" dir="rtl"></span>)</h2>
         <div class="reveal-table" id="reveal-table"></div>
       </div>
       <button class="btn-main" onclick="nextRound()">Manche suivante</button>
@@ -265,8 +266,25 @@ const HEADERS = {
   "Authorization": "Bearer " + SB_KEY,
   "Content-Type": "application/json"
 };
-const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-const CATEGORIES = ['Bent','Walad','Balad','Mdina','Hayawan','Nabta/Fekha','Lawn','Grabetha'];
+const LETTERS = ['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
+const ARABIC_LATIN = {
+  'ا':['a'], 'ب':['b'], 'ت':['t'], 'ث':['th'], 'ج':['j','g'],
+  'ح':['h','7'], 'خ':['kh','5','k'], 'د':['d'], 'ذ':['dh','z','th'], 'ر':['r'],
+  'ز':['z'], 'س':['s'], 'ش':['ch','sh'], 'ص':['s','9'], 'ض':['dh','9'],
+  'ط':['t','6'], 'ظ':['dh','6','z'], 'ع':['3','a'], 'غ':['gh','8'], 'ف':['f'],
+  'ق':['9','k','q'], 'ك':['k'], 'ل':['l'], 'م':['m'], 'ن':['n'],
+  'ه':['h'], 'و':['w','ou'], 'ي':['y','i']
+};
+const CATEGORIES = [
+  {key:'bent', label:'بنت'},
+  {key:'walad', label:'ولد'},
+  {key:'balad', label:'بلاد'},
+  {key:'mdina', label:'مدينة'},
+  {key:'hayawan', label:'حيوان'},
+  {key:'nabta', label:'نبتة/فاكهة'},
+  {key:'lawn', label:'لون'},
+  {key:'grabetha', label:'جماد'}
+];
 const MAX_PLAYERS = 10;
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
@@ -282,7 +300,13 @@ function genCode(){
   for(let i=0;i<4;i++) c += letters[Math.floor(Math.random()*letters.length)];
   return c;
 }
-function catKey(cat){ return cat.replace(/[^a-zA-Z0-9]/g,''); }
+function latinHint(letter){ return (ARABIC_LATIN[letter]||[]).map(v=>v.toUpperCase()).join('/'); }
+function answerMatchesLetter(text, letter){
+  const t = String(text||'').trim().toLowerCase();
+  if(!t) return false;
+  const variants = ARABIC_LATIN[letter] || [];
+  return variants.some(v => t.startsWith(v));
+}
 function saveRole(c, idx){ try{ localStorage.setItem('bw-role-'+c, String(idx)); }catch(e){} }
 function loadRole(c){ try{ const v=localStorage.getItem('bw-role-'+c); return v===null?null:parseInt(v,10); }catch(e){ return null; } }
 
@@ -335,8 +359,8 @@ function computeRoundScores(st){
   CATEGORIES.forEach(cat => {
     const raw = [];
     for(let p=0;p<n;p++){
-      const text = (st.answers[p] && st.answers[p][cat]) ? String(st.answers[p][cat]).trim() : '';
-      const valid = text.length>0 && text[0].toUpperCase() === st.letter;
+      const text = (st.answers[p] && st.answers[p][cat.key]) ? String(st.answers[p][cat.key]).trim() : '';
+      const valid = answerMatchesLetter(text, st.letter);
       raw.push({p, text, valid});
     }
     const counts = {};
@@ -350,15 +374,15 @@ function computeRoundScores(st){
       scores[r.p] += points;
       return {p:r.p, text:r.text, valid:r.valid, points};
     });
-    detail.push({category:cat, entries:catDetail});
+    detail.push({category:cat.key, label:cat.label, entries:catDetail});
   });
   return {scores, detail};
 }
 function collectMyAnswers(){
   const obj = {};
   CATEGORIES.forEach(cat => {
-    const el = $('inp-'+catKey(cat));
-    obj[cat] = el ? el.value : '';
+    const el = $('inp-'+cat.key);
+    obj[cat.key] = el ? el.value : '';
   });
   return obj;
 }
@@ -553,6 +577,7 @@ function renderBoard(){
   $('phase-label').textContent =
     state.phase==='writing' ? "✍️ Remplis tes catégories !" :
     state.phase==='reveal_pending' ? "⏳ Fin du temps…" : "🏁 Résultats";
+  $('letter-hint').textContent = state.letter ? "Tape avec : " + latinHint(state.letter) : "";
 
   $('scoreboard-row').innerHTML = state.players.map((p, idx) =>
     '<div class="sb-chip'+(idx===me?' me':'')+'"><div class="nm">'+esc(p.name)+'</div><div class="n">'+state.totals[idx]+'</div></div>'
@@ -563,8 +588,10 @@ function renderBoard(){
     $('reveal-pending-zone').classList.add('hidden');
     $('reveal-zone').classList.add('hidden');
     if(renderedRound !== state.round){
+      const hint = latinHint(state.letter);
       $('cat-form').innerHTML = CATEGORIES.map(cat =>
-        '<div class="cat-row"><label>'+esc(cat)+'</label><input type="text" id="inp-'+catKey(cat)+'" autocomplete="off" placeholder="'+state.letter+'…"></div>'
+        '<div class="cat-row"><label lang="ar" dir="rtl">'+esc(cat.label)+'</label>'+
+        '<input type="text" id="inp-'+cat.key+'" lang="fr" autocomplete="off" placeholder="'+hint+'…"></div>'
       ).join('');
       renderedRound = state.round;
     }
@@ -589,7 +616,7 @@ function renderReveal(){
       const acls = e.valid ? '' : 'invalid';
       return '<div class="reveal-entry"><span class="nm">'+esc(state.players[e.p].name)+'</span><span class="ans '+acls+'">'+ans+'</span><span class="pts '+pcls+'">+'+e.points+'</span></div>';
     }).join('');
-    return '<div class="reveal-cat"><h3>'+esc(d.category)+'</h3>'+rows+'</div>';
+    return '<div class="reveal-cat"><h3 lang="ar" dir="rtl">'+esc(d.label)+'</h3>'+rows+'</div>';
   }).join('');
 }
 async function renderEnd(){
