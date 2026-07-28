@@ -126,6 +126,13 @@
   .cat-row input{font-size:1.05rem}
 
   .reveal-pending{text-align:center}
+  .judge-cat{margin-bottom:16px}
+  .judge-cat h3{font-size:.85rem;color:var(--butter);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+  .judge-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+  .judge-row input[type=checkbox]{width:20px;height:20px;flex-shrink:0;accent-color:var(--butter)}
+  .judge-row .nm{color:var(--chalk-dim);flex:0 0 72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .judge-row .ans{flex:1;font-weight:600}
+  .judge-row .ans.empty{color:var(--chalk-dim);font-weight:400;font-style:italic}
   .reveal-table{display:flex;flex-direction:column;gap:10px}
   .reveal-cat{border-bottom:1px solid var(--line);padding-bottom:8px}
   .reveal-cat h3{font-size:.85rem;color:var(--butter);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
@@ -234,6 +241,18 @@
       </div>
     </div>
 
+    <div id="judging-zone" class="hidden">
+      <div class="card" id="judge-host-panel">
+        <h2>🧐 Validation des réponses</h2>
+        <p class="muted">Décoche les réponses que tu juges invalides ou mal orthographiées.</p>
+        <div id="judge-form"></div>
+        <button class="btn-main" onclick="confirmScores()">Valider les scores</button>
+      </div>
+      <div class="card reveal-pending hidden" id="judge-wait-panel">
+        <p class="muted pulse">⏳ <span id="judge-host-name"></span> valide les réponses…</p>
+      </div>
+    </div>
+
     <div id="reveal-zone" class="hidden">
       <div class="card">
         <h2>Résultats — Manche <span id="reveal-round"></span> (lettre <span id="reveal-letter" lang="ar" dir="rtl"></span>)</h2>
@@ -289,6 +308,7 @@ const MAX_PLAYERS = 10;
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
 let renderedRound = -1;
+let judgeState = null, judgingRound = -1;
 
 const $ = id => document.getElementById(id);
 const screens = ['home','create','join','wait','game','end'];
@@ -352,7 +372,17 @@ function startRound(st, roundNum){
   st.submitted = [];
   st.roundResult = null;
 }
-function computeRoundScores(st){
+function buildDefaultValidity(st){
+  const validity = {};
+  CATEGORIES.forEach(cat => {
+    validity[cat.key] = st.players.map((p, idx) => {
+      const text = (st.answers[idx] && st.answers[idx][cat.key]) ? String(st.answers[idx][cat.key]).trim() : '';
+      return answerMatchesLetter(text, st.letter);
+    });
+  });
+  return validity;
+}
+function computeRoundScores(st, validityMap){
   const n = st.players.length;
   const scores = new Array(n).fill(0);
   const detail = [];
@@ -360,7 +390,7 @@ function computeRoundScores(st){
     const raw = [];
     for(let p=0;p<n;p++){
       const text = (st.answers[p] && st.answers[p][cat.key]) ? String(st.answers[p][cat.key]).trim() : '';
-      const valid = answerMatchesLetter(text, st.letter);
+      const valid = !!text && !!(validityMap[cat.key] && validityMap[cat.key][p]);
       raw.push({p, text, valid});
     }
     const counts = {};
@@ -531,10 +561,7 @@ async function autoSubmitMine(){
   st.answers[me] = myAnswers;
   st.submitted.push(me);
   if(st.submitted.length >= st.players.length && !st.roundResult){
-    const res = computeRoundScores(st);
-    st.roundResult = res;
-    st.totals = st.totals.map((t,i)=> t + res.scores[i]);
-    st.phase = 'reveal';
+    st.phase = 'judging';
   }
   await finalizeAction(st);
 }
@@ -544,11 +571,23 @@ async function forceReveal(){
   let st = await loadState(code) || state;
   if(st.phase!=='reveal_pending' || st.roundResult){ state=st; busy=false; renderCurrent(); return; }
   st.players.forEach((p, idx) => { if(!st.submitted.includes(idx)){ st.answers[idx] = st.answers[idx] || {}; st.submitted.push(idx); } });
-  const res = computeRoundScores(st);
+  st.phase = 'judging';
+  await finalizeAction(st);
+}
+async function confirmScores(){
+  if(busy || !state || state.phase!=='judging' || me!==0 || !judgeState) return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='judging' || st.roundResult){ state=st; busy=false; renderCurrent(); return; }
+  const res = computeRoundScores(st, judgeState);
   st.roundResult = res;
   st.totals = st.totals.map((t,i)=> t + res.scores[i]);
   st.phase = 'reveal';
   await finalizeAction(st);
+}
+function toggleValidity(catKey, idx, checked){
+  if(!judgeState) return;
+  judgeState[catKey][idx] = checked;
 }
 async function nextRound(){
   if(busy || !state || state.phase!=='reveal') return;
@@ -576,7 +615,8 @@ function renderBoard(){
   $('round-label').textContent = "Manche " + state.round;
   $('phase-label').textContent =
     state.phase==='writing' ? "✍️ Remplis tes catégories !" :
-    state.phase==='reveal_pending' ? "⏳ Fin du temps…" : "🏁 Résultats";
+    state.phase==='reveal_pending' ? "⏳ Fin du temps…" :
+    state.phase==='judging' ? "🧐 Validation en cours…" : "🏁 Résultats";
   $('letter-hint').textContent = state.letter ? "Tape avec : " + latinHint(state.letter) : "";
 
   $('scoreboard-row').innerHTML = state.players.map((p, idx) =>
@@ -586,6 +626,7 @@ function renderBoard(){
   if(state.phase==='writing'){
     $('writing-zone').classList.remove('hidden');
     $('reveal-pending-zone').classList.add('hidden');
+    $('judging-zone').classList.add('hidden');
     $('reveal-zone').classList.add('hidden');
     if(renderedRound !== state.round){
       const hint = latinHint(state.letter);
@@ -598,13 +639,47 @@ function renderBoard(){
   } else if(state.phase==='reveal_pending'){
     $('writing-zone').classList.add('hidden');
     $('reveal-pending-zone').classList.remove('hidden');
+    $('judging-zone').classList.add('hidden');
     $('reveal-zone').classList.add('hidden');
+  } else if(state.phase==='judging'){
+    $('writing-zone').classList.add('hidden');
+    $('reveal-pending-zone').classList.add('hidden');
+    $('judging-zone').classList.remove('hidden');
+    $('reveal-zone').classList.add('hidden');
+    renderJudging();
   } else if(state.phase==='reveal'){
     $('writing-zone').classList.add('hidden');
     $('reveal-pending-zone').classList.add('hidden');
+    $('judging-zone').classList.add('hidden');
     $('reveal-zone').classList.remove('hidden');
     renderReveal();
   }
+}
+function renderJudging(){
+  const isHost = me===0;
+  $('judge-host-panel').classList.toggle('hidden', !isHost);
+  $('judge-wait-panel').classList.toggle('hidden', isHost);
+  if(!isHost){
+    $('judge-host-name').textContent = state.players[0].name;
+    return;
+  }
+  if(judgingRound !== state.round){
+    judgeState = buildDefaultValidity(state);
+    judgingRound = state.round;
+  }
+  $('judge-form').innerHTML = CATEGORIES.map(cat => {
+    const rows = state.players.map((p, idx) => {
+      const text = (state.answers[idx] && state.answers[idx][cat.key]) ? String(state.answers[idx][cat.key]).trim() : '';
+      const checked = (text && judgeState[cat.key][idx]) ? 'checked' : '';
+      const disabled = text ? '' : 'disabled';
+      const ans = text ? esc(text) : '(vide)';
+      const acls = text ? '' : 'empty';
+      return '<div class="judge-row"><input type="checkbox" '+checked+' '+disabled+
+        ' onchange="toggleValidity(\''+cat.key+'\','+idx+',this.checked)">'+
+        '<span class="nm">'+esc(p.name)+'</span><span class="ans '+acls+'">'+ans+'</span></div>';
+    }).join('');
+    return '<div class="judge-cat"><h3 lang="ar" dir="rtl">'+esc(cat.label)+'</h3>'+rows+'</div>';
+  }).join('');
 }
 function renderReveal(){
   $('reveal-round').textContent = state.round;
