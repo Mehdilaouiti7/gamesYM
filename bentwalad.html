@@ -141,9 +141,12 @@
   .reveal-entry .ans{flex:2;font-weight:600}
   .reveal-entry .ans.invalid{color:var(--chalk-dim);font-weight:400;font-style:italic}
   .reveal-entry .pts{width:44px;text-align:right;font-family:'Space Mono',monospace;font-weight:700}
-  .reveal-entry .pts.p10{color:var(--green-chalk)}
-  .reveal-entry .pts.p5{color:var(--blue-chalk)}
+  .reveal-entry .pts.p1{color:var(--green-chalk)}
   .reveal-entry .pts.p0{color:var(--chalk-dim)}
+
+  .judge-row.read-only .mark{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+  .judge-row.read-only .mark.ok{color:var(--green-chalk)}
+  .judge-row.read-only .mark.no{color:var(--chalk-dim)}
 
   .rank-list{display:flex;flex-direction:column;gap:6px;margin:14px 0 4px}
   .rank-list .row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:rgba(0,0,0,.18);font-size:.9rem}
@@ -176,9 +179,10 @@
     </div>
     <div class="card">
       <h2>Règles</h2>
-      <p class="muted">Une lettre arabe est tirée au hasard (avec son équivalent en alphabet latin affiché en indice, tu tapes normalement avec ton clavier français). Chacun remplit, le plus vite possible, un mot commençant par cette lettre pour chaque catégorie : <span lang="ar" dir="rtl">بنت</span> (prénom fille), <span lang="ar" dir="rtl">ولد</span> (prénom garçon), <span lang="ar" dir="rtl">بلاد</span> (pays), <span lang="ar" dir="rtl">مدينة</span> (ville), <span lang="ar" dir="rtl">حيوان</span> (animal), <span lang="ar" dir="rtl">نبتة/فاكهة</span> (plante ou fruit), <span lang="ar" dir="rtl">لون</span> (couleur), <span lang="ar" dir="rtl">جماد</span> (objet).<br>
+      <p class="muted">Une lettre arabe est tirée au hasard, jamais deux fois la même dans une partie (avec son équivalent en alphabet latin affiché en indice, tu tapes normalement avec ton clavier français). Chacun remplit, le plus vite possible, un mot commençant par cette lettre pour chaque catégorie : <span lang="ar" dir="rtl">بنت</span> (prénom fille), <span lang="ar" dir="rtl">ولد</span> (prénom garçon), <span lang="ar" dir="rtl">بلاد</span> (pays), <span lang="ar" dir="rtl">مدينة</span> (ville), <span lang="ar" dir="rtl">حيوان</span> (animal), <span lang="ar" dir="rtl">نبتة/فاكهة</span> (plante ou fruit), <span lang="ar" dir="rtl">شخصية مشهورة</span> (personnalité connue), <span lang="ar" dir="rtl">جماد</span> (objet).<br>
       Dès que quelqu'un appuie sur <b>STOP !</b>, tout le monde envoie ses réponses telles quelles.<br>
-      Score par catégorie : réponse valide et unique = <b>10 pts</b>, valide mais partagée avec un autre joueur = <b>5 pts</b>, vide ou fausse lettre = <b>0 pt</b>.</p>
+      À chaque manche, un joueur est tiré au sort pour valider les réponses de tout le monde (jamais deux fois de suite la même personne) — tout le monde voit les réponses des autres pendant ce temps.<br>
+      Score par catégorie : réponse validée = <b>1 pt</b>, vide ou refusée = <b>0 pt</b>.</p>
     </div>
   </div>
 
@@ -242,14 +246,11 @@
     </div>
 
     <div id="judging-zone" class="hidden">
-      <div class="card" id="judge-host-panel">
-        <h2>🧐 Validation des réponses</h2>
-        <p class="muted">Décoche les réponses que tu juges invalides ou mal orthographiées.</p>
+      <div class="card">
+        <h2 id="judge-title">🧐 Validation des réponses</h2>
+        <p class="muted" id="judge-subtitle"></p>
         <div id="judge-form"></div>
-        <button class="btn-main" onclick="confirmScores()">Valider les scores</button>
-      </div>
-      <div class="card reveal-pending hidden" id="judge-wait-panel">
-        <p class="muted pulse">⏳ <span id="judge-host-name"></span> valide les réponses…</p>
+        <button class="btn-main hidden" id="judge-confirm-btn" onclick="confirmScores()">Valider les scores</button>
       </div>
     </div>
 
@@ -301,7 +302,7 @@ const CATEGORIES = [
   {key:'mdina', label:'مدينة'},
   {key:'hayawan', label:'حيوان'},
   {key:'nabta', label:'نبتة/فاكهة'},
-  {key:'lawn', label:'لون'},
+  {key:'shakhsia', label:'شخصية مشهورة'},
   {key:'grabetha', label:'جماد'}
 ];
 const MAX_PLAYERS = 10;
@@ -363,9 +364,28 @@ async function saveResult(st){
 }
 
 /* ---------- rules ---------- */
+function drawLetter(st){
+  const used = st.usedLetters || [];
+  let available = LETTERS.filter(l => !used.includes(l));
+  if(available.length === 0){
+    st.usedLetters = [];
+    available = LETTERS.slice();
+  }
+  const letter = available[Math.floor(Math.random()*available.length)];
+  st.usedLetters = (st.usedLetters || []).concat([letter]);
+  return letter;
+}
+function pickJudge(st){
+  let candidates = st.players.map((p, i) => i);
+  if(candidates.length > 1 && typeof st.judgeIdx === 'number'){
+    candidates = candidates.filter(i => i !== st.judgeIdx);
+  }
+  return candidates[Math.floor(Math.random()*candidates.length)];
+}
 function startRound(st, roundNum){
   st.round = roundNum;
-  st.letter = LETTERS[Math.floor(Math.random()*LETTERS.length)];
+  st.letter = drawLetter(st);
+  st.judgeIdx = pickJudge(st);
   st.phase = 'writing';
   st.stoppedBy = null;
   st.answers = {};
@@ -387,23 +407,14 @@ function computeRoundScores(st, validityMap){
   const scores = new Array(n).fill(0);
   const detail = [];
   CATEGORIES.forEach(cat => {
-    const raw = [];
+    const catDetail = [];
     for(let p=0;p<n;p++){
       const text = (st.answers[p] && st.answers[p][cat.key]) ? String(st.answers[p][cat.key]).trim() : '';
       const valid = !!text && !!(validityMap[cat.key] && validityMap[cat.key][p]);
-      raw.push({p, text, valid});
+      const points = valid ? 1 : 0;
+      scores[p] += points;
+      catDetail.push({p, text, valid, points});
     }
-    const counts = {};
-    raw.forEach(r=>{ if(r.valid){ const key=r.text.toLowerCase(); counts[key]=(counts[key]||0)+1; } });
-    const catDetail = raw.map(r=>{
-      let points = 0;
-      if(r.valid){
-        const key = r.text.toLowerCase();
-        points = counts[key]>1 ? 5 : 10;
-      }
-      scores[r.p] += points;
-      return {p:r.p, text:r.text, valid:r.valid, points};
-    });
     detail.push({category:cat.key, label:cat.label, entries:catDetail});
   });
   return {scores, detail};
@@ -422,7 +433,7 @@ async function createGame(){
   const name = $('create-name').value.trim() || "Joueur 1";
   $('btn-create').disabled = true; busy = true;
   code = genCode();
-  state = { v:1, code, status:'waiting', players:[{name}], totals:[0], round:0 };
+  state = { v:1, code, status:'waiting', players:[{name}], totals:[0], round:0, usedLetters:[] };
   const ok = await saveState(state);
   busy = false; $('btn-create').disabled = false;
   if(!ok){ $('create-err').textContent = "Connexion impossible. Vérifie ton réseau et réessaie."; return; }
@@ -575,7 +586,7 @@ async function forceReveal(){
   await finalizeAction(st);
 }
 async function confirmScores(){
-  if(busy || !state || state.phase!=='judging' || me!==0 || !judgeState) return;
+  if(busy || !state || state.phase!=='judging' || me!==state.judgeIdx || !judgeState) return;
   busy = true;
   let st = await loadState(code) || state;
   if(st.phase!=='judging' || st.roundResult){ state=st; busy=false; renderCurrent(); return; }
@@ -656,13 +667,14 @@ function renderBoard(){
   }
 }
 function renderJudging(){
-  const isHost = me===0;
-  $('judge-host-panel').classList.toggle('hidden', !isHost);
-  $('judge-wait-panel').classList.toggle('hidden', isHost);
-  if(!isHost){
-    $('judge-host-name').textContent = state.players[0].name;
-    return;
-  }
+  const isJudge = me===state.judgeIdx;
+  const judgeName = state.players[state.judgeIdx].name;
+  $('judge-title').textContent = isJudge ? "🧐 À toi de valider !" : "🧐 Validation en cours";
+  $('judge-subtitle').textContent = isJudge
+    ? "Décoche les réponses que tu juges invalides ou mal orthographiées."
+    : "⏳ " + esc(judgeName) + " valide les réponses…";
+  $('judge-confirm-btn').classList.toggle('hidden', !isJudge);
+
   if(judgingRound !== state.round){
     judgeState = buildDefaultValidity(state);
     judgingRound = state.round;
@@ -670,12 +682,17 @@ function renderJudging(){
   $('judge-form').innerHTML = CATEGORIES.map(cat => {
     const rows = state.players.map((p, idx) => {
       const text = (state.answers[idx] && state.answers[idx][cat.key]) ? String(state.answers[idx][cat.key]).trim() : '';
-      const checked = (text && judgeState[cat.key][idx]) ? 'checked' : '';
-      const disabled = text ? '' : 'disabled';
       const ans = text ? esc(text) : '(vide)';
       const acls = text ? '' : 'empty';
-      return '<div class="judge-row"><input type="checkbox" '+checked+' '+disabled+
-        ' onchange="toggleValidity(\''+cat.key+'\','+idx+',this.checked)">'+
+      if(isJudge){
+        const checked = (text && judgeState[cat.key][idx]) ? 'checked' : '';
+        const disabled = text ? '' : 'disabled';
+        return '<div class="judge-row"><input type="checkbox" '+checked+' '+disabled+
+          ' onchange="toggleValidity(\''+cat.key+'\','+idx+',this.checked)">'+
+          '<span class="nm">'+esc(p.name)+'</span><span class="ans '+acls+'">'+ans+'</span></div>';
+      }
+      const isOk = !!(text && judgeState[cat.key][idx]);
+      return '<div class="judge-row read-only"><span class="mark '+(isOk?'ok':'no')+'">'+(isOk?'✓':'·')+'</span>'+
         '<span class="nm">'+esc(p.name)+'</span><span class="ans '+acls+'">'+ans+'</span></div>';
     }).join('');
     return '<div class="judge-cat"><h3 lang="ar" dir="rtl">'+esc(cat.label)+'</h3>'+rows+'</div>';
@@ -686,7 +703,7 @@ function renderReveal(){
   $('reveal-letter').textContent = state.letter;
   $('reveal-table').innerHTML = state.roundResult.detail.map(d => {
     const rows = d.entries.map(e => {
-      const pcls = e.points===10?'p10':e.points===5?'p5':'p0';
+      const pcls = e.points===1?'p1':'p0';
       const ans = e.text ? esc(e.text) : '—';
       const acls = e.valid ? '' : 'invalid';
       return '<div class="reveal-entry"><span class="nm">'+esc(state.players[e.p].name)+'</span><span class="ans '+acls+'">'+ans+'</span><span class="pts '+pcls+'">+'+e.points+'</span></div>';
