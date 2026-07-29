@@ -59,8 +59,6 @@
   .hidden{display:none !important}
 
   .date-row{display:flex;align-items:center;gap:6px;margin-bottom:12px}
-  .date-nav{flex:0 0 auto;width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--chalk);font-size:1.15rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
-  .date-nav:active{filter:brightness(.9)}
   .date-picker-wrap{flex:1;position:relative}
   input[type=date]{
     width:100%;
@@ -75,8 +73,6 @@
     color-scheme: dark;
   }
   input[type=date]:focus{border-color:var(--butter)}
-  .date-today-btn{flex:0 0 auto;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:999px;padding:0 12px;height:36px;font-size:.78rem;color:var(--chalk-dim);cursor:pointer;white-space:nowrap}
-  .date-today-btn:active{filter:brightness(.9)}
 
   .filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:14px}
   .filter-row::-webkit-scrollbar{display:none}
@@ -109,12 +105,9 @@
   </header>
 
   <div class="date-row">
-    <div class="date-nav" onclick="shiftDate(-1)">‹</div>
     <div class="date-picker-wrap">
       <input type="date" id="date-picker" onchange="onDateChange()">
     </div>
-    <div class="date-nav" onclick="shiftDate(1)">›</div>
-    <div class="date-today-btn" onclick="jumpToday()">Aujourd'hui</div>
   </div>
 
   <div class="filter-row" id="filter-row"></div>
@@ -221,8 +214,6 @@ function renderChips(){
 }
 function setFilter(key){ activeFilter = key; renderChips(); renderList(); }
 
-function jumpToday(){ selectedDate = new Date(); syncDatePicker(); renderList(); }
-function shiftDate(delta){ selectedDate.setDate(selectedDate.getDate()+delta); syncDatePicker(); renderList(); }
 function onDateChange(){
   const v = $('date-picker').value;
   if(v){
