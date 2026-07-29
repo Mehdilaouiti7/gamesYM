@@ -59,7 +59,7 @@
   const overlay = document.createElement('div');
   overlay.className = 'itut-overlay';
   overlay.innerHTML = `
-    <div class="itut-panel" role="dialog" aria-label="Installer Games YM">
+    <div class="itut-panel" role="dialog" aria-label="Installer Games Room">
       <div class="itut-head">
         <div class="itut-title">📲 Ajouter à l'écran d'accueil</div>
         <button class="itut-close" aria-label="Fermer">✕</button>
@@ -86,7 +86,7 @@
             <path d="M20 6L9 17l-5-5"/>
           </svg>
         </div>
-        <p>Appuie sur <b>« Ajouter »</b> en haut à droite. L'icône Games YM apparaît sur ton écran d'accueil !</p>
+        <p>Appuie sur <b>« Ajouter »</b> en haut à droite. L'icône Games Room apparaît sur ton écran d'accueil !</p>
       </div>
       <p class="itut-footer-note">Tu retrouveras ce tuto à tout moment depuis le menu ☰ de l'accueil.</p>
       <button class="itut-btn">J'ai compris</button>
