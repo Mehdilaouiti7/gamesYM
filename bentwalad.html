@@ -402,7 +402,7 @@ function computeRoundScores(st, validityMap){
 function collectMyAnswers(){
   const obj = {};
   CATEGORIES.forEach(cat => {
-    const el = $('inp-'+cat.key);
+    const el = $('inp-'+state.round+'-'+cat.key);
     obj[cat.key] = el ? el.value : '';
   });
   return obj;
@@ -627,7 +627,7 @@ function renderBoard(){
     if(renderedRound !== state.round){
       $('cat-form').innerHTML = CATEGORIES.map(cat =>
         '<div class="cat-row"><label lang="ar" dir="rtl">'+esc(cat.label)+'</label>'+
-        '<input type="text" id="inp-'+cat.key+'" lang="fr" autocomplete="off"></div>'
+        '<input type="text" id="inp-'+state.round+'-'+cat.key+'" lang="fr" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value=""></div>'
       ).join('');
       renderedRound = state.round;
     }
