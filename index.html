@@ -603,7 +603,6 @@ function renderGame(){
   pill.textContent = myTurn ? "🎯 À toi de jouer !" : "⏳ Au tour de "+oppName+"…";
   pill.classList.toggle('mine', myTurn);
   $('btn-guess').disabled = !myTurn;
-  $('guess-input').disabled = !myTurn;
 
   $('history-opp-label').textContent = oppName;
   renderHistoryCol('history-me', state.guesses.filter(g=>g.by===me), 'me');
