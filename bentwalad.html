@@ -158,6 +158,7 @@
   .win-card .big{font-size:2.6rem;margin:6px 0}
 </style>
 <link rel="stylesheet" href="responsive.css">
+<link rel="stylesheet" href="avatar.css">
 </head>
 <body>
 <div class="frame">
@@ -192,6 +193,8 @@
       <h2>Créer une partie</h2>
       <label>Ton prénom</label>
       <input type="text" id="create-name" maxlength="12" placeholder="Ex. Léa">
+      <label>Ton avatar</label>
+      <div class="avatar-row" id="create-avatar-row"></div>
       <div class="error" id="create-err"></div>
       <button class="btn-main" id="btn-create" onclick="createGame()">Créer et obtenir le code</button>
       <button class="btn-ghost" onclick="show('home')">Retour</button>
@@ -205,6 +208,8 @@
       <input type="text" class="code-input" id="join-code" maxlength="4" placeholder="ABCD">
       <label>Ton prénom</label>
       <input type="text" id="join-name" maxlength="12" placeholder="Ex. Emma">
+      <label>Ton avatar</label>
+      <div class="avatar-row" id="join-avatar-row"></div>
       <div class="error" id="join-err"></div>
       <button class="btn-main" id="btn-join" onclick="joinGame()">Rejoindre</button>
       <button class="btn-ghost" onclick="show('home')">Retour</button>
@@ -283,6 +288,7 @@
 <script src="recent-games.js"></script>
 <script src="feedback.js"></script>
 <script src="connection-banner.js"></script>
+<script src="avatar-picker.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -312,6 +318,7 @@ const $ = id => document.getElementById(id);
 const screens = ['home','create','join','wait','game','end'];
 function show(name){ screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name)); }
 function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
+function pAvatar(p){ return p && p.avatar ? p.avatar : '🙂'; }
 function genCode(){
   const letters="ABCDEFGHJKMNPQRSTUVWXYZ";
   let c="";
@@ -418,11 +425,14 @@ function collectMyAnswers(){
 }
 
 /* ---------- create / join ---------- */
+const createAvatarPicker = window.GYMAvatarPicker.render('create-avatar-row');
+const joinAvatarPicker = window.GYMAvatarPicker.render('join-avatar-row');
 async function createGame(){
   const name = $('create-name').value.trim() || "Joueur 1";
+  const avatar = createAvatarPicker.get();
   $('btn-create').disabled = true; busy = true;
   code = genCode();
-  state = { v:1, code, status:'waiting', players:[{name}], totals:[0], round:0, usedLetters:[] };
+  state = { v:1, code, status:'waiting', players:[{name, avatar}], totals:[0], round:0, usedLetters:[] };
   const ok = await saveState(state);
   busy = false; $('btn-create').disabled = false;
   if(!ok){ $('create-err').textContent = "Connexion impossible. Vérifie ton réseau et réessaie."; return; }
@@ -437,6 +447,7 @@ async function createGame(){
 async function joinGame(){
   const c = $('join-code').value.trim().toUpperCase();
   const name = $('join-name').value.trim() || "Joueur";
+  const avatar = joinAvatarPicker.get();
   if(!/^[A-Z]{4}$/.test(c)){ $('join-err').textContent = "Le code fait 4 lettres."; return; }
   $('join-err').textContent = "";
   $('btn-join').disabled = true; busy = true;
@@ -464,7 +475,7 @@ async function joinGame(){
     $('btn-join').disabled = false; busy = false; return;
   }
   const newIdx = st.players.length;
-  st.players.push({name});
+  st.players.push({name, avatar});
   st.totals.push(0);
   const ok = await saveState(st);
   busy = false; $('btn-join').disabled = false;
@@ -514,7 +525,7 @@ async function refresh(){
 }
 function renderWait(){
   $('joined-list').innerHTML = state.players.map((p,idx) =>
-    '<span class="joined-chip'+(idx===0?' host':'')+'">'+(idx===0?'👑 ':'')+esc(p.name)+'</span>'
+    '<span class="joined-chip'+(idx===0?' host':'')+'">'+(idx===0?'👑 ':'')+pAvatar(p)+' '+esc(p.name)+'</span>'
   ).join('');
   const isHost = me===0;
   $('btn-start').classList.toggle('hidden', !isHost);
@@ -627,7 +638,7 @@ function renderBoard(){
     state.phase==='judging' ? "🧐 Validation en cours…" : "🏁 Résultats";
 
   $('scoreboard-row').innerHTML = state.players.map((p, idx) =>
-    '<div class="sb-chip'+(idx===me?' me':'')+'"><div class="nm">'+esc(p.name)+'</div><div class="n">'+state.totals[idx]+'</div></div>'
+    '<div class="sb-chip'+(idx===me?' me':'')+'"><div class="nm">'+pAvatar(p)+' '+esc(p.name)+'</div><div class="n">'+state.totals[idx]+'</div></div>'
   ).join('');
 
   if(state.phase==='writing'){
@@ -711,10 +722,10 @@ async function renderEnd(){
   $('end-emoji').textContent = iWon ? "🏆" : "📖";
   $('end-title').textContent = iWon ? "Bravo " + winName + ", tu as gagné !" : winName + " a gagné !";
   $('end-detail').textContent = "Partie en " + state.round + " manche" + (state.round>1?'s':'') + ".";
-  const ranking = state.players.map((p, idx) => ({name:p.name, score:state.totals[idx], idx}))
+  const ranking = state.players.map((p, idx) => ({name:p.name, avatar:pAvatar(p), score:state.totals[idx], idx}))
     .sort((a,b) => b.score - a.score);
   $('rank-list').innerHTML = ranking.map((r, pos) =>
-    '<div class="row'+(r.idx===state.winner?' win':'')+'"><span class="pos">'+(pos+1)+'</span><span class="nm">'+esc(r.name)+(r.idx===me?' (toi)':'')+'</span><span class="sc">'+r.score+' pts</span></div>'
+    '<div class="row'+(r.idx===state.winner?' win':'')+'"><span class="pos">'+(pos+1)+'</span><span class="nm">'+r.avatar+' '+esc(r.name)+(r.idx===me?' (toi)':'')+'</span><span class="sc">'+r.score+' pts</span></div>'
   ).join('');
   show('end');
 }

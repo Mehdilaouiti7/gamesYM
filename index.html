@@ -227,6 +227,7 @@
   ::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
 </style>
 <link rel="stylesheet" href="responsive.css">
+<link rel="stylesheet" href="avatar.css">
 </head>
 <body>
 <div class="frame">
@@ -314,6 +315,8 @@
       </div>
       <label>Ton prénom (toujours le même pour garder ton score !)</label>
       <input type="text" id="create-name" class="name-input" maxlength="12" placeholder="Ex. Léa">
+      <label>Ton avatar</label>
+      <div class="avatar-row" id="create-avatar-row"></div>
       <label>Ton nombre secret (4 chiffres différents)</label>
       <input type="tel" id="create-secret" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
       <div class="error" id="create-err"></div>
@@ -329,6 +332,8 @@
       <input type="text" id="join-code" maxlength="4" placeholder="ABCD" style="text-transform:uppercase">
       <label>Ton prénom (toujours le même pour garder ton score !)</label>
       <input type="text" id="join-name" class="name-input" maxlength="12" placeholder="Ex. Emma">
+      <label>Ton avatar</label>
+      <div class="avatar-row" id="join-avatar-row"></div>
       <label>Ton nombre secret (4 chiffres différents)</label>
       <input type="tel" id="join-secret" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
       <div class="error" id="join-err"></div>
@@ -418,6 +423,7 @@
 <script src="recent-games.js"></script>
 <script src="feedback.js"></script>
 <script src="connection-banner.js"></script>
+<script src="avatar-picker.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -515,8 +521,11 @@ async function headToHead(n1, n2){
 function saveRole(c, role){ try{ localStorage.setItem('vt-role-'+c, role); }catch(e){} }
 function loadRole(c){ try{ return localStorage.getItem('vt-role-'+c); }catch(e){ return null; } }
 
+const createAvatarPicker = window.GYMAvatarPicker.render('create-avatar-row');
+const joinAvatarPicker = window.GYMAvatarPicker.render('join-avatar-row');
 async function createGame(){
   const name = $('create-name').value.trim() || "Joueuse 1";
+  const avatar = createAvatarPicker.get();
   const secret = $('create-secret').value.trim();
   const err = validSecret(secret);
   if(err){ $('create-err').textContent = err; return; }
@@ -530,7 +539,7 @@ async function createGame(){
     v:4, code,
     status:'waiting',
     matchRounds, roundIndex:1, score:{p1:0,p2:0},
-    players:{ p1:{name, secret}, p2:null },
+    players:{ p1:{name, secret, avatar}, p2:null },
     roundPhase:'duel',
     turn:'p1', winner:null, matchWinner:null,
     guesses:[], lastRoundResult:null
@@ -566,6 +575,7 @@ async function joinGame(){
     return;
   }
   const name = $('join-name').value.trim() || "Joueuse 2";
+  const avatar = joinAvatarPicker.get();
   const secret = $('join-secret').value.trim();
   const errS = validSecret(secret);
   if(errS){ $('join-err').textContent = errS; $('btn-join').disabled = false; busy = false; return; }
@@ -573,7 +583,7 @@ async function joinGame(){
     $('join-err').textContent = "Cette partie a déjà deux joueuses.";
     $('btn-join').disabled = false; busy = false; return;
   }
-  st.players.p2 = {name, secret};
+  st.players.p2 = {name, secret, avatar};
   st.status = 'playing';
   const ok = await saveState(st);
   busy = false; $('btn-join').disabled = false;
@@ -635,13 +645,14 @@ function renderGame(){
   $('duel-zone').classList.remove('hidden');
 
   const myTurn = state.turn === me;
-  const oppName = state.players[opp()] ? state.players[opp()].name : "…";
+  const oppP = state.players[opp()];
+  const oppName = oppP ? oppP.name : "…";
   const pill = $('turn-pill');
   pill.textContent = myTurn ? "🎯 À toi de jouer !" : "⏳ Au tour de "+oppName+"…";
   pill.classList.toggle('mine', myTurn);
   $('btn-guess').disabled = !myTurn;
 
-  $('history-opp-label').textContent = oppName;
+  $('history-opp-label').textContent = oppP ? pAvatar(oppP)+' '+oppName : oppName;
   renderHistoryCol('history-me', state.guesses.filter(g=>g.by===me), 'me');
   renderHistoryCol('history-opp', state.guesses.filter(g=>g.by!==me), 'them');
 }
@@ -787,6 +798,7 @@ function shareCode(){
 }
 if($('share-btn')) $('share-btn').classList.toggle('hidden', !navigator.share);
 function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
+function pAvatar(p){ return p && p.avatar ? p.avatar : '🙂'; }
 
 document.addEventListener('keydown', e=>{
   if(e.key!=='Enter') return;

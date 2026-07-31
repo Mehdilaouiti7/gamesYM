@@ -1,0 +1,12 @@
+.avatar-row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
+.avatar-opt{
+  width:40px;height:40px;flex:0 0 auto;
+  font-size:1.2rem;line-height:1;
+  border-radius:10px;border:1.5px dashed var(--line);
+  background:rgba(0,0,0,.2);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;padding:0;margin:0;
+}
+.avatar-opt.sel{border-style:solid;border-color:var(--butter);background:rgba(233,196,106,.14)}
+.avatar-opt:active{transform:scale(.92)}
+.p-avatar{margin-right:4px}

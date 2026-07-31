@@ -198,6 +198,7 @@
   .score-vs{color:var(--chalk-dim);font-size:.9rem}
 </style>
 <link rel="stylesheet" href="responsive.css">
+<link rel="stylesheet" href="avatar.css">
 </head>
 <body>
 <div class="frame">
@@ -241,6 +242,8 @@
       </div>
       <label>Ton prénom (toujours le même pour garder ton score !)</label>
       <input type="text" id="create-name" class="name-input" maxlength="12" placeholder="Ex. Léa">
+      <label>Ton avatar</label>
+      <div class="avatar-row" id="create-avatar-row"></div>
       <div class="error" id="create-err"></div>
       <button class="btn-main" id="btn-create" onclick="createGame()">Créer et obtenir le code</button>
       <button class="btn-ghost" onclick="show('home')">Retour</button>
@@ -254,6 +257,8 @@
       <input type="text" id="join-code" maxlength="4" placeholder="ABCD" style="text-transform:uppercase">
       <label>Ton prénom (toujours le même pour garder ton score !)</label>
       <input type="text" id="join-name" class="name-input" maxlength="12" placeholder="Ex. Emma">
+      <label>Ton avatar</label>
+      <div class="avatar-row" id="join-avatar-row"></div>
       <div class="error" id="join-err"></div>
       <button class="btn-main" id="btn-join" onclick="joinGame()">Rejoindre</button>
       <button class="btn-ghost" onclick="show('home')">Retour</button>
@@ -333,6 +338,7 @@
 <script src="recent-games.js"></script>
 <script src="feedback.js"></script>
 <script src="connection-banner.js"></script>
+<script src="avatar-picker.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -348,6 +354,7 @@ const $ = id => document.getElementById(id);
 const screens = ['home','create','join','wait','game','end'];
 function show(name){ screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name)); }
 function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
+function pAvatar(p){ return p && p.avatar ? p.avatar : '🙂'; }
 function genCode(){
   const letters="ABCDEFGHJKMNPQRSTUVWXYZ";
   let c="";
@@ -498,13 +505,16 @@ function valClass(v){
 }
 
 /* ---------- create / join ---------- */
+const createAvatarPicker = window.GYMAvatarPicker.render('create-avatar-row');
+const joinAvatarPicker = window.GYMAvatarPicker.render('join-avatar-row');
 async function createGame(){
   const name = $('create-name').value.trim() || "Joueur 1";
+  const avatar = createAvatarPicker.get();
   const n = parseInt(document.querySelector('input[name=pcount]:checked').value, 10);
   $('btn-create').disabled = true; busy = true;
   code = genCode();
   const players = new Array(n).fill(null);
-  players[0] = {name};
+  players[0] = {name, avatar};
   state = { v:2, code, status:'waiting', maxPlayers:n, players, totals:new Array(n).fill(0), round:1 };
   const ok = await saveState(state);
   busy = false; $('btn-create').disabled = false;
@@ -520,6 +530,7 @@ async function createGame(){
 async function joinGame(){
   const c = $('join-code').value.trim().toUpperCase();
   const name = $('join-name').value.trim() || "Joueur";
+  const avatar = joinAvatarPicker.get();
   if(!/^[A-Z]{4}$/.test(c)){ $('join-err').textContent = "Le code fait 4 lettres."; return; }
   $('join-err').textContent = "";
   $('btn-join').disabled = true; busy = true;
@@ -542,7 +553,7 @@ async function joinGame(){
     $('join-err').textContent = "Cette partie est déjà complète.";
     $('btn-join').disabled = false; busy = false; return;
   }
-  st.players[freeIdx] = {name};
+  st.players[freeIdx] = {name, avatar};
   const stillFree = st.players.some(p=>!p);
   if(!stillFree){ st.status = 'playing'; setupRound(st, 0); }
   const ok = await saveState(st);
@@ -573,7 +584,7 @@ async function refresh(){
   applyIncomingState(st);
 }
 function renderWait(){
-  const joined = state.players.filter(Boolean).map(p=>p.name);
+  const joined = state.players.filter(Boolean).map(p=>pAvatar(p)+' '+p.name);
   $('wait-count').textContent = joined.length + "/" + state.maxPlayers + " joueurs";
   $('wait-names').textContent = joined.join(', ');
 }
@@ -774,7 +785,7 @@ function renderBoard(){
     const block = document.createElement('div');
     block.className = "opp-board";
     const gridId = "grid-opp-"+idx;
-    block.innerHTML = '<div class="board-name">'+esc(state.players[idx].name)+'</div><div class="grid mini" id="'+gridId+'"></div>';
+    block.innerHTML = '<div class="board-name">'+pAvatar(state.players[idx])+' '+esc(state.players[idx].name)+'</div><div class="grid mini" id="'+gridId+'"></div>';
     oppBoards.appendChild(block);
     renderGrid(gridId, idx, state.grids[idx], false);
   });
@@ -802,10 +813,10 @@ async function renderEnd(){
   $('end-title').textContent = iWon ? "Bravo " + winName + ", tu as gagné !" : winName + " a gagné !";
   $('end-detail').textContent = "Le score le plus bas gagne — voici le classement final :";
 
-  const ranking = state.players.map((p, idx) => ({name:p.name, score:state.totals[idx], idx}))
+  const ranking = state.players.map((p, idx) => ({name:p.name, avatar:pAvatar(p), score:state.totals[idx], idx}))
     .sort((a,b) => a.score - b.score);
   $('rank-list').innerHTML = ranking.map((r, pos) =>
-    '<div class="row'+(r.idx===state.winner?' win':'')+'"><span class="pos">'+(pos+1)+'</span><span class="nm">'+esc(r.name)+(r.idx===me?' (toi)':'')+'</span><span class="sc">'+r.score+' pts</span></div>'
+    '<div class="row'+(r.idx===state.winner?' win':'')+'"><span class="pos">'+(pos+1)+'</span><span class="nm">'+r.avatar+' '+esc(r.name)+(r.idx===me?' (toi)':'')+'</span><span class="sc">'+r.score+' pts</span></div>'
   ).join('');
 
   show('end');

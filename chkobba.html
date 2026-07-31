@@ -160,6 +160,7 @@
   .win-card .big{font-size:2.6rem;margin:6px 0}
 </style>
 <link rel="stylesheet" href="responsive.css">
+<link rel="stylesheet" href="avatar.css">
 </head>
 <body>
 <div class="frame">
@@ -200,6 +201,8 @@
       </div>
       <label>Ton prénom</label>
       <input type="text" id="create-name" class="name-input" maxlength="12" placeholder="Ex. Léa">
+      <label>Ton avatar</label>
+      <div class="avatar-row" id="create-avatar-row"></div>
       <div class="error" id="create-err"></div>
       <button class="btn-main" id="btn-create" onclick="createGame()">Créer et obtenir le code</button>
       <button class="btn-ghost" onclick="show('home')">Retour</button>
@@ -213,6 +216,8 @@
       <input type="text" id="join-code" maxlength="4" placeholder="ABCD" style="text-transform:uppercase">
       <label>Ton prénom</label>
       <input type="text" id="join-name" class="name-input" maxlength="12" placeholder="Ex. Emma">
+      <label>Ton avatar</label>
+      <div class="avatar-row" id="join-avatar-row"></div>
       <div class="error" id="join-err"></div>
       <button class="btn-main" id="btn-join" onclick="joinGame()">Rejoindre</button>
       <button class="btn-ghost" onclick="show('home')">Retour</button>
@@ -278,6 +283,7 @@
 <script src="recent-games.js"></script>
 <script src="feedback.js"></script>
 <script src="connection-banner.js"></script>
+<script src="avatar-picker.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -298,6 +304,7 @@ const $ = id => document.getElementById(id);
 const screens = ['home','create','join','wait','game','end'];
 function show(name){ screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name)); }
 function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
+function pAvatar(p){ return p && p.avatar ? p.avatar : '🙂'; }
 function genCode(){
   const letters="ABCDEFGHJKMNPQRSTUVWXYZ";
   let c="";
@@ -457,13 +464,16 @@ function finishHand(st){
 }
 
 /* ---------- create / join ---------- */
+const createAvatarPicker = window.GYMAvatarPicker.render('create-avatar-row');
+const joinAvatarPicker = window.GYMAvatarPicker.render('join-avatar-row');
 async function createGame(){
   const name = $('create-name').value.trim() || "Joueur 1";
+  const avatar = createAvatarPicker.get();
   const n = parseInt(document.querySelector('input[name=pcount]:checked').value, 10);
   $('btn-create').disabled = true; busy = true;
   code = genCode();
   const players = new Array(n).fill(null);
-  players[0] = {name};
+  players[0] = {name, avatar};
   state = { v:1, code, status:'waiting', maxPlayers:n, players, totals:[0,0], hand:0, dealerIndex:-1 };
   const ok = await saveState(state);
   busy = false; $('btn-create').disabled = false;
@@ -479,6 +489,7 @@ async function createGame(){
 async function joinGame(){
   const c = $('join-code').value.trim().toUpperCase();
   const name = $('join-name').value.trim() || "Joueur";
+  const avatar = joinAvatarPicker.get();
   if(!/^[A-Z]{4}$/.test(c)){ $('join-err').textContent = "Le code fait 4 lettres."; return; }
   $('join-err').textContent = "";
   $('btn-join').disabled = true; busy = true;
@@ -501,7 +512,7 @@ async function joinGame(){
     $('join-err').textContent = "Cette partie est déjà complète.";
     $('btn-join').disabled = false; busy = false; return;
   }
-  st.players[freeIdx] = {name};
+  st.players[freeIdx] = {name, avatar};
   const stillFree = st.players.some(p=>!p);
   if(!stillFree){ st.status = 'playing'; newHand(st); }
   const ok = await saveState(st);
@@ -533,7 +544,7 @@ async function refresh(){
   applyIncomingState(st);
 }
 function renderWait(){
-  const joined = state.players.filter(Boolean).map(p=>p.name);
+  const joined = state.players.filter(Boolean).map(p=>pAvatar(p)+' '+p.name);
   $('wait-count').textContent = joined.length + "/" + state.maxPlayers + " joueurs";
   $('wait-names').textContent = joined.join(', ');
 }
@@ -627,7 +638,7 @@ function renderBoard(){
   oppRow.innerHTML = state.players.map((p, idx) => {
     if(idx===me || !p) return '';
     const n = state.hands[idx] ? state.hands[idx].length : 0;
-    return '<div class="opp-chip'+(state.turn===idx?' turn':'')+'"><div class="nm">'+esc(p.name)+'</div><div class="cnt">'+n+'</div></div>';
+    return '<div class="opp-chip'+(state.turn===idx?' turn':'')+'"><div class="nm">'+pAvatar(p)+' '+esc(p.name)+'</div><div class="cnt">'+n+'</div></div>';
   }).join('');
 
   const tableRow = $('table-row');
