@@ -277,6 +277,7 @@
 </div>
 
 <script src="realtime.js"></script>
+<script src="leave-guard.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -519,8 +520,8 @@ function enterGame(){
 }
 function renderCurrent(){
   if(!state) return;
-  if(state.status==='finished') renderEnd();
-  else if(state.status==='playing') renderBoard();
+  if(state.status==='finished'){ window.GYMLeaveGuard.disable(); renderEnd(); }
+  else if(state.status==='playing'){ window.GYMLeaveGuard.enable(); renderBoard(); }
 }
 
 /* ---------- actions ---------- */

@@ -389,6 +389,7 @@
 </div>
 
 <script src="realtime.js"></script>
+<script src="leave-guard.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -559,9 +560,11 @@ function applyIncomingState(st){
   if(busy || !st) return;
   state = st;
   if(st.status==='playing'){
+    window.GYMLeaveGuard.enable();
     if($('screen-game').classList.contains('hidden')) enterGame();
     renderGame();
   } else if(st.status==='finished'){
+    window.GYMLeaveGuard.disable();
     renderEnd();
   }
 }
@@ -579,6 +582,7 @@ function enterGame(){
 function opp(){ return me==='p1' ? 'p2' : 'p1'; }
 
 function renderGame(){
+  window.GYMLeaveGuard.enable();
   const matchScoreEl = $('match-score');
   if(state.matchRounds > 1){
     matchScoreEl.classList.remove('hidden');
