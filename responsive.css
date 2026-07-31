@@ -1,0 +1,23 @@
+/* Progressive widening of the content column for tablets and desktops.
+   Inner elements (game grids, hand rows...) already cap their own width,
+   so widening .frame just gives them more breathing room, it never
+   stretches them awkwardly. */
+@media (min-width: 700px){
+  .frame{ max-width: 560px; }
+}
+@media (min-width: 1000px){
+  .frame{ max-width: 680px; }
+  body{ font-size: 1.02rem; }
+}
+
+/* Home screen: let the "En groupe" game cards use the extra width as a
+   2-column grid instead of a long single-column stack. */
+@media (min-width: 700px){
+  .group-grid{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    align-items: start;
+  }
+  .group-grid .card{ margin-bottom: 0; }
+}
