@@ -321,6 +321,7 @@
       <h2>Partie créée !</h2>
       <p class="muted">Envoie ce code à ton amie :</p>
       <div class="code-big" id="wait-code">····</div>
+      <button class="btn-main btn-small hidden" id="share-btn" onclick="shareCode()">📤 Partager le code</button>
       <button class="btn-ghost btn-small" onclick="copyCode()" id="copy-btn">Copier le code</button>
       <p class="muted pulse" style="margin-top:16px">En attente de ton adversaire…</p>
     </div>
@@ -747,6 +748,14 @@ function copyCode(){
     setTimeout(()=>$('copy-btn').textContent="Copier le code", 1500);
   });
 }
+function shareCode(){
+  if(!navigator.share) return;
+  navigator.share({
+    title: 'Games Room',
+    text: 'Rejoins ma partie de Vache & Taureau sur Games Room ! Code : ' + code
+  }).catch(()=>{});
+}
+if($('share-btn')) $('share-btn').classList.toggle('hidden', !navigator.share);
 function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
 
 document.addEventListener('keydown', e=>{

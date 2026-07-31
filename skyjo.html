@@ -265,6 +265,7 @@
       <h2>Partie créée !</h2>
       <p class="muted">Envoie ce code à tes ami·e·s :</p>
       <div class="code-big" id="wait-code">····</div>
+      <button class="btn-main btn-small hidden" id="share-btn" onclick="shareCode()">📤 Partager le code</button>
       <button class="btn-ghost btn-small" onclick="copyCode()" id="copy-btn">Copier le code</button>
       <p class="muted pulse" style="margin-top:16px" id="wait-count">0/0 joueurs</p>
       <p class="muted" id="wait-names"></p>
@@ -825,6 +826,14 @@ function copyCode(){
     setTimeout(()=>$('copy-btn').textContent="Copier le code", 1500);
   });
 }
+function shareCode(){
+  if(!navigator.share) return;
+  navigator.share({
+    title: 'Games Room',
+    text: 'Rejoins ma partie de Skyjo sur Games Room ! Code : ' + code
+  }).catch(()=>{});
+}
+if($('share-btn')) $('share-btn').classList.toggle('hidden', !navigator.share);
 </script>
 <script src="install-tutorial.js" defer></script>
 </body>
