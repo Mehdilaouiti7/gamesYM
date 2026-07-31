@@ -21,3 +21,27 @@
   }
   .group-grid .card{ margin-bottom: 0; }
 }
+
+/* Mouse hover feedback — gated on (hover:hover) so touchscreens never get
+   a "stuck" hover state after a tap. */
+@media (hover: hover) and (pointer: fine){
+  button:not(:disabled):hover{ filter: brightness(1.08); cursor: pointer; }
+  .btn-ghost:hover{ background: rgba(255,255,255,.08); border-color: rgba(243,239,228,.32); }
+  .card:hover{ border-color: rgba(243,239,228,.22); }
+  .recent-row:hover{ background: rgba(255,255,255,.09); border-color: rgba(243,239,228,.32); }
+  .avatar-opt:hover{ border-color: var(--butter, #e9c46a); }
+  .chip:hover{ filter: brightness(1.1); }
+  .joined-chip:hover, .opp-chip:hover, .sb-chip:hover{ border-color: rgba(243,239,228,.32); }
+  .group-grid .card:hover{ transform: translateY(-2px); box-shadow: 0 14px 32px rgba(0,0,0,.22); transition: transform .15s ease, box-shadow .15s ease; }
+}
+
+/* Keyboard focus visibility — only shows for keyboard nav, not mouse clicks. */
+button:focus-visible,
+input:focus-visible,
+a:focus-visible,
+.avatar-opt:focus-visible,
+.recent-row:focus-visible,
+.chip:focus-visible{
+  outline: 2px solid var(--butter, #e9c46a);
+  outline-offset: 2px;
+}
