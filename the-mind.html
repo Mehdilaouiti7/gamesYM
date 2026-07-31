@@ -270,6 +270,7 @@
 <script src="leave-guard.js"></script>
 <script src="recent-games.js"></script>
 <script src="feedback.js"></script>
+<script src="connection-banner.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -299,10 +300,11 @@ function loadRole(c){ try{ const v=localStorage.getItem('tm-role-'+c); return v=
 async function loadState(c){
   try{
     const r = await fetch(SB_URL+"/rest/v1/tm_games?code=eq."+encodeURIComponent(c)+"&select=state", {headers:HEADERS});
-    if(!r.ok) return null;
+    if(!r.ok){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return null; }
+    if(window.GYMConnection) window.GYMConnection.reportSuccess();
     const rows = await r.json();
     return rows.length ? rows[0].state : null;
-  }catch(e){ return null; }
+  }catch(e){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return null; }
 }
 async function saveState(st){
   try{
@@ -311,8 +313,9 @@ async function saveState(st){
       headers:{...HEADERS, "Prefer":"resolution=merge-duplicates"},
       body: JSON.stringify({code:st.code, state:st, updated_at:new Date().toISOString()})
     });
+    if(window.GYMConnection) (r.ok ? window.GYMConnection.reportSuccess() : window.GYMConnection.reportFailure());
     return r.ok;
-  }catch(e){ return false; }
+  }catch(e){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return false; }
 }
 async function saveResult(st){
   try{
