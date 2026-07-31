@@ -215,6 +215,13 @@
   .round-result{text-align:center;padding:6px 0 2px}
   .round-result .big{font-size:2rem;margin:4px 0}
 
+  .rr-secrets-row{display:flex;gap:10px;justify-content:center;margin-top:6px}
+  .rr-secret-chip{flex:1;text-align:center;background:rgba(0,0,0,.18);border:1px solid var(--line);border-radius:10px;padding:10px}
+  .rr-secret-chip .nm{font-size:.78rem;color:var(--chalk-dim);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rr-secret-chip .val{font-family:'Space Mono',monospace;font-weight:700;font-size:1.3rem;letter-spacing:.15em;color:var(--chalk)}
+  .rr-secret-chip.win{border-color:var(--butter)}
+  .rr-secret-chip.win .val{color:var(--butter)}
+
   .scoreboard{
     display:flex;align-items:center;justify-content:center;gap:14px;
     margin:14px 0 4px;
@@ -362,6 +369,14 @@
         <h2 id="rr-title">Manche terminée</h2>
         <p class="muted" id="rr-detail"></p>
       </div>
+      <div class="card hidden" id="rr-reveal-card">
+        <h2>Nombres secrets de cette manche</h2>
+        <div class="rr-secrets-row" id="rr-secrets-row"></div>
+      </div>
+      <div id="rr-round-end-actions" class="hidden">
+        <button class="btn-main" onclick="continueToNextRound()">Manche suivante</button>
+        <button class="btn-ghost" onclick="quitMatchEarly()">Quitter la partie</button>
+      </div>
       <div class="card" id="rr-secret-form">
         <h2>Nouveau nombre secret</h2>
         <p class="muted">Choisis un nouveau nombre secret de 4 chiffres différents pour la manche suivante.</p>
@@ -380,7 +395,7 @@
       <div class="card">
         <div class="history-split">
           <div class="history-col">
-            <div class="history-col-label">Toi</div>
+            <div class="history-col-label" id="history-me-label">Toi</div>
             <div class="history-list" id="history-me"></div>
           </div>
           <div class="history-col">
@@ -641,17 +656,22 @@ function renderGame(){
     renderRoundResult();
     return;
   }
-  $('round-result-zone').classList.add('hidden');
+
+  const isRoundEnd = state.roundPhase==='round_end';
+  $('round-result-zone').classList.toggle('hidden', !isRoundEnd);
+  if(isRoundEnd) renderRoundResult();
   $('duel-zone').classList.remove('hidden');
 
-  const myTurn = state.turn === me;
+  const myTurn = !isRoundEnd && state.turn === me;
   const oppP = state.players[opp()];
   const oppName = oppP ? oppP.name : "…";
   const pill = $('turn-pill');
-  pill.textContent = myTurn ? "🎯 À toi de jouer !" : "⏳ Au tour de "+oppName+"…";
+  pill.textContent = isRoundEnd ? "🏁 Manche terminée" : (myTurn ? "🎯 À toi de jouer !" : "⏳ Au tour de "+oppName+"…");
   pill.classList.toggle('mine', myTurn);
   $('btn-guess').disabled = !myTurn;
+  $('guess-zone').classList.toggle('hidden', isRoundEnd);
 
+  $('history-me-label').textContent = pAvatar(state.players[me]) + ' Toi';
   $('history-opp-label').textContent = oppP ? pAvatar(oppP)+' '+oppName : oppName;
   renderHistoryCol('history-me', state.guesses.filter(g=>g.by===me), 'me');
   renderHistoryCol('history-opp', state.guesses.filter(g=>g.by!==me), 'them');
@@ -665,10 +685,20 @@ function renderRoundResult(){
     $('rr-title').textContent = "Manche "+lr.roundIndex+" : "+(iWonRound ? "tu as gagné !" : state.players[lr.winner].name+" a gagné !");
     $('rr-detail').textContent = "Score : "+state.players.p1.name+" "+state.score.p1+" — "+state.score.p2+" "+state.players.p2.name;
   }
+
+  const isRoundEnd = state.roundPhase==='round_end';
+  $('rr-reveal-card').classList.toggle('hidden', !isRoundEnd);
+  $('rr-round-end-actions').classList.toggle('hidden', !isRoundEnd);
+  if(isRoundEnd && lr){
+    $('rr-secrets-row').innerHTML =
+      '<div class="rr-secret-chip'+(lr.winner==='p1'?' win':'')+'"><div class="nm">'+pAvatar(state.players.p1)+' '+esc(state.players.p1.name)+'</div><div class="val">'+lr.secretP1+'</div></div>'+
+      '<div class="rr-secret-chip'+(lr.winner==='p2'?' win':'')+'"><div class="nm">'+pAvatar(state.players.p2)+' '+esc(state.players.p2.name)+'</div><div class="val">'+lr.secretP2+'</div></div>';
+  }
+
   const mySecretSet = !!state.players[me].secret;
-  $('rr-secret-form').classList.toggle('hidden', mySecretSet);
-  $('rr-waiting').classList.toggle('hidden', !mySecretSet);
-  if(mySecretSet) $('rr-waiting').textContent = "En attente de "+oppName+"…";
+  $('rr-secret-form').classList.toggle('hidden', isRoundEnd || mySecretSet);
+  $('rr-waiting').classList.toggle('hidden', isRoundEnd || !mySecretSet);
+  if(!isRoundEnd && mySecretSet) $('rr-waiting').textContent = "En attente de "+oppName+"…";
 }
 async function submitRoundSecret(){
   if(busy || !state || state.roundPhase!=='secrets') return;
@@ -730,12 +760,7 @@ async function submitGuess(){
         secretP2: st.players.p2.secret,
         roundIndex: st.roundIndex
       };
-      st.roundIndex += 1;
-      st.players.p1.secret = null;
-      st.players.p2.secret = null;
-      st.roundPhase = 'secrets';
-      st.guesses = [];
-      st.turn = (st.roundIndex % 2 === 1) ? 'p1' : 'p2';
+      st.roundPhase = 'round_end';
     }
   } else {
     st.turn = opp();
@@ -751,6 +776,39 @@ async function submitGuess(){
   } else {
     renderGame();
   }
+}
+
+async function continueToNextRound(){
+  if(busy || !state || state.roundPhase!=='round_end') return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.roundPhase!=='round_end'){ state=st; busy=false; renderGame(); return; }
+  st.roundIndex += 1;
+  st.players.p1.secret = null;
+  st.players.p2.secret = null;
+  st.roundPhase = 'secrets';
+  st.guesses = [];
+  st.turn = (st.roundIndex % 2 === 1) ? 'p1' : 'p2';
+  const ok = await saveState(st);
+  busy = false;
+  if(!ok) return;
+  state = st;
+  renderGame();
+}
+async function quitMatchEarly(){
+  if(busy || !state || state.roundPhase!=='round_end') return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.roundPhase!=='round_end'){ state=st; busy=false; renderGame(); return; }
+  const p1s = st.score.p1, p2s = st.score.p2;
+  st.matchWinner = p1s!==p2s ? (p1s>p2s ? 'p1' : 'p2') : st.lastRoundResult.winner;
+  st.status = 'finished';
+  const ok = await saveState(st);
+  busy = false;
+  if(!ok) return;
+  state = st;
+  await saveResult(st);
+  renderEnd();
 }
 
 async function renderEnd(){
