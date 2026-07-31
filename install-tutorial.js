@@ -103,7 +103,21 @@
   overlay.querySelector('.itut-close').addEventListener('click', hide);
   overlay.querySelector('.itut-btn').addEventListener('click', hide);
 
-  window.showInstallTutorial = function(){ overlay.classList.add('open'); };
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+
+  window.showInstallTutorial = function(){
+    if(deferredPrompt){
+      const promptEvent = deferredPrompt;
+      deferredPrompt = null;
+      promptEvent.prompt();
+      return;
+    }
+    overlay.classList.add('open');
+  };
 
   if(isIos() && !isStandalone()){
     let seen = false;
