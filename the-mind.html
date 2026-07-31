@@ -269,6 +269,7 @@
 <script src="realtime.js"></script>
 <script src="leave-guard.js"></script>
 <script src="recent-games.js"></script>
+<script src="feedback.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -280,6 +281,7 @@ const HEADERS = {
 const REWARD_LEVELS = new Set([2,3,5,6,8,9]);
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
+let lastFeedbackEvent = null;
 
 const $ = id => document.getElementById(id);
 const screens = ['home','create','join','wait','game','end'];
@@ -508,13 +510,17 @@ function renderBoard(){
 
   const ev = state.lastEvent;
   const banner = $('event-banner');
-  if(!ev){ banner.textContent = ""; banner.className = "event-banner"; }
+  if(!ev){ banner.textContent = ""; banner.className = "event-banner"; lastFeedbackEvent = null; }
   else if(ev.type==='ok'){
     banner.className = "event-banner ok";
     banner.textContent = (state.players[ev.by]?state.players[ev.by].name:'?') + " a joué " + ev.card + (ev.reward ? " · récompense : ❤️ vie" : "");
+    const evKey = 'ok-'+ev.by+'-'+ev.card;
+    if(evKey !== lastFeedbackEvent){ lastFeedbackEvent = evKey; if(window.GYMFeedback) window.GYMFeedback.ok(); }
   } else if(ev.type==='mistake'){
     banner.className = "event-banner mistake";
     banner.textContent = "❌ " + (state.players[ev.by]?state.players[ev.by].name:'?') + " a joué "+ev.card+" trop tôt — 1 vie perdue";
+    const evKey = 'mistake-'+ev.by+'-'+ev.card;
+    if(evKey !== lastFeedbackEvent){ lastFeedbackEvent = evKey; if(window.GYMFeedback) window.GYMFeedback.mistake(); }
   }
 
   const others = $('others-row');
@@ -563,6 +569,7 @@ async function renderEnd(){
   if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
   window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
   if(!$('screen-end').classList.contains('hidden')) return;
+  if(state.won && window.GYMFeedback) window.GYMFeedback.win();
   $('end-emoji').textContent = state.won ? "🏆" : "💔";
   $('end-title').textContent = state.won ? "Victoire d'équipe !" : "Défaite…";
   $('end-detail').textContent = state.won

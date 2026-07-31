@@ -281,6 +281,7 @@
 <script src="realtime.js"></script>
 <script src="leave-guard.js"></script>
 <script src="recent-games.js"></script>
+<script src="feedback.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -702,6 +703,7 @@ async function renderEnd(){
   window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
   if(!$('screen-end').classList.contains('hidden')) return;
   const iWon = state.winner === me;
+  if(iWon && window.GYMFeedback) window.GYMFeedback.win();
   const winName = state.players[state.winner].name;
   $('end-emoji').textContent = iWon ? "🏆" : "📖";
   $('end-title').textContent = iWon ? "Bravo " + winName + ", tu as gagné !" : winName + " a gagné !";

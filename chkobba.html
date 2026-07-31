@@ -276,6 +276,7 @@
 <script src="realtime.js"></script>
 <script src="leave-guard.js"></script>
 <script src="recent-games.js"></script>
+<script src="feedback.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -289,6 +290,7 @@ const SUIT_SYMBOL = ['♦','♥','♣','♠'];
 const SUIT_CLASS = ['red','red','dark','dark'];
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
+let lastFeedbackEvent = null;
 let pendingHandIdx = null, pendingOptions = [];
 
 const $ = id => document.getElementById(id);
@@ -650,15 +652,18 @@ function renderBoard(){
 
   const ev = state.lastEvent;
   const banner = $('event-banner');
-  if(!ev){ banner.textContent=""; banner.className="event-banner"; }
+  if(!ev){ banner.textContent=""; banner.className="event-banner"; lastFeedbackEvent = null; }
   else {
     const byName = state.players[ev.by] ? state.players[ev.by].name : '?';
+    const evKey = ev.type+'-'+ev.by+'-'+ev.card.r+'-'+ev.card.s+'-'+(ev.capturedCount||0);
     if(ev.type==='capture'){
       banner.className = "event-banner " + (ev.chkobba ? "chkobba" : "capture");
       banner.textContent = (ev.chkobba ? "🎉 Chkobba ! " : "✅ ") + byName + " a joué " + rankLabel(ev.card.r)+SUIT_SYMBOL[ev.card.s] + " et capturé " + ev.capturedCount + " carte(s)";
+      if(evKey !== lastFeedbackEvent){ lastFeedbackEvent = evKey; if(window.GYMFeedback) window.GYMFeedback.vibrate(ev.chkobba ? [40,40,40,40,120] : 30); }
     } else {
       banner.className = "event-banner";
       banner.textContent = byName + " a posé " + rankLabel(ev.card.r)+SUIT_SYMBOL[ev.card.s];
+      lastFeedbackEvent = evKey;
     }
   }
 
@@ -679,6 +684,7 @@ async function renderEnd(){
   if(!$('screen-end').classList.contains('hidden')) return;
   const side = mySide();
   const iWon = state.winnerSide === side;
+  if(iWon && window.GYMFeedback) window.GYMFeedback.win();
   const sideNames = [[],[]];
   state.players.forEach((p, idx) => { if(p) sideNames[sideOf(state, idx)].push(p.name); });
   const winName = sideNames[state.winnerSide].join(' & ');
