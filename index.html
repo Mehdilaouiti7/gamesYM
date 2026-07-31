@@ -108,6 +108,22 @@
   }
   .card-head h2{margin-bottom:0}
   .card h2{font-size:1.05rem;font-weight:600;margin-bottom:10px}
+
+  .recent-row{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;border-radius:12px;
+    background:rgba(255,255,255,.05);
+    border:1px solid var(--line);
+    margin-bottom:8px;
+    text-decoration:none;color:inherit;
+    cursor:pointer;
+  }
+  .recent-row:active{transform:scale(.98)}
+  .recent-row .emo{font-size:1.3rem;flex-shrink:0}
+  .recent-row .info{flex:1;min-width:0}
+  .recent-row .info .g{font-weight:600;font-size:.9rem}
+  .recent-row .info .c{font-size:.72rem;color:var(--chalk-dim);font-family:'Space Mono',monospace;letter-spacing:.12em}
+  .recent-row .go{color:var(--butter);font-size:.78rem;flex-shrink:0;white-space:nowrap}
   label{display:block;font-size:.85rem;color:var(--chalk-dim);margin:10px 0 4px}
   input[type=text],input[type=tel]{
     width:100%;
@@ -227,6 +243,11 @@
 
   <div id="screen-home">
     <p class="muted" style="text-align:center;margin-bottom:6px">Choisis un jeu, seul·e ou avec tes ami·e·s.</p>
+
+    <div id="recent-section" class="hidden">
+      <div class="section-label">🕒 Reprendre une partie</div>
+      <div id="recent-list"></div>
+    </div>
 
     <div class="section-label">🎯 En tête-à-tête</div>
     <div class="card">
@@ -394,6 +415,7 @@
 
 <script src="realtime.js"></script>
 <script src="leave-guard.js"></script>
+<script src="recent-games.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -514,6 +536,7 @@ async function createGame(){
   if(!ok){ $('create-err').textContent = "Connexion impossible. Vérifie ton réseau et réessaie."; return; }
   me = 'p1';
   saveRole(code,'p1');
+  if(window.GYMRecent) window.GYMRecent.record('vt', code, 'Vache & Taureau');
   $('wait-code').textContent = code;
   show('wait');
   startPolling();
@@ -521,11 +544,7 @@ async function createGame(){
 
 async function joinGame(){
   const c = $('join-code').value.trim().toUpperCase();
-  const name = $('join-name').value.trim() || "Joueuse 2";
-  const secret = $('join-secret').value.trim();
   if(!/^[A-Z]{4}$/.test(c)){ $('join-err').textContent = "Le code fait 4 lettres."; return; }
-  const errS = validSecret(secret);
-  if(errS){ $('join-err').textContent = errS; return; }
   $('join-err').textContent = "";
   $('btn-join').disabled = true; busy = true;
 
@@ -538,9 +557,14 @@ async function joinGame(){
   if(existing && st.players[existing]){
     code = c; me = existing; state = st;
     busy = false; $('btn-join').disabled = false;
+    if(window.GYMRecent) window.GYMRecent.record('vt', c, 'Vache & Taureau');
     if(st.status==='finished'){ renderEnd(); } else { enterGame(); startPolling(); }
     return;
   }
+  const name = $('join-name').value.trim() || "Joueuse 2";
+  const secret = $('join-secret').value.trim();
+  const errS = validSecret(secret);
+  if(errS){ $('join-err').textContent = errS; $('btn-join').disabled = false; busy = false; return; }
   if(st.players.p2){
     $('join-err').textContent = "Cette partie a déjà deux joueuses.";
     $('btn-join').disabled = false; busy = false; return;
@@ -552,6 +576,7 @@ async function joinGame(){
   if(!ok){ $('join-err').textContent = "Erreur d'enregistrement. Réessaie."; return; }
   code = c; me = 'p2'; state = st;
   saveRole(c,'p2');
+  if(window.GYMRecent) window.GYMRecent.record('vt', c, 'Vache & Taureau');
   enterGame(); startPolling();
 }
 
@@ -764,6 +789,36 @@ document.addEventListener('keydown', e=>{
   else if(!$('screen-create').classList.contains('hidden')) createGame();
   else if(!$('screen-join').classList.contains('hidden')) joinGame();
 });
+
+const RECENT_META = {
+  vt: {emoji:'🐄', label:'Vache & Taureau', url:'index.html'},
+  sk: {emoji:'🎴', label:'Skyjo', url:'skyjo.html'},
+  tm: {emoji:'🧠', label:'The Mind', url:'the-mind.html'},
+  cb: {emoji:'🃏', label:'Chkobba', url:'chkobba.html'},
+  bw: {emoji:'📖', label:'Bent Walad', url:'bentwalad.html'}
+};
+function renderRecent(){
+  const list = window.GYMRecent ? window.GYMRecent.getAll() : [];
+  if(!list.length){ $('recent-section').classList.add('hidden'); return; }
+  $('recent-section').classList.remove('hidden');
+  $('recent-list').innerHTML = list.map(e => {
+    const meta = RECENT_META[e.game] || {emoji:'🎲', label:e.game, url:'index.html'};
+    const href = meta.url + '?code=' + encodeURIComponent(e.code);
+    return '<a class="recent-row" href="'+href+'"><span class="emo">'+meta.emoji+'</span>'+
+      '<span class="info"><div class="g">'+esc(meta.label)+'</div><div class="c">'+esc(e.code)+'</div></span>'+
+      '<span class="go">Reprendre →</span></a>';
+  }).join('');
+}
+renderRecent();
+
+(function(){
+  const qcode = (new URLSearchParams(location.search).get('code')||'').toUpperCase();
+  if(/^[A-Z]{4}$/.test(qcode)){
+    show('join');
+    $('join-code').value = qcode;
+    if(loadRole(qcode)) joinGame();
+  }
+})();
 </script>
 <script src="install-tutorial.js" defer></script>
 </body>

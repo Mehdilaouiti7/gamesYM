@@ -275,6 +275,7 @@
 
 <script src="realtime.js"></script>
 <script src="leave-guard.js"></script>
+<script src="recent-games.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -464,6 +465,7 @@ async function createGame(){
   if(!ok){ $('create-err').textContent = "Connexion impossible. Vérifie ton réseau et réessaie."; return; }
   me = 0;
   saveRole(code, 0);
+  if(window.GYMRecent) window.GYMRecent.record('cb', code, 'Chkobba');
   $('wait-code').textContent = code;
   renderWait();
   show('wait');
@@ -502,6 +504,7 @@ async function joinGame(){
   if(!ok){ $('join-err').textContent = "Erreur d'enregistrement. Réessaie."; return; }
   code = c; me = freeIdx; state = st;
   saveRole(c, freeIdx);
+  if(window.GYMRecent) window.GYMRecent.record('cb', c, 'Chkobba');
   if(st.status==='waiting'){ $('wait-code').textContent = c; renderWait(); show('wait'); startPolling(); }
   else { enterGame(); startPolling(); }
 }
@@ -698,6 +701,15 @@ function shareCode(){
   }).catch(()=>{});
 }
 if($('share-btn')) $('share-btn').classList.toggle('hidden', !navigator.share);
+
+(function(){
+  const qcode = (new URLSearchParams(location.search).get('code')||'').toUpperCase();
+  if(/^[A-Z]{4}$/.test(qcode)){
+    show('join');
+    $('join-code').value = qcode;
+    if(loadRole(qcode)!==null) joinGame();
+  }
+})();
 </script>
 <script src="install-tutorial.js" defer></script>
 </body>
