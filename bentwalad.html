@@ -406,14 +406,14 @@ function spinWheel(letter, round){
   overlay.classList.add('show');
 
   const spins = 6;
+  const SPIN_MS = 3300;
   wheelRotation = wheelRotation - (wheelRotation % 360) + spins * 360 - targetIndex * WHEEL_SLICE;
   wheel.style.transition = 'none';
   void wheel.offsetHeight;
-  wheel.style.transition = 'transform 3.3s cubic-bezier(.13,.79,.18,1)';
+  wheel.style.transition = 'transform ' + SPIN_MS + 'ms cubic-bezier(.13,.79,.18,1)';
   wheel.style.transform = 'rotate(' + wheelRotation + 'deg)';
 
-  const onDone = () => {
-    wheel.removeEventListener('transitionend', onDone);
+  setTimeout(() => {
     wheel.classList.add('landed');
     $('wheel-caption').innerHTML = 'Lettre tirée : <b style="color:var(--butter)">' + esc(letter) + '</b><span class="sub">' + esc(contextLabel) + '</span>';
     setTimeout(() => {
@@ -423,8 +423,7 @@ function spinWheel(letter, round){
       spinning = false;
       if(state) renderBoard();
     }, 900);
-  };
-  wheel.addEventListener('transitionend', onDone);
+  }, SPIN_MS);
 }
 function genCode(){
   const letters="ABCDEFGHJKMNPQRSTUVWXYZ";
