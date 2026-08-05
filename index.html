@@ -168,39 +168,74 @@
   .pulse{animation:pulse 1.6s ease-in-out infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
 
-  .status-bar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
   .status-pill{
     background:rgba(0,0,0,.28);
     border:1px solid var(--line);
     border-radius:999px;
     padding:7px 14px;font-size:.85rem;
-    flex:1;text-align:center;
+    text-align:center;
+    display:table;margin:0 auto 8px;
   }
   .status-pill.mine{border-color:var(--butter);color:var(--butter)}
-  .legend{display:flex;gap:14px;justify-content:center;font-size:.8rem;color:var(--chalk-dim);margin-bottom:10px}
-  .history-split{display:flex;gap:8px}
-  .history-col{flex:1;min-width:0}
-  .history-col-label{font-size:.78rem;color:var(--chalk-dim);text-align:center;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .history-list{
-    max-height:42dvh;overflow-y:auto;
-    display:flex;flex-direction:column;gap:6px;
-    padding:4px 2px;
-  }
-  .h-row{
-    padding:8px 10px;border-radius:10px;
-    background:rgba(0,0,0,.18);
-    border-left:3px solid transparent;
-    display:flex;align-items:center;justify-content:space-between;gap:8px;
-  }
-  .h-row.me{border-left-color:var(--butter)}
-  .h-row.them{border-left-color:var(--blue-chalk)}
-  .h-row .g{font-family:'Space Mono',monospace;font-weight:700;letter-spacing:.18em;font-size:.95rem;flex-shrink:0}
-  .h-row .res{font-size:.78rem;color:var(--chalk-dim);white-space:nowrap;text-align:right}
-  .guess-line{display:flex;gap:8px;margin-top:4px}
-  .guess-line input{flex:1}
-  .guess-line button{width:auto;margin-top:0;padding:0 18px}
+  .legend{display:flex;gap:14px;justify-content:center;font-size:.8rem;color:var(--chalk-dim);margin-bottom:14px}
   .win-card{text-align:center}
   .win-card .big{font-size:2.6rem;margin:6px 0}
+
+  .vt-score-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .vt-score-row .nm{font-size:.92rem;font-weight:600;color:var(--chalk-dim);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .vt-score-row .nm.me{color:var(--butter)}
+  .vt-score-row .sc{font-family:'Space Mono',monospace;font-weight:700;font-size:1.35rem}
+  .vt-score-row .colon{color:var(--chalk-dim)}
+
+  .vt-columns{
+    display:flex;
+    min-height:44dvh;
+    border-radius:16px;overflow:hidden;
+    border:1px solid var(--line);
+    margin-bottom:12px;
+    background:rgba(0,0,0,.12);
+  }
+  .vt-col{flex:1;min-width:0;display:flex;flex-direction:column}
+  .vt-col.me{background:rgba(233,196,106,.09)}
+  .vt-divider{width:2px;background:var(--butter);flex-shrink:0;opacity:.5}
+  .vt-col-label{text-align:center;padding:10px 6px 6px;font-size:.82rem;font-weight:600;color:var(--chalk-dim)}
+  .vt-rows{flex:1;overflow-y:auto;padding:2px 8px 10px;display:flex;flex-direction:column;gap:5px}
+  .vt-row{
+    display:flex;align-items:center;gap:6px;
+    font-family:'Space Mono',monospace;font-size:.82rem;
+    padding:6px 6px;border-radius:8px;background:rgba(0,0,0,.16);
+  }
+  .vt-row .idx{color:var(--chalk-dim);font-size:.7rem;width:20px;flex-shrink:0}
+  .vt-row .g{font-weight:700;letter-spacing:.1em;flex:1}
+  .vt-row .res{font-size:.76rem;white-space:nowrap;color:var(--chalk-dim)}
+
+  .digit-boxes{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+  .digit-box{
+    flex:1;height:56px;max-width:64px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Mono',monospace;font-weight:700;font-size:1.5rem;
+    background:rgba(0,0,0,.25);border:1.5px dashed var(--line);border-radius:10px;
+    color:var(--chalk);
+  }
+  .digit-box.filled{border-style:solid;border-color:var(--butter)}
+  .dp-enter{
+    flex:0 0 auto;width:auto;padding:0 16px;height:56px;
+    background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;
+    border:none;border-radius:10px;font-weight:700;font-family:'Fredoka',sans-serif;font-size:.95rem;
+    cursor:pointer;margin:0;
+  }
+  .dp-enter:disabled{opacity:.4;cursor:default}
+  .dp-keys{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:6px}
+  .dp-key{
+    padding:14px 0;font-size:1.15rem;font-weight:600;
+    background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:10px;
+    color:var(--chalk);cursor:pointer;font-family:'Fredoka',sans-serif;
+    margin:0;width:100%;
+  }
+  .dp-key:active{transform:scale(.94)}
+  .dp-key:disabled{opacity:.28;cursor:default}
+  .dp-back{background:rgba(231,111,81,.14);color:var(--red-chalk)}
+  .dp-clear{background:rgba(231,111,81,.14);color:var(--red-chalk);font-size:1rem}
 
   .pcount-row{display:flex;gap:8px;margin-top:6px}
   .pcount-opt{flex:1}
@@ -389,29 +424,32 @@
     </div>
 
     <div id="duel-zone" class="hidden">
-      <div class="status-bar">
-        <div class="status-pill" id="turn-pill">…</div>
+      <div class="vt-score-row">
+        <span class="nm me" id="vt-nm-me"></span>
+        <span class="sc" id="vt-sc-me">0</span>
+        <span class="colon">:</span>
+        <span class="sc" id="vt-sc-opp">0</span>
+        <span class="nm" id="vt-nm-opp"></span>
       </div>
+
+      <div class="vt-columns">
+        <div class="vt-col me">
+          <div class="vt-col-label" id="history-me-label">Toi</div>
+          <div class="vt-rows" id="history-me"></div>
+        </div>
+        <div class="vt-divider"></div>
+        <div class="vt-col opp">
+          <div class="vt-col-label" id="history-opp-label">Adversaire</div>
+          <div class="vt-rows" id="history-opp"></div>
+        </div>
+      </div>
+
+      <div class="status-pill" id="turn-pill">…</div>
       <div class="legend"><span>🐂 bien placé</span><span>🐄 mal placé</span></div>
-      <div class="card">
-        <div class="history-split">
-          <div class="history-col">
-            <div class="history-col-label" id="history-me-label">Toi</div>
-            <div class="history-list" id="history-me"></div>
-          </div>
-          <div class="history-col">
-            <div class="history-col-label" id="history-opp-label">Adversaire</div>
-            <div class="history-list" id="history-opp"></div>
-          </div>
-        </div>
-        <div id="guess-zone">
-          <label>Ta proposition</label>
-          <div class="guess-line">
-            <input type="tel" id="guess-input" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
-            <button class="btn-main" id="btn-guess" onclick="submitGuess()">Jouer</button>
-          </div>
-          <div class="error" id="guess-err"></div>
-        </div>
+
+      <div id="guess-zone">
+        <div id="guess-pad"></div>
+        <div class="error" id="guess-err"></div>
       </div>
     </div>
     <p class="muted" style="text-align:center">Code de la partie : <b id="game-code-label"></b></p>
@@ -440,6 +478,7 @@
 <script src="feedback.js"></script>
 <script src="connection-banner.js"></script>
 <script src="avatar-picker.js"></script>
+<script src="digit-pad.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -450,6 +489,7 @@ const HEADERS = {
 };
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
+let guessPad = null;
 
 const $ = id => document.getElementById(id);
 const screens = ['home','vt-home','create','join','wait','game','end'];
@@ -669,13 +709,29 @@ function renderGame(){
   const pill = $('turn-pill');
   pill.textContent = isRoundEnd ? "🏁 Manche terminée" : (myTurn ? "🎯 À toi de jouer !" : "⏳ Au tour de "+oppName+"…");
   pill.classList.toggle('mine', myTurn);
-  $('btn-guess').disabled = !myTurn;
   $('guess-zone').classList.toggle('hidden', isRoundEnd);
+
+  const myScore = me==='p1' ? state.score.p1 : state.score.p2;
+  const oppScore = me==='p1' ? state.score.p2 : state.score.p1;
+  $('vt-nm-me').textContent = pAvatar(state.players[me]) + ' Toi';
+  $('vt-nm-opp').textContent = oppP ? pAvatar(oppP)+' '+oppName : oppName;
+  $('vt-sc-me').textContent = myScore;
+  $('vt-sc-opp').textContent = oppScore;
 
   $('history-me-label').textContent = pAvatar(state.players[me]) + ' Toi';
   $('history-opp-label').textContent = oppP ? pAvatar(oppP)+' '+oppName : oppName;
   renderHistoryCol('history-me', state.guesses.filter(g=>g.by===me), 'me');
   renderHistoryCol('history-opp', state.guesses.filter(g=>g.by!==me), 'them');
+
+  if(!guessPad){
+    guessPad = window.GYMDigitPad.render('guess-pad', {
+      maxLen: 4, distinct: true, showEnter: true, enterLabel: 'Jouer',
+      onEnter: function(value){ submitGuess(value); },
+      enterDisabled: function(){ return !(state && state.roundPhase==='duel' && state.turn===me); }
+    });
+  } else {
+    guessPad.refresh();
+  }
 }
 function renderRoundResult(){
   const lr = state.lastRoundResult;
@@ -723,22 +779,21 @@ async function submitRoundSecret(){
 function renderHistoryCol(elId, list, cls){
   const el = $(elId);
   if(list.length===0){
-    el.innerHTML = '<p class="muted" style="text-align:center;padding:10px 0;font-size:.8rem">Aucune proposition</p>';
+    el.innerHTML = '<p class="muted" style="text-align:center;padding:10px 0;font-size:.78rem">Aucun essai</p>';
     return;
   }
-  el.innerHTML = list.map(g =>
-    '<div class="h-row '+cls+'"><span class="g">'+g.guess+'</span><span class="res">'+g.t+' 🐂 · '+g.v+' 🐄</span></div>'
+  el.innerHTML = list.map((g, i) =>
+    '<div class="vt-row"><span class="idx">'+String(i+1).padStart(2,'0')+'</span><span class="g">'+g.guess+'</span><span class="res">'+g.t+'🐂 '+g.v+'🐄</span></div>'
   ).join('');
   el.scrollTop = el.scrollHeight;
 }
 
-async function submitGuess(){
+async function submitGuess(guess){
   if(!state || state.roundPhase!=='duel' || state.turn !== me) return;
-  const guess = $('guess-input').value.trim();
   const err = validSecret(guess);
   if(err){ $('guess-err').textContent = err; return; }
   $('guess-err').textContent = "";
-  busy = true; $('btn-guess').disabled = true;
+  busy = true;
 
   const st = await loadState(code) || state;
   if(st.roundPhase!=='duel' || st.turn !== me || st.status!=='playing'){ busy=false; state=st; renderGame(); return; }
@@ -767,9 +822,9 @@ async function submitGuess(){
     st.turn = opp();
   }
   const ok = await saveState(st);
-  if(!ok){ busy=false; $('guess-err').textContent = "Erreur réseau, réessaie."; $('btn-guess').disabled=false; return; }
+  if(!ok){ busy=false; $('guess-err').textContent = "Erreur réseau, réessaie."; return; }
   state = st;
-  $('guess-input').value = "";
+  if(guessPad) guessPad.clear();
   busy = false;
   if(st.status==='finished'){
     await saveResult(st);
@@ -862,8 +917,7 @@ function pAvatar(p){ return p && p.avatar ? p.avatar : '🙂'; }
 
 document.addEventListener('keydown', e=>{
   if(e.key!=='Enter') return;
-  if(!$('screen-game').classList.contains('hidden')) submitGuess();
-  else if(!$('screen-create').classList.contains('hidden')) createGame();
+  if(!$('screen-create').classList.contains('hidden')) createGame();
   else if(!$('screen-join').classList.contains('hidden')) joinGame();
 });
 
