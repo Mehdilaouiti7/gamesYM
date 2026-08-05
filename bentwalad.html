@@ -17,6 +17,7 @@
   :root{
     --board:#24382e;
     --board-deep:#1b2c24;
+    --board-mid:#2f4a3c;
     --chalk:#f3efe4;
     --chalk-dim:#c9c4b4;
     --butter:#e9c46a;
@@ -111,7 +112,46 @@
     display:flex;align-items:center;justify-content:center;
     font-family:'Space Mono',monospace;font-weight:700;font-size:1.8rem;
     box-shadow:0 6px 16px rgba(233,196,106,.25);
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1);
   }
+  .letter-badge.pop{transform:scale(1.14)}
+
+  .wheel-overlay{
+    position:fixed;inset:0;background:rgba(10,16,13,.72);backdrop-filter:blur(3px);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+    opacity:0;pointer-events:none;transition:opacity .35s ease;z-index:20;
+  }
+  .wheel-overlay.show{opacity:1;pointer-events:auto}
+  .wheel-caption{font-size:1.05rem;font-weight:600;color:#f2dfa4;text-align:center}
+  .wheel-caption .sub{display:block;font-size:.82rem;font-weight:400;color:var(--chalk-dim);margin-top:3px}
+  .wheel-wrap{position:relative;width:min(78vw,300px);height:min(78vw,300px)}
+  .pointer{
+    position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+    width:0;height:0;z-index:2;
+    border-left:12px solid transparent;border-right:12px solid transparent;
+    border-top:20px solid var(--butter);
+    filter:drop-shadow(0 3px 6px rgba(0,0,0,.4));
+  }
+  .wheel-hub{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:44px;height:44px;border-radius:50%;z-index:2;
+    background:linear-gradient(160deg,#eecd7c,var(--butter));
+    box-shadow:0 4px 12px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.5);
+    display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+  }
+  .wheel{
+    position:absolute;inset:0;border-radius:50%;
+    box-shadow:0 12px 30px rgba(0,0,0,.4), 0 0 0 6px rgba(0,0,0,.25), inset 0 0 24px rgba(0,0,0,.35);
+    transform:rotate(0deg);
+  }
+  .wheel-letters{position:absolute;inset:0}
+  .wheel-letter{
+    position:absolute;top:50%;left:50%;width:0;height:0;
+    font-family:'Space Mono',monospace;font-weight:700;font-size:.98rem;color:var(--chalk);
+  }
+  .wheel-letter span{position:absolute;left:0;top:-1.28em;transform:translateX(-50%);transition:opacity .2s}
+  .wheel-letter.used span{opacity:.28}
+  .wheel.landed{filter:drop-shadow(0 0 14px rgba(233,196,106,.55))}
   .status-text{flex:1}
   .status-text .rnd{font-size:.8rem;color:var(--chalk-dim)}
   .status-text .ph{font-size:.95rem;font-weight:600}
@@ -284,6 +324,17 @@
   </div>
 </div>
 
+<div class="wheel-overlay" id="wheel-overlay">
+  <div class="wheel-caption" id="wheel-caption">La roue tourne…</div>
+  <div class="wheel-wrap">
+    <div class="pointer"></div>
+    <div class="wheel-hub">🎲</div>
+    <div class="wheel" id="wheel">
+      <div class="wheel-letters" id="wheel-letters"></div>
+    </div>
+  </div>
+</div>
+
 <script src="realtime.js"></script>
 <script src="leave-guard.js"></script>
 <script src="recent-games.js"></script>
@@ -314,12 +365,66 @@ const MAX_PLAYERS = 10;
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
 let renderedRound = -1;
+let wheelPlayedForRound = -1, spinning = false, wheelRotation = 0;
 
 const $ = id => document.getElementById(id);
 const screens = ['home','create','join','wait','game','end'];
 function show(name){ screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name)); }
 function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
 function pAvatar(p){ return p && p.avatar ? p.avatar : '🙂'; }
+
+/* ---------- letter wheel ---------- */
+const WHEEL_SLICE = 360 / LETTERS.length;
+const wheelLetterEls = [];
+(function buildWheel(){
+  const wheel = $('wheel');
+  const wheelLetters = $('wheel-letters');
+  wheel.style.background = 'repeating-conic-gradient(from 0deg, var(--board-mid) 0deg ' + WHEEL_SLICE + 'deg, var(--board-deep) ' + WHEEL_SLICE + 'deg ' + (WHEEL_SLICE * 2) + 'deg)';
+  LETTERS.forEach((l, i) => {
+    const el = document.createElement('div');
+    el.className = 'wheel-letter';
+    el.style.transform = 'rotate(' + (i * WHEEL_SLICE) + 'deg)';
+    el.innerHTML = '<span lang="ar" dir="rtl">' + l + '</span>';
+    wheelLetters.appendChild(el);
+    wheelLetterEls.push(el);
+  });
+})();
+function spinWheel(letter, round){
+  const targetIndex = LETTERS.indexOf(letter);
+  if(targetIndex === -1) return;
+  spinning = true;
+  const wheel = $('wheel');
+  const overlay = $('wheel-overlay');
+  const contextLabel = round === 1 ? "Début de partie" : "Manche " + round;
+  $('wheel-caption').innerHTML = 'La roue tourne…<span class="sub">' + esc(contextLabel) + '</span>';
+  $('letter-badge').textContent = '?';
+  $('letter-badge').classList.remove('pop');
+  const used = new Set((state.usedLetters || []).filter(l => l !== letter));
+  wheelLetterEls.forEach((el, i) => el.classList.toggle('used', used.has(LETTERS[i])));
+  wheel.classList.remove('landed');
+  overlay.classList.add('show');
+
+  const spins = 6;
+  wheelRotation = wheelRotation - (wheelRotation % 360) + spins * 360 - targetIndex * WHEEL_SLICE;
+  wheel.style.transition = 'none';
+  void wheel.offsetHeight;
+  wheel.style.transition = 'transform 3.3s cubic-bezier(.13,.79,.18,1)';
+  wheel.style.transform = 'rotate(' + wheelRotation + 'deg)';
+
+  const onDone = () => {
+    wheel.removeEventListener('transitionend', onDone);
+    wheel.classList.add('landed');
+    $('wheel-caption').innerHTML = 'Lettre tirée : <b style="color:var(--butter)">' + esc(letter) + '</b><span class="sub">' + esc(contextLabel) + '</span>';
+    setTimeout(() => {
+      overlay.classList.remove('show');
+      $('letter-badge').textContent = letter;
+      $('letter-badge').classList.add('pop');
+      spinning = false;
+      if(state) renderBoard();
+    }, 900);
+  };
+  wheel.addEventListener('transitionend', onDone);
+}
 function genCode(){
   const letters="ABCDEFGHJKMNPQRSTUVWXYZ";
   let c="";
@@ -631,9 +736,11 @@ async function endGame(){
 /* ---------- rendering ---------- */
 function renderBoard(){
   if(!state || state.status!=='playing') return;
-  $('letter-badge').textContent = state.letter || '?';
+  const needsSpin = state.phase==='writing' && wheelPlayedForRound !== state.round;
+  if(needsSpin) wheelPlayedForRound = state.round;
+  if(!spinning && !needsSpin) $('letter-badge').textContent = state.letter || '?';
   $('round-label').textContent = "Manche " + state.round;
-  $('phase-label').textContent =
+  $('phase-label').textContent = (spinning || needsSpin) ? "🎡 La roue tourne…" :
     state.phase==='writing' ? "✍️ Remplis tes catégories !" :
     state.phase==='reveal_pending' ? "⏳ Fin du temps…" :
     state.phase==='judging' ? "🧐 Validation en cours…" : "🏁 Résultats";
@@ -672,6 +779,8 @@ function renderBoard(){
     $('reveal-zone').classList.remove('hidden');
     renderReveal();
   }
+
+  if(needsSpin) spinWheel(state.letter, state.round);
 }
 function renderJudging(){
   const isJudge = me===state.judgeIdx;
