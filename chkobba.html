@@ -697,6 +697,7 @@ async function renderEnd(){
   if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
   window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
   if(!$('screen-end').classList.contains('hidden')) return;
+  if(window.GYMRecent) window.GYMRecent.remove('cb', code);
   const side = mySide();
   const iWon = state.winnerSide === side;
   if(iWon && window.GYMFeedback) window.GYMFeedback.win();

@@ -807,6 +807,7 @@ async function renderEnd(){
   if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
   window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
   if(!$('screen-end').classList.contains('hidden')) return;
+  if(window.GYMRecent) window.GYMRecent.remove('sk', code);
   const iWon = state.winner===me;
   if(iWon && window.GYMFeedback) window.GYMFeedback.win();
   const winName = state.players[state.winner].name;

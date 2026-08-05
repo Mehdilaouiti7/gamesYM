@@ -584,6 +584,7 @@ async function renderEnd(){
   if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
   window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
   if(!$('screen-end').classList.contains('hidden')) return;
+  if(window.GYMRecent) window.GYMRecent.remove('tm', code);
   if(state.won && window.GYMFeedback) window.GYMFeedback.win();
   $('end-emoji').textContent = state.won ? "🏆" : "💔";
   $('end-title').textContent = state.won ? "Victoire d'équipe !" : "Défaite…";
