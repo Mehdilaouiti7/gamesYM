@@ -384,7 +384,7 @@ const wheelLetterEls = [];
   LETTERS.forEach((l, i) => {
     const el = document.createElement('div');
     el.className = 'wheel-letter';
-    el.style.transform = 'translate(-50%,-50%) rotate(' + (i * WHEEL_SLICE) + 'deg) translateY(-' + radius + 'px)';
+    el.style.transform = 'translate(-50%,-50%) rotate(' + (i * WHEEL_SLICE + WHEEL_SLICE / 2) + 'deg) translateY(-' + radius + 'px)';
     el.innerHTML = '<span lang="ar" dir="rtl">' + l + '</span>';
     wheelLetters.appendChild(el);
     wheelLetterEls.push(el);
@@ -407,7 +407,7 @@ function spinWheel(letter, round){
 
   const spins = 6;
   const SPIN_MS = 3300;
-  wheelRotation = wheelRotation - (wheelRotation % 360) + spins * 360 - targetIndex * WHEEL_SLICE;
+  wheelRotation = wheelRotation - (wheelRotation % 360) + spins * 360 - (targetIndex * WHEEL_SLICE + WHEEL_SLICE / 2);
   wheel.style.transition = 'none';
   void wheel.offsetHeight;
   wheel.style.transition = 'transform ' + SPIN_MS + 'ms cubic-bezier(.13,.79,.18,1)';
