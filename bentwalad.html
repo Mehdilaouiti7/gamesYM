@@ -28,7 +28,7 @@
     --radius:14px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
+  html,body{min-height:100%}
   body{
     font-family:'Fredoka',system-ui,sans-serif;
     background:
@@ -146,10 +146,10 @@
   }
   .wheel-letters{position:absolute;inset:0}
   .wheel-letter{
-    position:absolute;top:50%;left:50%;width:0;height:0;
-    font-family:'Space Mono',monospace;font-weight:700;font-size:.98rem;color:var(--chalk);
+    position:absolute;top:50%;left:50%;
+    font-family:'Space Mono',monospace;font-weight:700;font-size:1.05rem;color:var(--chalk);
   }
-  .wheel-letter span{position:absolute;left:0;top:-1.28em;transform:translateX(-50%);transition:opacity .2s}
+  .wheel-letter span{display:block;transition:opacity .2s}
   .wheel-letter.used span{opacity:.28}
   .wheel.landed{filter:drop-shadow(0 0 14px rgba(233,196,106,.55))}
   .status-text{flex:1}
@@ -379,11 +379,13 @@ const wheelLetterEls = [];
 (function buildWheel(){
   const wheel = $('wheel');
   const wheelLetters = $('wheel-letters');
+  const wrap = document.querySelector('.wheel-wrap');
+  const radius = Math.max(80, wrap.getBoundingClientRect().width / 2) * 0.78;
   wheel.style.background = 'repeating-conic-gradient(from 0deg, var(--board-mid) 0deg ' + WHEEL_SLICE + 'deg, var(--board-deep) ' + WHEEL_SLICE + 'deg ' + (WHEEL_SLICE * 2) + 'deg)';
   LETTERS.forEach((l, i) => {
     const el = document.createElement('div');
     el.className = 'wheel-letter';
-    el.style.transform = 'rotate(' + (i * WHEEL_SLICE) + 'deg)';
+    el.style.transform = 'translate(-50%,-50%) rotate(' + (i * WHEEL_SLICE) + 'deg) translateY(-' + radius + 'px)';
     el.innerHTML = '<span lang="ar" dir="rtl">' + l + '</span>';
     wheelLetters.appendChild(el);
     wheelLetterEls.push(el);

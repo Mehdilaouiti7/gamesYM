@@ -27,14 +27,13 @@
     --radius:16px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
+  html,body{min-height:100%}
   body{
     font-family:'Fredoka',system-ui,sans-serif;
     background:
       radial-gradient(1000px 520px at 15% -8%, rgba(233,196,106,.09), transparent 55%),
       radial-gradient(900px 500px at 100% 10%, rgba(63,163,137,.10), transparent 55%),
       linear-gradient(var(--board), var(--board-deep));
-    background-attachment:fixed;
     background-repeat: no-repeat;
     color:var(--chalk);
     min-height:100dvh;
