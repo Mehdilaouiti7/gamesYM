@@ -479,6 +479,7 @@ const HEADERS = {
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
 let guessPad = null;
+let renderedMeCount = -1, renderedOppCount = -1;
 
 const $ = id => document.getElementById(id);
 const screens = ['home','vt-home','create','join','wait','game','end'];
@@ -706,8 +707,10 @@ function renderGame(){
 
   $('history-me-label').textContent = pAvatar(state.players[me]) + ' Toi';
   $('history-opp-label').textContent = oppP ? pAvatar(oppP)+' '+oppName : oppName;
-  renderHistoryCol('history-me', state.guesses.filter(g=>g.by===me), 'me');
-  renderHistoryCol('history-opp', state.guesses.filter(g=>g.by!==me), 'them');
+  const meGuesses = state.guesses.filter(g=>g.by===me);
+  const oppGuesses = state.guesses.filter(g=>g.by!==me);
+  if(renderedMeCount !== meGuesses.length){ renderHistoryCol('history-me', meGuesses, 'me'); renderedMeCount = meGuesses.length; }
+  if(renderedOppCount !== oppGuesses.length){ renderHistoryCol('history-opp', oppGuesses, 'them'); renderedOppCount = oppGuesses.length; }
 
   if(!guessPad){
     guessPad = window.GYMDigitPad.render('guess-pad', {
