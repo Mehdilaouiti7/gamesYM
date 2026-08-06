@@ -205,7 +205,9 @@
   }
   .vt-row .idx{color:var(--chalk-dim);font-size:.7rem;width:20px;flex-shrink:0}
   .vt-row .g{font-weight:700;letter-spacing:.1em;flex:1}
-  .vt-row .res{font-size:.76rem;white-space:nowrap;color:var(--chalk-dim)}
+  .vt-row .res{font-size:.76rem;white-space:nowrap;color:var(--chalk-dim);display:flex;align-items:center;gap:2px}
+  .res-icon{width:17px;height:17px;flex-shrink:0;vertical-align:middle}
+  .res-none{display:inline-block;width:26px;height:2px;background:var(--chalk-dim);opacity:.45}
 
   .digit-boxes{display:flex;gap:8px;align-items:center;margin-bottom:10px}
   .digit-box{
@@ -359,8 +361,6 @@
       <input type="text" id="create-name" class="name-input" maxlength="12" placeholder="Ex. Léa">
       <label>Ton avatar</label>
       <div class="avatar-row" id="create-avatar-row"></div>
-      <label>Ton nombre secret (4 chiffres différents)</label>
-      <input type="tel" id="create-secret" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
       <div class="error" id="create-err"></div>
       <button class="btn-main" id="btn-create" onclick="createGame()">Créer et obtenir le code</button>
       <button class="btn-ghost" onclick="show('vt-home')">Retour</button>
@@ -376,8 +376,6 @@
       <input type="text" id="join-name" class="name-input" maxlength="12" placeholder="Ex. Emma">
       <label>Ton avatar</label>
       <div class="avatar-row" id="join-avatar-row"></div>
-      <label>Ton nombre secret (4 chiffres différents)</label>
-      <input type="tel" id="join-secret" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
       <div class="error" id="join-err"></div>
       <button class="btn-main" id="btn-join" onclick="joinGame()">Rejoindre</button>
       <button class="btn-ghost" onclick="show('vt-home')">Retour</button>
@@ -412,14 +410,6 @@
         <button class="btn-main" onclick="continueToNextRound()">Manche suivante</button>
         <button class="btn-ghost" onclick="quitMatchEarly()">Quitter la partie</button>
       </div>
-      <div class="card" id="rr-secret-form">
-        <h2>Nouveau nombre secret</h2>
-        <p class="muted">Choisis un nouveau nombre secret de 4 chiffres différents pour la manche suivante.</p>
-        <input type="tel" id="round-secret-input" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
-        <div class="error" id="round-secret-err"></div>
-        <button class="btn-main" onclick="submitRoundSecret()">Valider mon secret</button>
-      </div>
-      <p class="muted pulse hidden" id="rr-waiting" style="text-align:center">En attente de ton adversaire…</p>
     </div>
 
     <div id="duel-zone" class="hidden">
@@ -444,7 +434,7 @@
       </div>
 
       <div class="status-pill" id="turn-pill">…</div>
-      <div class="legend"><span>🐂 bien placé</span><span>🐄 mal placé</span></div>
+      <div class="legend"><span><img class="res-icon" src="icons/icon_bull.svg" alt="taureau"> bien placé</span><span><img class="res-icon" src="icons/icon_cow.svg" alt="vache"> mal placé</span></div>
 
       <div id="guess-zone">
         <div id="guess-pad"></div>
@@ -507,6 +497,14 @@ function validSecret(s){
   if(!/^[0-9]{4}$/.test(s)) return "Il faut exactement 4 chiffres.";
   if(new Set(s).size !== 4) return "Les 4 chiffres doivent être différents.";
   return null;
+}
+function genSecret(){
+  const digits = ['0','1','2','3','4','5','6','7','8','9'];
+  for(let i=digits.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    const tmp = digits[i]; digits[i] = digits[j]; digits[j] = tmp;
+  }
+  return digits.slice(0,4).join('');
 }
 function score(secret, guess){
   let t=0, v=0;
@@ -581,9 +579,7 @@ const joinAvatarPicker = window.GYMAvatarPicker.render('join-avatar-row');
 async function createGame(){
   const name = $('create-name').value.trim() || "Joueuse 1";
   const avatar = createAvatarPicker.get();
-  const secret = $('create-secret').value.trim();
-  const err = validSecret(secret);
-  if(err){ $('create-err').textContent = err; return; }
+  const secret = genSecret();
   const mrEl = document.querySelector('input[name=mrounds]:checked');
   const matchRounds = mrEl ? parseInt(mrEl.value, 10) : 3;
   $('create-err').textContent = "";
@@ -631,9 +627,7 @@ async function joinGame(){
   }
   const name = $('join-name').value.trim() || "Joueuse 2";
   const avatar = joinAvatarPicker.get();
-  const secret = $('join-secret').value.trim();
-  const errS = validSecret(secret);
-  if(errS){ $('join-err').textContent = errS; $('btn-join').disabled = false; busy = false; return; }
+  const secret = genSecret();
   if(st.players.p2){
     $('join-err').textContent = "Cette partie a déjà deux joueuses.";
     $('btn-join').disabled = false; busy = false; return;
@@ -690,13 +684,6 @@ function renderGame(){
     matchScoreEl.classList.add('hidden');
   }
 
-  if(state.roundPhase==='secrets'){
-    $('round-result-zone').classList.remove('hidden');
-    $('duel-zone').classList.add('hidden');
-    renderRoundResult();
-    return;
-  }
-
   const isRoundEnd = state.roundPhase==='round_end';
   $('round-result-zone').classList.toggle('hidden', !isRoundEnd);
   if(isRoundEnd) renderRoundResult();
@@ -734,7 +721,6 @@ function renderGame(){
 }
 function renderRoundResult(){
   const lr = state.lastRoundResult;
-  const oppName = state.players[opp()] ? state.players[opp()].name : "…";
   if(lr){
     const iWonRound = lr.winner === me;
     $('rr-emoji').textContent = iWonRound ? "🎉" : "🐄";
@@ -750,30 +736,6 @@ function renderRoundResult(){
       '<div class="rr-secret-chip'+(lr.winner==='p1'?' win':'')+'"><div class="nm">'+pAvatar(state.players.p1)+' '+esc(state.players.p1.name)+'</div><div class="val">'+lr.secretP1+'</div></div>'+
       '<div class="rr-secret-chip'+(lr.winner==='p2'?' win':'')+'"><div class="nm">'+pAvatar(state.players.p2)+' '+esc(state.players.p2.name)+'</div><div class="val">'+lr.secretP2+'</div></div>';
   }
-
-  const mySecretSet = !!state.players[me].secret;
-  $('rr-secret-form').classList.toggle('hidden', isRoundEnd || mySecretSet);
-  $('rr-waiting').classList.toggle('hidden', isRoundEnd || !mySecretSet);
-  if(!isRoundEnd && mySecretSet) $('rr-waiting').textContent = "En attente de "+oppName+"…";
-}
-async function submitRoundSecret(){
-  if(busy || !state || state.roundPhase!=='secrets') return;
-  const secret = $('round-secret-input').value.trim();
-  const err = validSecret(secret);
-  if(err){ $('round-secret-err').textContent = err; return; }
-  $('round-secret-err').textContent = "";
-  busy = true;
-
-  const st = await loadState(code) || state;
-  if(st.roundPhase!=='secrets' || st.players[me].secret){ state=st; busy=false; renderGame(); return; }
-  st.players[me].secret = secret;
-  if(st.players.p1.secret && st.players.p2.secret){ st.roundPhase = 'duel'; }
-  const ok = await saveState(st);
-  busy = false;
-  if(!ok){ $('round-secret-err').textContent = "Erreur réseau, réessaie."; return; }
-  state = st;
-  $('round-secret-input').value = "";
-  renderGame();
 }
 function renderHistoryCol(elId, list, cls){
   const el = $(elId);
@@ -782,9 +744,16 @@ function renderHistoryCol(elId, list, cls){
     return;
   }
   el.innerHTML = list.map((g, i) =>
-    '<div class="vt-row"><span class="idx">'+String(i+1).padStart(2,'0')+'</span><span class="g">'+g.guess+'</span><span class="res">'+g.t+'🐂 '+g.v+'🐄</span></div>'
+    '<div class="vt-row"><span class="idx">'+String(i+1).padStart(2,'0')+'</span><span class="g">'+g.guess+'</span><span class="res">'+resultIcons(g.t, g.v)+'</span></div>'
   ).join('');
   el.scrollTop = el.scrollHeight;
+}
+function resultIcons(t, v){
+  if(t===0 && v===0) return '<span class="res-none"></span>';
+  let html = '';
+  for(let i=0;i<t;i++) html += '<img class="res-icon" src="icons/icon_bull.svg" alt="taureau">';
+  for(let i=0;i<v;i++) html += '<img class="res-icon" src="icons/icon_cow.svg" alt="vache">';
+  return html;
 }
 
 async function submitGuess(guess){
@@ -839,9 +808,9 @@ async function continueToNextRound(){
   let st = await loadState(code) || state;
   if(st.roundPhase!=='round_end'){ state=st; busy=false; renderGame(); return; }
   st.roundIndex += 1;
-  st.players.p1.secret = null;
-  st.players.p2.secret = null;
-  st.roundPhase = 'secrets';
+  st.players.p1.secret = genSecret();
+  st.players.p2.secret = genSecret();
+  st.roundPhase = 'duel';
   st.guesses = [];
   st.turn = (st.roundIndex % 2 === 1) ? 'p1' : 'p2';
   const ok = await saveState(st);
