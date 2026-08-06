@@ -45,6 +45,12 @@
   h1{font-weight:700;font-size:1.9rem;letter-spacing:.5px}
   .tagline{color:var(--chalk-dim);font-size:.9rem;margin-top:2px}
   .back-link{display:inline-block;margin-top:8px;color:var(--chalk-dim);font-size:.82rem;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+  .quit-match-btn{
+    display:inline-block;width:auto;margin:0 0 10px;padding:6px 12px;
+    background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:999px;
+    color:var(--chalk-dim);font-size:.78rem;font-weight:500;cursor:pointer;
+  }
+  .quit-match-btn:active{opacity:.7}
   .back-link:active{opacity:.7}
   .card{
     background:linear-gradient(160deg, rgba(52,74,62,.9), rgba(30,46,38,.88));
@@ -271,13 +277,14 @@
       <p class="muted">Envoie ce code à tes ami·e·s :</p>
       <div class="code-big" id="wait-code">····</div>
       <button class="btn-main btn-small hidden" id="share-btn" onclick="shareCode()">📤 Partager le code</button>
-      <button class="btn-ghost btn-small" onclick="copyCode()" id="copy-btn">Copier le code</button>
+      <button class="btn-ghost btn-small" onclick="copyCode()" id="copy-btn">Copier le lien</button>
       <p class="muted pulse" style="margin-top:16px" id="wait-count">0/0 joueurs</p>
       <p class="muted" id="wait-names"></p>
     </div>
   </div>
 
   <div id="screen-game" class="hidden">
+    <button class="quit-match-btn" onclick="confirmQuitMatch()">✕ Quitter</button>
     <div class="status-bar">
       <div class="status-pill" id="turn-pill">…</div>
     </div>
@@ -339,6 +346,7 @@
 <script src="feedback.js"></script>
 <script src="connection-banner.js"></script>
 <script src="avatar-picker.js"></script>
+<script src="game-link.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -840,17 +848,28 @@ async function renderEnd(){
     $('score-note').textContent = "";
   }
 }
+function confirmQuitMatch(){
+  if(!state) return;
+  if(!confirm("Es-tu sûr de vouloir quitter ? Tu ne pourras plus reprendre cette partie.")) return;
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
+  window.GYMLeaveGuard.disable();
+  if(window.GYMRecent) window.GYMRecent.remove('sk', code);
+  location.href = 'index.html';
+}
 function copyCode(){
-  navigator.clipboard && navigator.clipboard.writeText(code).then(()=>{
-    $('copy-btn').textContent = "Copié ✓";
-    setTimeout(()=>$('copy-btn').textContent="Copier le code", 1500);
+  const link = window.GYMGameLink.build(code);
+  navigator.clipboard && navigator.clipboard.writeText(link).then(()=>{
+    $('copy-btn').textContent = "Lien copié ✓";
+    setTimeout(()=>$('copy-btn').textContent="Copier le lien", 1500);
   });
 }
 function shareCode(){
   if(!navigator.share) return;
   navigator.share({
     title: 'Games Room',
-    text: 'Rejoins ma partie de Skyjo sur Games Room ! Code : ' + code
+    text: 'Rejoins ma partie de Skyjo sur Games Room !',
+    url: window.GYMGameLink.build(code)
   }).catch(()=>{});
 }
 if($('share-btn')) $('share-btn').classList.toggle('hidden', !navigator.share);

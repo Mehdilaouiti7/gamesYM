@@ -45,6 +45,12 @@
   .section-label{font-size:.78rem;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 8px;padding-left:2px}
   .section-label:first-of-type{margin-top:0}
   .back-link{display:inline-block;margin-bottom:14px;color:var(--chalk-dim);font-size:.82rem;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+  .quit-match-btn{
+    display:inline-block;width:auto;margin:0 0 10px;padding:6px 12px;
+    background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:999px;
+    color:var(--chalk-dim);font-size:.78rem;font-weight:500;cursor:pointer;
+  }
+  .quit-match-btn:active{opacity:.7}
   h1{font-weight:700;font-size:1.9rem;letter-spacing:.5px}
   h1 .emo{font-size:1.5rem;vertical-align:-2px}
   .tagline{color:var(--chalk-dim);font-size:.9rem;margin-top:2px}
@@ -201,7 +207,7 @@
   .vt-row{
     display:flex;align-items:center;gap:6px;
     font-family:'Space Mono',monospace;font-size:.82rem;
-    padding:6px 6px;border-radius:8px;background:rgba(0,0,0,.16);
+    padding:6px 6px;border-radius:8px;background:rgba(255,255,255,.06);
   }
   .vt-row .idx{color:var(--chalk-dim);font-size:.7rem;width:20px;flex-shrink:0}
   .vt-row .g{font-weight:700;letter-spacing:.1em;flex:1}
@@ -388,12 +394,13 @@
       <p class="muted">Envoie ce code à ton amie :</p>
       <div class="code-big" id="wait-code">····</div>
       <button class="btn-main btn-small hidden" id="share-btn" onclick="shareCode()">📤 Partager le code</button>
-      <button class="btn-ghost btn-small" onclick="copyCode()" id="copy-btn">Copier le code</button>
+      <button class="btn-ghost btn-small" onclick="copyCode()" id="copy-btn">Copier le lien</button>
       <p class="muted pulse" style="margin-top:16px">En attente de ton adversaire…</p>
     </div>
   </div>
 
   <div id="screen-game" class="hidden">
+    <button class="quit-match-btn" onclick="confirmQuitMatch()">✕ Quitter</button>
     <div class="match-score hidden" id="match-score"></div>
 
     <div id="round-result-zone" class="hidden">
@@ -468,6 +475,7 @@
 <script src="connection-banner.js"></script>
 <script src="avatar-picker.js"></script>
 <script src="digit-pad.js"></script>
+<script src="game-link.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -822,6 +830,15 @@ async function continueToNextRound(){
   state = st;
   renderGame();
 }
+function confirmQuitMatch(){
+  if(!state) return;
+  if(!confirm("Es-tu sûr de vouloir quitter ? Tu ne pourras plus reprendre cette partie.")) return;
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
+  window.GYMLeaveGuard.disable();
+  if(window.GYMRecent) window.GYMRecent.remove('vt', code);
+  location.href = location.pathname;
+}
 async function quitMatchEarly(){
   if(busy || !state || state.roundPhase!=='round_end') return;
   busy = true;
@@ -870,16 +887,18 @@ async function renderEnd(){
 }
 
 function copyCode(){
-  navigator.clipboard && navigator.clipboard.writeText(code).then(()=>{
-    $('copy-btn').textContent = "Copié ✓";
-    setTimeout(()=>$('copy-btn').textContent="Copier le code", 1500);
+  const link = window.GYMGameLink.build(code);
+  navigator.clipboard && navigator.clipboard.writeText(link).then(()=>{
+    $('copy-btn').textContent = "Lien copié ✓";
+    setTimeout(()=>$('copy-btn').textContent="Copier le lien", 1500);
   });
 }
 function shareCode(){
   if(!navigator.share) return;
   navigator.share({
     title: 'Games Room',
-    text: 'Rejoins ma partie de Vache & Taureau sur Games Room ! Code : ' + code
+    text: 'Rejoins ma partie de Vache & Taureau sur Games Room !',
+    url: window.GYMGameLink.build(code)
   }).catch(()=>{});
 }
 if($('share-btn')) $('share-btn').classList.toggle('hidden', !navigator.share);
