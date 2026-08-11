@@ -193,9 +193,10 @@ function buildEntries(vt, sk, tm, cb, bw, dm){
   }));
   dm.forEach(r => {
     const won = r.final_label || (r.final_amount != null ? r.final_amount.toLocaleString('fr-FR')+' DT' : '?');
+    const wilaya = r.candidate_wilaya ? ' (' + esc(r.candidate_wilaya) + ')' : '';
     entries.push({
       ts: r.finished_at, game:'dm', emoji:'💼', title:'Dlilek Mlek',
-      detail: esc(r.candidate_name)+' (candidat·e) vs '+esc(r.banker_name)+' (banquier·ère)',
+      detail: esc(r.candidate_name)+wilaya+' (candidat·e) vs '+esc(r.banker_name)+' (banquier·ère)',
       result: (r.accepted_offer ? '🤝 Offre acceptée : ' : '💼 Mallette ouverte : ')+esc(won)
     });
   });

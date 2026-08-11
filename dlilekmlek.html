@@ -129,26 +129,35 @@
   .status-text .rnd{font-size:.8rem;color:var(--chalk-dim)}
   .status-text .ph{font-size:.92rem;font-weight:600}
 
-  .value-ladder{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .dm-layout{display:flex;gap:5px;align-items:flex-start;margin-bottom:14px}
+  .value-col{flex:0 0 78px;display:flex;flex-direction:column;gap:4px;min-width:0}
   .vl-item{
-    font-family:'Space Mono',monospace;font-size:.7rem;font-weight:600;
-    padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.06);
-    border:1px solid var(--line);color:var(--chalk-dim);
+    font-family:'Space Mono',monospace;font-size:.62rem;font-weight:600;line-height:1.2;
+    padding:5px 3px;border-radius:7px;background:rgba(255,255,255,.06);
+    border:1px solid var(--line);color:var(--chalk-dim);text-align:center;word-break:break-word;
   }
   .vl-item.joke{font-family:'Fredoka',sans-serif;font-weight:500}
   .vl-item.used{opacity:.3;text-decoration:line-through}
 
-  .box-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:8px;margin-bottom:14px}
+  .box-grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;min-width:0}
   .box{
     aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-    font-family:'Space Mono',monospace;font-weight:700;font-size:.82rem;
+    font-family:'Space Mono',monospace;font-weight:700;font-size:.78rem;
     background:rgba(0,0,0,.25);border:1.5px solid var(--line);border-radius:10px;
     color:var(--chalk);padding:2px;text-align:center;line-height:1.1;margin:0;width:auto;cursor:default;
   }
   .box.tappable{cursor:pointer;border-color:var(--butter);background:rgba(233,196,106,.08)}
   .box.tappable:active{transform:scale(.92)}
-  .box.opened{background:rgba(0,0,0,.4);color:var(--chalk-dim);font-size:.66rem;border-style:dashed;opacity:.65}
+  .box.opened{background:rgba(0,0,0,.4);color:var(--chalk-dim);font-size:.6rem;border-style:dashed;opacity:.65}
   .box.own{background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;border-color:var(--butter);font-size:1.15rem}
+
+  .wilaya-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+  .wilaya-btn{
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:.92rem;
+    padding:13px 6px;border-radius:10px;background:rgba(0,0,0,.25);
+    border:1.5px solid var(--line);color:var(--chalk);cursor:pointer;margin:0;width:100%;
+  }
+  .wilaya-btn:active{transform:scale(.96);border-color:var(--butter)}
 
   .offer-btns{display:flex;gap:8px}
   .offer-btns button{margin-top:0}
@@ -243,8 +252,12 @@
       </div>
     </div>
 
-    <div class="value-ladder" id="value-ladder"></div>
-    <div class="box-grid" id="box-grid"></div>
+    <div class="card hidden" id="wilaya-panel"></div>
+    <div class="dm-layout hidden" id="dm-layout">
+      <div class="value-col" id="value-col-left"></div>
+      <div class="box-grid" id="box-grid"></div>
+      <div class="value-col" id="value-col-right"></div>
+    </div>
     <div class="card hidden" id="offer-panel"></div>
 
     <p class="muted" style="text-align:center;margin-top:10px">Code de la partie : <b id="game-code-label"></b></p>
@@ -308,6 +321,13 @@ const BOX_VALUES = [
   {n:1000000000, label:'1 MILLIARD DT'}
 ];
 const ROUND_SCHEDULE = [7,6,5,4,3,2,1,1];
+const VALUE_SPLIT = 15;
+const WILAYAS = [
+  'تونس','أريانة','بن عروس','منوبة','نابل','زغوان',
+  'بنزرت','باجة','جندوبة','الكاف','سليانة','القيروان',
+  'القصرين','سيدي بوزيد','سوسة','المنستير','المهدية','صفاقس',
+  'قابس','مدنين','تطاوين','قفصة','توزر','قبلي'
+];
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
 let renderedLadderCount = -1, renderedBoxKey = null, renderedOfferKey = null;
@@ -371,6 +391,7 @@ async function saveResult(st){
       body: JSON.stringify({
         code: st.code,
         candidate_name: st.players.candidate.name,
+        candidate_wilaya: st.candidateWilaya,
         banker_name: st.players.banker.name,
         final_amount: st.finalAmount,
         final_label: st.finalLabel,
@@ -437,7 +458,8 @@ async function joinGame(){
   st.assignment = genAssignment();
   st.ownBoxId = null;
   st.openedBoxIds = [];
-  st.phase = 'pick_box';
+  st.phase = 'pick_wilaya';
+  st.candidateWilaya = null;
   st.roundIdx = 0;
   st.toOpenThisRound = ROUND_SCHEDULE[0];
   st.currentOffer = null;
@@ -487,6 +509,19 @@ function enterGame(){
 }
 
 /* ---------- actions ---------- */
+async function pickWilaya(name){
+  if(busy || !state || me!=='candidate' || state.phase!=='pick_wilaya') return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='pick_wilaya'){ state=st; busy=false; renderGame(); return; }
+  st.candidateWilaya = name;
+  st.phase = 'pick_box';
+  const ok = await saveState(st);
+  busy = false;
+  if(!ok) return;
+  state = st;
+  renderGame();
+}
 async function pickBox(id){
   if(busy || !state || me!=='candidate' || state.phase!=='pick_box') return;
   busy = true;
@@ -570,25 +605,52 @@ async function respondOffer(accept){
 
 /* ---------- rendering ---------- */
 function phaseLabelText(st, isCandidate, candName, bankName){
+  if(st.phase==='pick_wilaya') return isCandidate ? '📍 Choisis ta wilaya' : '⏳ '+candName+' choisit sa wilaya…';
   if(st.phase==='pick_box') return isCandidate ? '🎯 Choisis ta mallette' : '⏳ '+candName+' choisit sa mallette…';
   if(st.phase==='opening') return isCandidate ? '📦 Ouvre encore '+st.toOpenThisRound+' mallette'+(st.toOpenThisRound>1?'s':'') : '⏳ '+candName+' ouvre les mallettes…';
   if(st.phase==='offer_pending') return isCandidate ? '⏳ '+bankName+' réfléchit à son offre…' : '💼 Fais ton offre';
   if(st.phase==='offer_made') return isCandidate ? '🤔 Dlilek ou Mlek ?' : '⏳ En attente de la décision…';
   return '';
 }
+let renderedWilaya = false;
+function renderWilayaPanel(isCandidate){
+  const panel = $('wilaya-panel');
+  if(isCandidate){
+    panel.innerHTML = '<h2>Choisis ta wilaya</h2><div class="wilaya-grid">' +
+      WILAYAS.map(w => '<button type="button" class="wilaya-btn" lang="ar" dir="rtl" onclick="pickWilaya(\''+w+'\')">'+w+'</button>').join('') +
+      '</div>';
+  } else {
+    panel.innerHTML = '<p class="muted" style="text-align:center">⏳ Le/la candidat·e choisit sa wilaya…</p>';
+  }
+}
 function renderGame(){
   if(!state || state.status!=='playing') return;
   const isCandidate = me==='candidate';
   const candP = state.players.candidate, bankP = state.players.banker;
   $('role-badge').textContent = isCandidate ? '🎯' : '💼';
-  $('round-label').textContent = 'Manche ' + (state.roundIdx+1) + '/' + ROUND_SCHEDULE.length;
+  if(state.phase==='pick_wilaya'){
+    $('round-label').textContent = 'Choix de la wilaya';
+  } else {
+    $('round-label').innerHTML = 'Manche ' + (state.roundIdx+1) + '/' + ROUND_SCHEDULE.length +
+      (state.candidateWilaya ? ' · <span lang="ar" dir="rtl">'+esc(state.candidateWilaya)+'</span>' : '');
+  }
   $('phase-label').textContent = phaseLabelText(state, isCandidate, candP.name, bankP.name);
+
+  const inWilayaPhase = state.phase==='pick_wilaya';
+  $('wilaya-panel').classList.toggle('hidden', !inWilayaPhase);
+  $('dm-layout').classList.toggle('hidden', inWilayaPhase);
+  if(inWilayaPhase){
+    if(!renderedWilaya){ renderWilayaPanel(isCandidate); renderedWilaya = true; }
+    $('offer-panel').classList.add('hidden');
+    return;
+  }
+  renderedWilaya = false;
 
   if(renderedLadderCount !== state.openedBoxIds.length){
     const openedValueIdx = state.openedBoxIds.map(b=>state.assignment[b]);
-    $('value-ladder').innerHTML = BOX_VALUES.map((v,idx) =>
-      '<div class="vl-item'+(v.joke?' joke':'')+(openedValueIdx.includes(idx)?' used':'')+'">'+labelHtml(v)+'</div>'
-    ).join('');
+    const vlItem = (v, idx) => '<div class="vl-item'+(v.joke?' joke':'')+(openedValueIdx.includes(idx)?' used':'')+'">'+labelHtml(v)+'</div>';
+    $('value-col-left').innerHTML = BOX_VALUES.slice(0, VALUE_SPLIT).map(vlItem).join('');
+    $('value-col-right').innerHTML = BOX_VALUES.slice(VALUE_SPLIT).map((v,i)=>vlItem(v, i+VALUE_SPLIT)).join('');
     renderedLadderCount = state.openedBoxIds.length;
   }
 
@@ -648,7 +710,8 @@ async function renderEnd(){
   const big = state.finalAmount >= 1000;
   $('end-emoji').textContent = big ? '🏆' : '💼';
   $('end-title').textContent = state.outcome==='accepted' ? 'Offre acceptée !' : 'Mallette ouverte !';
-  $('end-detail').innerHTML = (isCandidate ? 'Tu repars' : esc(candName)+' repart') + ' avec <b>'+finalHtml+'</b>.' +
+  const wilayaHtml = state.candidateWilaya ? ' (<span lang="ar" dir="rtl">'+esc(state.candidateWilaya)+'</span>)' : '';
+  $('end-detail').innerHTML = (isCandidate ? 'Tu repars' : esc(candName)+wilayaHtml+' repart') + ' avec <b>'+finalHtml+'</b>.' +
     (state.outcome==='accepted' ? '<br>Sa mallette contenait '+labelHtml(ownBox)+'.' : '');
   if(big && window.GYMFeedback) window.GYMFeedback.win();
 }
