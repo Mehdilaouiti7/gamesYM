@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Games Room · Dlilek Mlek</title>
+<meta name="theme-color" content="#233a2f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Games Room">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board:#24382e;
+    --board-deep:#1b2c24;
+    --chalk:#f3efe4;
+    --chalk-dim:#c9c4b4;
+    --butter:#e9c46a;
+    --red-chalk:#e76f51;
+    --green-chalk:#7bb274;
+    --line:rgba(243,239,228,.18);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%}
+  body{
+    font-family:'Fredoka',system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(233,196,106,.07), transparent 60%),
+      linear-gradient(var(--board), var(--board-deep));
+    background-repeat: no-repeat;
+    color:var(--chalk);
+    min-height:100dvh;
+    display:flex;flex-direction:column;align-items:center;
+    padding:20px 16px 40px;
+  }
+  .frame{width:100%;max-width:460px}
+  header{text-align:center;margin-bottom:14px;position:relative}
+  h1{font-weight:700;font-size:1.9rem;letter-spacing:.5px}
+  .tagline{color:var(--chalk-dim);font-size:.9rem;margin-top:2px}
+  .back-link{display:inline-block;margin-top:8px;color:var(--chalk-dim);font-size:.82rem;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+  .back-link:active{opacity:.7}
+  .quit-match-btn{
+    display:inline-block;width:auto;margin:0 0 10px;padding:6px 12px;
+    background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:999px;
+    color:var(--chalk-dim);font-size:.78rem;font-weight:500;cursor:pointer;
+  }
+  .quit-match-btn:active{opacity:.7}
+  .card{
+    background:linear-gradient(160deg, rgba(52,74,62,.9), rgba(30,46,38,.88));
+    border:1px solid rgba(243,239,228,.13);
+    border-radius:var(--radius);
+    padding:18px 16px;
+    margin-bottom:14px;
+    box-shadow:0 10px 26px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .card h2{font-size:1.05rem;font-weight:600;margin-bottom:10px}
+  label{display:block;font-size:.85rem;color:var(--chalk-dim);margin:10px 0 4px}
+  input[type=text],input[type=tel]{
+    width:100%;
+    background:rgba(0,0,0,.25);
+    border:1.5px dashed var(--line);
+    border-radius:10px;
+    color:var(--chalk);
+    font-family:'Fredoka',sans-serif;
+    font-size:1rem;
+    padding:11px 12px;
+    outline:none;
+  }
+  input[type=text].code-input{
+    font-family:'Space Mono',monospace;font-size:1.15rem;letter-spacing:.25em;text-transform:uppercase;
+  }
+  input:focus{border-color:var(--butter)}
+  button{
+    font-family:'Fredoka',sans-serif;
+    font-weight:600;font-size:1rem;
+    border:none;border-radius:13px;
+    padding:13px 16px;width:100%;
+    cursor:pointer;margin-top:12px;
+    transition:transform .12s cubic-bezier(.22,1,.36,1), filter .15s, opacity .15s;
+  }
+  button:active{transform:scale(.97);filter:brightness(.96)}
+  button:disabled{opacity:.45;cursor:default}
+  .btn-main{background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;box-shadow:0 6px 16px rgba(233,196,106,.18)}
+  .btn-ghost{background:rgba(255,255,255,.04);color:var(--chalk);border:1.5px solid var(--line)}
+  .btn-small{width:auto;padding:8px 14px;font-size:.85rem;margin-top:0}
+  .muted{color:var(--chalk-dim);font-size:.85rem;line-height:1.45}
+  .error{color:var(--red-chalk);font-size:.85rem;margin-top:8px;min-height:1.2em}
+  .hidden{display:none !important}
+
+  .code-big{
+    font-family:'Space Mono',monospace;
+    font-size:2.4rem;font-weight:700;
+    letter-spacing:.35em;text-align:center;
+    color:var(--butter);
+    padding:10px 0 4px;
+    text-indent:.35em;
+  }
+  .pulse{animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+  .role-choice{display:flex;gap:8px;margin-top:6px}
+  .role-opt{flex:1}
+  .role-opt input{display:none}
+  .role-opt span{
+    display:block;text-align:center;padding:11px 6px;border-radius:10px;
+    border:1.5px dashed var(--line);color:var(--chalk-dim);cursor:pointer;font-weight:600;font-size:.88rem;
+  }
+  .role-opt input:checked + span{border-color:var(--butter);border-style:solid;color:var(--butter);background:rgba(233,196,106,.1)}
+
+  .wait-roles{display:flex;gap:8px;justify-content:center;margin:12px 0}
+  .wait-role-chip{flex:1;background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+  .wait-role-chip .lbl{font-size:.72rem;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+  .wait-role-chip .val{font-size:.9rem;font-weight:600}
+
+  .status-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .role-badge{
+    width:52px;height:52px;border-radius:16px;flex-shrink:0;
+    background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.5rem;
+    box-shadow:0 6px 16px rgba(233,196,106,.25);
+  }
+  .status-text{flex:1}
+  .status-text .rnd{font-size:.8rem;color:var(--chalk-dim)}
+  .status-text .ph{font-size:.92rem;font-weight:600}
+
+  .value-ladder{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .vl-item{
+    font-family:'Space Mono',monospace;font-size:.7rem;font-weight:600;
+    padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.06);
+    border:1px solid var(--line);color:var(--chalk-dim);
+  }
+  .vl-item.used{opacity:.3;text-decoration:line-through}
+
+  .box-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:8px;margin-bottom:14px}
+  .box{
+    aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+    font-family:'Space Mono',monospace;font-weight:700;font-size:.82rem;
+    background:rgba(0,0,0,.25);border:1.5px solid var(--line);border-radius:10px;
+    color:var(--chalk);padding:2px;text-align:center;line-height:1.1;margin:0;width:auto;cursor:default;
+  }
+  .box.tappable{cursor:pointer;border-color:var(--butter);background:rgba(233,196,106,.08)}
+  .box.tappable:active{transform:scale(.92)}
+  .box.opened{background:rgba(0,0,0,.4);color:var(--chalk-dim);font-size:.66rem;border-style:dashed;opacity:.65}
+  .box.own{background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;border-color:var(--butter);font-size:1.15rem}
+
+  .offer-btns{display:flex;gap:8px}
+  .offer-btns button{margin-top:0}
+
+  .win-card{text-align:center}
+  .win-card .big{font-size:2.6rem;margin:6px 0}
+</style>
+<link rel="stylesheet" href="responsive.css">
+<link rel="stylesheet" href="avatar.css">
+</head>
+<body>
+<div class="frame">
+  <header>
+    <h1>💼 Dlilek Mlek</h1>
+    <div class="tagline">دليلك ملك — le jeu des mallettes, à deux</div>
+    <a class="back-link" href="index.html">← Retour à l'accueil</a>
+  </header>
+
+  <div id="screen-home">
+    <div class="card">
+      <h2>Nouvelle partie</h2>
+      <p class="muted">Crée une partie et envoie le code à ton ami·e. Un·e candidat·e, un·e banquier·ère.</p>
+      <button class="btn-main" onclick="show('create')">Créer une partie</button>
+    </div>
+    <div class="card">
+      <h2>Rejoindre</h2>
+      <p class="muted">Tu as reçu un code ? Entre-le ici.</p>
+      <button class="btn-ghost" onclick="show('join')">Rejoindre avec un code</button>
+    </div>
+    <div class="card">
+      <h2>Règles</h2>
+      <p class="muted">22 mallettes contiennent chacune un montant, de 0,010 DT à 100 000 DT. Le·la <b>candidat·e</b> choisit une mallette qui restera fermée jusqu'à la fin, puis ouvre les autres par lots (6, puis 5, 4, 3, 2, 1). Après chaque lot, le·la <b>banquier·ère</b> propose un montant pour racheter la mallette du·de la candidat·e.<br>
+      Le·la candidat·e répond <b>Dlilek</b> (je continue) ou <b>Mlek</b> (j'accepte l'offre). S'il·elle refuse toutes les offres jusqu'au bout, il·elle repart avec le contenu de sa propre mallette !</p>
+    </div>
+  </div>
+
+  <div id="screen-create" class="hidden">
+    <div class="card">
+      <h2>Créer une partie</h2>
+      <label>Ton prénom</label>
+      <input type="text" id="create-name" class="name-input" maxlength="12" placeholder="Ex. Léa">
+      <label>Ton avatar</label>
+      <div class="avatar-row" id="create-avatar-row"></div>
+      <label>Ton rôle</label>
+      <div class="role-choice">
+        <label class="role-opt"><input type="radio" name="myrole" value="candidate" checked><span>🎯 Candidat·e</span></label>
+        <label class="role-opt"><input type="radio" name="myrole" value="banker"><span>💼 Banquier·ère</span></label>
+      </div>
+      <div class="error" id="create-err"></div>
+      <button class="btn-main" id="btn-create" onclick="createGame()">Créer et obtenir le code</button>
+      <button class="btn-ghost" onclick="show('home')">Retour</button>
+    </div>
+  </div>
+
+  <div id="screen-join" class="hidden">
+    <div class="card">
+      <h2>Rejoindre une partie</h2>
+      <label>Code de la partie</label>
+      <input type="text" class="code-input" id="join-code" maxlength="4" placeholder="ABCD">
+      <label>Ton prénom</label>
+      <input type="text" id="join-name" class="name-input" maxlength="12" placeholder="Ex. Emma">
+      <label>Ton avatar</label>
+      <div class="avatar-row" id="join-avatar-row"></div>
+      <div class="error" id="join-err"></div>
+      <button class="btn-main" id="btn-join" onclick="joinGame()">Rejoindre</button>
+      <button class="btn-ghost" onclick="show('home')">Retour</button>
+    </div>
+  </div>
+
+  <div id="screen-wait" class="hidden">
+    <div class="card" style="text-align:center">
+      <h2>Partie créée !</h2>
+      <p class="muted">Envoie ce code à ton ami·e :</p>
+      <div class="code-big" id="wait-code">····</div>
+      <button class="btn-main btn-small hidden" id="share-btn" onclick="shareCode()">📤 Partager le code</button>
+      <button class="btn-ghost btn-small" onclick="copyCode()" id="copy-btn">Copier le lien</button>
+      <div class="wait-roles">
+        <div class="wait-role-chip"><div class="lbl">🎯 Candidat·e</div><div class="val" id="wait-role-candidate">—</div></div>
+        <div class="wait-role-chip"><div class="lbl">💼 Banquier·ère</div><div class="val" id="wait-role-banker">—</div></div>
+      </div>
+      <p class="muted pulse" style="margin-top:6px">En attente de ton ami·e…</p>
+    </div>
+  </div>
+
+  <div id="screen-game" class="hidden">
+    <button class="quit-match-btn" onclick="confirmQuitMatch()">✕ Quitter</button>
+    <div class="status-bar">
+      <div class="role-badge" id="role-badge">🎯</div>
+      <div class="status-text">
+        <div class="rnd" id="round-label">Manche 1/6</div>
+        <div class="ph" id="phase-label">…</div>
+      </div>
+    </div>
+
+    <div class="value-ladder" id="value-ladder"></div>
+    <div class="box-grid" id="box-grid"></div>
+    <div class="card hidden" id="offer-panel"></div>
+
+    <p class="muted" style="text-align:center;margin-top:10px">Code de la partie : <b id="game-code-label"></b></p>
+  </div>
+
+  <div id="screen-end" class="hidden">
+    <div class="card win-card">
+      <div class="big" id="end-emoji">🏆</div>
+      <h2 id="end-title">…</h2>
+      <p class="muted" id="end-detail"></p>
+      <button class="btn-main" onclick="location.reload()">Nouvelle partie</button>
+    </div>
+  </div>
+</div>
+
+<script src="realtime.js"></script>
+<script src="leave-guard.js"></script>
+<script src="recent-games.js"></script>
+<script src="feedback.js"></script>
+<script src="connection-banner.js"></script>
+<script src="avatar-picker.js"></script>
+<script src="game-link.js"></script>
+<script>
+const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
+const HEADERS = {
+  "apikey": SB_KEY,
+  "Authorization": "Bearer " + SB_KEY,
+  "Content-Type": "application/json"
+};
+const BOX_VALUES = [
+  {n:0.01, label:'0,010 DT'},
+  {n:0.1, label:'0,100 DT'},
+  {n:0.5, label:'0,500 DT'},
+  {n:1, label:'1 DT'},
+  {n:5, label:'5 DT'},
+  {n:10, label:'10 DT'},
+  {n:20, label:'20 DT'},
+  {n:50, label:'50 DT'},
+  {n:75, label:'75 DT'},
+  {n:100, label:'100 DT'},
+  {n:150, label:'150 DT'},
+  {n:200, label:'200 DT'},
+  {n:300, label:'300 DT'},
+  {n:500, label:'500 DT'},
+  {n:750, label:'750 DT'},
+  {n:1000, label:'1 000 DT'},
+  {n:2000, label:'2 000 DT'},
+  {n:5000, label:'5 000 DT'},
+  {n:10000, label:'10 000 DT'},
+  {n:25000, label:'25 000 DT'},
+  {n:50000, label:'50 000 DT'},
+  {n:100000, label:'100 000 DT'}
+];
+const ROUND_SCHEDULE = [6,5,4,3,2,1];
+
+let code = null, me = null, state = null, pollTimer = null, busy = false;
+
+const $ = id => document.getElementById(id);
+const screens = ['home','create','join','wait','game','end'];
+function show(name){ screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name)); }
+function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
+function pAvatar(p){ return p && p.avatar ? p.avatar : '🙂'; }
+function otherRole(r){ return r==='candidate' ? 'banker' : 'candidate'; }
+function fmtAmount(n){
+  n = Number(n);
+  if(!isFinite(n)) return '0 DT';
+  if(Number.isInteger(n)) return n.toLocaleString('fr-FR') + ' DT';
+  return n.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:3}) + ' DT';
+}
+function genCode(){
+  const letters="ABCDEFGHJKMNPQRSTUVWXYZ";
+  let c="";
+  for(let i=0;i<4;i++) c += letters[Math.floor(Math.random()*letters.length)];
+  return c;
+}
+function genAssignment(){
+  const arr = BOX_VALUES.map((v,i)=>i);
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    const tmp = arr[i]; arr[i]=arr[j]; arr[j]=tmp;
+  }
+  return arr;
+}
+function saveRole(c, role){ try{ localStorage.setItem('dm-role-'+c, role); }catch(e){} }
+function loadRole(c){ try{ return localStorage.getItem('dm-role-'+c); }catch(e){ return null; } }
+
+async function loadState(c){
+  try{
+    const r = await fetch(SB_URL+"/rest/v1/dm_games?code=eq."+encodeURIComponent(c)+"&select=state", {headers:HEADERS});
+    if(!r.ok){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return null; }
+    if(window.GYMConnection) window.GYMConnection.reportSuccess();
+    const rows = await r.json();
+    return rows.length ? rows[0].state : null;
+  }catch(e){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return null; }
+}
+async function saveState(st){
+  try{
+    const r = await fetch(SB_URL+"/rest/v1/dm_games", {
+      method:"POST",
+      headers:{...HEADERS, "Prefer":"resolution=merge-duplicates"},
+      body: JSON.stringify({code:st.code, state:st, updated_at:new Date().toISOString()})
+    });
+    if(window.GYMConnection) (r.ok ? window.GYMConnection.reportSuccess() : window.GYMConnection.reportFailure());
+    return r.ok;
+  }catch(e){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return false; }
+}
+async function saveResult(st){
+  try{
+    await fetch(SB_URL+"/rest/v1/dm_results", {
+      method:"POST", headers:HEADERS,
+      body: JSON.stringify({
+        code: st.code,
+        candidate_name: st.players.candidate.name,
+        banker_name: st.players.banker.name,
+        final_amount: st.finalAmount,
+        own_box_value: BOX_VALUES[st.assignment[st.ownBoxId]].n,
+        accepted_offer: st.outcome==='accepted'
+      })
+    });
+  }catch(e){}
+}
+
+/* ---------- create / join ---------- */
+const createAvatarPicker = window.GYMAvatarPicker.render('create-avatar-row');
+const joinAvatarPicker = window.GYMAvatarPicker.render('join-avatar-row');
+async function createGame(){
+  const name = $('create-name').value.trim() || "Joueur 1";
+  const avatar = createAvatarPicker.get();
+  const role = document.querySelector('input[name=myrole]:checked').value;
+  $('btn-create').disabled = true; busy = true;
+
+  code = genCode();
+  const players = {candidate:null, banker:null};
+  players[role] = {name, avatar};
+  state = { v:1, code, status:'waiting', players };
+  const ok = await saveState(state);
+  busy = false; $('btn-create').disabled = false;
+  if(!ok){ $('create-err').textContent = "Connexion impossible. Vérifie ton réseau et réessaie."; return; }
+  me = role;
+  saveRole(code, role);
+  if(window.GYMRecent) window.GYMRecent.record('dm', code, 'Dlilek Mlek');
+  $('wait-code').textContent = code;
+  renderWait();
+  show('wait');
+  startPolling();
+}
+async function joinGame(){
+  const c = $('join-code').value.trim().toUpperCase();
+  if(!/^[A-Z]{4}$/.test(c)){ $('join-err').textContent = "Le code fait 4 lettres."; return; }
+  $('join-err').textContent = "";
+  $('btn-join').disabled = true; busy = true;
+
+  const st = await loadState(c);
+  if(!st){
+    $('join-err').textContent = "Partie introuvable. Vérifie le code.";
+    $('btn-join').disabled = false; busy = false; return;
+  }
+  const existing = loadRole(c);
+  if(existing && st.players[existing]){
+    code = c; me = existing; state = st;
+    busy = false; $('btn-join').disabled = false;
+    if(window.GYMRecent) window.GYMRecent.record('dm', c, 'Dlilek Mlek');
+    if(st.status==='finished'){ renderEnd(); } else { enterGame(); startPolling(); }
+    return;
+  }
+  const openRole = !st.players.candidate ? 'candidate' : (!st.players.banker ? 'banker' : null);
+  if(!openRole){
+    $('join-err').textContent = "Cette partie a déjà ses deux joueurs.";
+    $('btn-join').disabled = false; busy = false; return;
+  }
+  const name = $('join-name').value.trim() || "Joueur 2";
+  const avatar = joinAvatarPicker.get();
+  st.players[openRole] = {name, avatar};
+  st.status = 'playing';
+  st.assignment = genAssignment();
+  st.ownBoxId = null;
+  st.openedBoxIds = [];
+  st.phase = 'pick_box';
+  st.roundIdx = 0;
+  st.toOpenThisRound = ROUND_SCHEDULE[0];
+  st.currentOffer = null;
+  st.offerHistory = [];
+  st.outcome = null;
+  st.finalAmount = null;
+  const ok = await saveState(st);
+  busy = false; $('btn-join').disabled = false;
+  if(!ok){ $('join-err').textContent = "Erreur d'enregistrement. Réessaie."; return; }
+  code = c; me = openRole; state = st;
+  saveRole(c, openRole);
+  if(window.GYMRecent) window.GYMRecent.record('dm', c, 'Dlilek Mlek');
+  enterGame(); startPolling();
+}
+
+function startPolling(){
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(refresh, 2000);
+  window.GYMRealtime.subscribe(SB_URL, SB_KEY, 'dm_games', code, applyIncomingState);
+}
+function applyIncomingState(st){
+  if(busy || !st) return;
+  state = st;
+  if(st.status==='waiting'){ renderWait(); return; }
+  if($('screen-game').classList.contains('hidden') && $('screen-end').classList.contains('hidden')) enterGame();
+  renderCurrent();
+}
+async function refresh(){
+  if(busy || !code) return;
+  const st = await loadState(code);
+  applyIncomingState(st);
+}
+function renderCurrent(){
+  if(!state) return;
+  if(state.status==='finished'){ window.GYMLeaveGuard.disable(); renderEnd(); }
+  else if(state.status==='playing'){ window.GYMLeaveGuard.enable(); renderGame(); }
+}
+function renderWait(){
+  const c = state.players.candidate, b = state.players.banker;
+  $('wait-role-candidate').textContent = c ? pAvatar(c)+' '+esc(c.name) : '— en attente —';
+  $('wait-role-banker').textContent = b ? pAvatar(b)+' '+esc(b.name) : '— en attente —';
+}
+function enterGame(){
+  $('game-code-label').textContent = code;
+  show('game');
+  renderCurrent();
+}
+
+/* ---------- actions ---------- */
+async function pickBox(id){
+  if(busy || !state || me!=='candidate' || state.phase!=='pick_box') return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='pick_box'){ state=st; busy=false; renderGame(); return; }
+  st.ownBoxId = id;
+  st.phase = 'opening';
+  const ok = await saveState(st);
+  busy = false;
+  if(!ok) return;
+  state = st;
+  renderGame();
+}
+async function openBox(id){
+  if(busy || !state || me!=='candidate' || state.phase!=='opening') return;
+  if(id===state.ownBoxId || state.openedBoxIds.includes(id)) return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='opening' || id===st.ownBoxId || st.openedBoxIds.includes(id)){ state=st; busy=false; renderGame(); return; }
+  st.openedBoxIds.push(id);
+  st.toOpenThisRound -= 1;
+  const remaining = BOX_VALUES.length - 1 - st.openedBoxIds.length;
+  if(remaining === 0){
+    st.status = 'finished';
+    st.phase = 'finished';
+    st.outcome = 'final_box';
+    st.finalAmount = BOX_VALUES[st.assignment[st.ownBoxId]].n;
+  } else if(st.toOpenThisRound <= 0){
+    st.phase = 'offer_pending';
+  }
+  const ok = await saveState(st);
+  busy = false;
+  if(!ok) return;
+  state = st;
+  if(st.status==='finished'){ await saveResult(st); renderEnd(); }
+  else renderGame();
+}
+async function submitOffer(){
+  if(busy || !state || me!=='banker' || state.phase!=='offer_pending') return;
+  const raw = $('offer-input').value.trim().replace(',', '.');
+  const amount = parseFloat(raw);
+  if(!raw || isNaN(amount) || amount < 0){ $('offer-err').textContent = "Entre un montant valide."; return; }
+  $('offer-err').textContent = "";
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='offer_pending'){ state=st; busy=false; renderGame(); return; }
+  st.currentOffer = amount;
+  st.offerHistory.push({round: st.roundIdx+1, amount});
+  st.phase = 'offer_made';
+  const ok = await saveState(st);
+  busy = false;
+  if(!ok){ $('offer-err').textContent = "Erreur réseau, réessaie."; return; }
+  state = st;
+  renderGame();
+}
+async function respondOffer(accept){
+  if(busy || !state || me!=='candidate' || state.phase!=='offer_made') return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='offer_made'){ state=st; busy=false; renderGame(); return; }
+  if(accept){
+    st.status = 'finished';
+    st.phase = 'finished';
+    st.outcome = 'accepted';
+    st.finalAmount = st.currentOffer;
+  } else {
+    st.roundIdx += 1;
+    st.toOpenThisRound = ROUND_SCHEDULE[st.roundIdx];
+    st.phase = 'opening';
+    st.currentOffer = null;
+  }
+  const ok = await saveState(st);
+  busy = false;
+  if(!ok) return;
+  state = st;
+  if(st.status==='finished'){ await saveResult(st); renderEnd(); }
+  else renderGame();
+}
+
+/* ---------- rendering ---------- */
+function phaseLabelText(st, isCandidate, candName, bankName){
+  if(st.phase==='pick_box') return isCandidate ? '🎯 Choisis ta mallette' : '⏳ '+candName+' choisit sa mallette…';
+  if(st.phase==='opening') return isCandidate ? '📦 Ouvre encore '+st.toOpenThisRound+' mallette'+(st.toOpenThisRound>1?'s':'') : '⏳ '+candName+' ouvre les mallettes…';
+  if(st.phase==='offer_pending') return isCandidate ? '⏳ '+bankName+' réfléchit à son offre…' : '💼 Fais ton offre';
+  if(st.phase==='offer_made') return isCandidate ? '🤔 Dlilek ou Mlek ?' : '⏳ En attente de la décision…';
+  return '';
+}
+function renderGame(){
+  if(!state || state.status!=='playing') return;
+  const isCandidate = me==='candidate';
+  const candP = state.players.candidate, bankP = state.players.banker;
+  $('role-badge').textContent = isCandidate ? '🎯' : '💼';
+  $('round-label').textContent = 'Manche ' + (state.roundIdx+1) + '/' + ROUND_SCHEDULE.length;
+  $('phase-label').textContent = phaseLabelText(state, isCandidate, candP.name, bankP.name);
+
+  $('value-ladder').innerHTML = BOX_VALUES.map((v,idx) => {
+    const openedValueIdx = state.openedBoxIds.map(b=>state.assignment[b]);
+    const used = openedValueIdx.includes(idx);
+    return '<div class="vl-item'+(used?' used':'')+'">'+v.label+'</div>';
+  }).join('');
+
+  let boxesHtml = '';
+  for(let i=0;i<BOX_VALUES.length;i++){
+    const opened = state.openedBoxIds.includes(i);
+    const isOwn = state.ownBoxId===i;
+    let cls='box', content=String(i+1), handler='';
+    if(opened){ cls+=' opened'; content = BOX_VALUES[state.assignment[i]].label; }
+    else if(isOwn){ cls+=' own'; content='💼'; }
+    else if(isCandidate && state.phase==='pick_box'){ cls+=' tappable'; handler='pickBox('+i+')'; }
+    else if(isCandidate && state.phase==='opening'){ cls+=' tappable'; handler='openBox('+i+')'; }
+    boxesHtml += '<button type="button" class="'+cls+'"'+(handler?' onclick="'+handler+'"':' disabled')+'>'+content+'</button>';
+  }
+  $('box-grid').innerHTML = boxesHtml;
+
+  renderOfferPanel(isCandidate);
+}
+function renderOfferPanel(isCandidate){
+  const panel = $('offer-panel');
+  if(state.phase==='offer_pending' && !isCandidate){
+    panel.classList.remove('hidden');
+    panel.innerHTML = '<h2>💼 Ton offre</h2><input type="tel" inputmode="decimal" id="offer-input" placeholder="Montant en DT"><div class="error" id="offer-err"></div><button class="btn-main" onclick="submitOffer()">Envoyer l\'offre</button>';
+  } else if(state.phase==='offer_pending' && isCandidate){
+    panel.classList.remove('hidden');
+    panel.innerHTML = '<p class="muted" style="text-align:center">⏳ Le/la banquier·ère réfléchit à son offre…</p>';
+  } else if(state.phase==='offer_made' && isCandidate){
+    panel.classList.remove('hidden');
+    panel.innerHTML = '<h2>💰 Offre du banquier·ère : '+fmtAmount(state.currentOffer)+'</h2><div class="offer-btns"><button class="btn-ghost" onclick="respondOffer(false)">✊ Dlilek</button><button class="btn-main" onclick="respondOffer(true)">🤝 Mlek</button></div>';
+  } else if(state.phase==='offer_made' && !isCandidate){
+    panel.classList.remove('hidden');
+    panel.innerHTML = '<h2>💰 Ton offre : '+fmtAmount(state.currentOffer)+'</h2><p class="muted" style="text-align:center">⏳ En attente de la décision…</p>';
+  } else {
+    panel.classList.add('hidden');
+    panel.innerHTML = '';
+  }
+}
+async function renderEnd(){
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
+  if(!$('screen-end').classList.contains('hidden')) return;
+  window.GYMLeaveGuard.disable();
+  if(window.GYMRecent) window.GYMRecent.remove('dm', code);
+  show('end');
+  const isCandidate = me==='candidate';
+  const candName = state.players.candidate.name;
+  const ownValue = BOX_VALUES[state.assignment[state.ownBoxId]].label;
+  const big = state.finalAmount >= 1000;
+  $('end-emoji').textContent = big ? '🏆' : '💼';
+  $('end-title').textContent = state.outcome==='accepted' ? 'Offre acceptée !' : 'Mallette ouverte !';
+  $('end-detail').innerHTML = (isCandidate ? 'Tu repars' : esc(candName)+' repart') + ' avec <b>'+fmtAmount(state.finalAmount)+'</b>.' +
+    (state.outcome==='accepted' ? '<br>Sa mallette contenait '+ownValue+'.' : '');
+  if(big && window.GYMFeedback) window.GYMFeedback.win();
+}
+
+function confirmQuitMatch(){
+  if(!state) return;
+  if(!confirm("Es-tu sûr de vouloir quitter ? Tu ne pourras plus reprendre cette partie.")) return;
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
+  window.GYMLeaveGuard.disable();
+  if(window.GYMRecent) window.GYMRecent.remove('dm', code);
+  location.href = 'index.html';
+}
+function copyCode(){
+  const link = window.GYMGameLink.build(code);
+  navigator.clipboard && navigator.clipboard.writeText(link).then(()=>{
+    $('copy-btn').textContent = "Lien copié ✓";
+    setTimeout(()=>$('copy-btn').textContent="Copier le lien", 1500);
+  });
+}
+function shareCode(){
+  if(!navigator.share) return;
+  navigator.share({
+    title: 'Games Room',
+    text: 'Rejoins ma partie de Dlilek Mlek sur Games Room !',
+    url: window.GYMGameLink.build(code)
+  }).catch(()=>{});
+}
+if($('share-btn')) $('share-btn').classList.toggle('hidden', !navigator.share);
+
+document.addEventListener('keydown', e=>{
+  if(e.key!=='Enter') return;
+  if(!$('screen-create').classList.contains('hidden')) createGame();
+  else if(!$('screen-join').classList.contains('hidden')) joinGame();
+});
+
+(function(){
+  const qcode = (new URLSearchParams(location.search).get('code')||'').toUpperCase();
+  if(/^[A-Z]{4}$/.test(qcode)){
+    show('join');
+    $('join-code').value = qcode;
+    if(loadRole(qcode)!==null) joinGame();
+  }
+})();
+</script>
+<script src="install-tutorial.js" defer></script>
+</body>
+</html>

@@ -144,7 +144,8 @@ const GAME_FILTERS = [
   {key:'sk', label:'🎴 Skyjo'},
   {key:'tm', label:'🧠 The Mind'},
   {key:'cb', label:'🃏 Chkobba'},
-  {key:'bw', label:'📖 Bent Walad'}
+  {key:'bw', label:'📖 Bent Walad'},
+  {key:'dm', label:'💼 Dlilek Mlek'}
 ];
 let activeFilter = 'all';
 let allEntries = [];
@@ -158,7 +159,7 @@ async function fetchResults(table){
   }catch(e){ return []; }
 }
 
-function buildEntries(vt, sk, tm, cb, bw){
+function buildEntries(vt, sk, tm, cb, bw, dm){
   const entries = [];
   vt.forEach(r => entries.push({
     ts: r.finished_at, game:'vt', emoji:'🐄', title:'Vache &amp; Taureau',
@@ -189,6 +190,11 @@ function buildEntries(vt, sk, tm, cb, bw){
     ts: r.finished_at, game:'bw', emoji:'📖', title:'Bent Walad'+((r.players||[]).length>2?' · '+r.players.length+' joueurs':''),
     detail: (r.players||[]).map(esc).join(', '),
     result: '🏆 '+esc(r.winner_name)
+  }));
+  dm.forEach(r => entries.push({
+    ts: r.finished_at, game:'dm', emoji:'💼', title:'Dlilek Mlek',
+    detail: esc(r.candidate_name)+' (candidat·e) vs '+esc(r.banker_name)+' (banquier·ère)',
+    result: (r.accepted_offer ? '🤝 Offre acceptée : ' : '💼 Mallette ouverte : ')+r.final_amount.toLocaleString('fr-FR')+' DT'
   }));
   entries.sort((a,b) => new Date(b.ts) - new Date(a.ts));
   return entries;
@@ -251,11 +257,11 @@ function renderList(){
 async function loadAll(isRefresh){
   if(isRefresh) $('refresh-btn').classList.add('spin');
   if(!allEntries.length) $('sec-loading').classList.remove('hidden');
-  const [vt, sk, tm, cb, bw] = await Promise.all([
+  const [vt, sk, tm, cb, bw, dm] = await Promise.all([
     fetchResults('vt_results'), fetchResults('sk_results'), fetchResults('tm_results'),
-    fetchResults('cb_results'), fetchResults('bw_results')
+    fetchResults('cb_results'), fetchResults('bw_results'), fetchResults('dm_results')
   ]);
-  allEntries = buildEntries(vt, sk, tm, cb, bw);
+  allEntries = buildEntries(vt, sk, tm, cb, bw, dm);
   renderChips();
   renderList();
   if(isRefresh) setTimeout(()=>$('refresh-btn').classList.remove('spin'), 700);
