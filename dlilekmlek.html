@@ -129,10 +129,7 @@
   .status-text .rnd{font-size:.8rem;color:var(--chalk-dim)}
   .status-text .ph{font-size:.92rem;font-weight:600}
 
-  .value-groups{margin-bottom:14px}
-  .vg-label{font-size:.72rem;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:.04em;margin:8px 0 5px}
-  .vg-label:first-child{margin-top:0}
-  .value-ladder{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+  .value-ladder{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
   .vl-item{
     font-family:'Space Mono',monospace;font-size:.7rem;font-weight:600;
     padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.06);
@@ -246,12 +243,7 @@
       </div>
     </div>
 
-    <div class="value-groups">
-      <div class="vg-label">🎁 Petits lots</div>
-      <div class="value-ladder" id="value-ladder-small"></div>
-      <div class="vg-label">💰 Gros lots</div>
-      <div class="value-ladder" id="value-ladder-big"></div>
-    </div>
+    <div class="value-ladder" id="value-ladder"></div>
     <div class="box-grid" id="box-grid"></div>
     <div class="card hidden" id="offer-panel"></div>
 
@@ -284,17 +276,17 @@ const HEADERS = {
   "Content-Type": "application/json"
 };
 const BOX_VALUES = [
-  {n:0.03, label:'👡 Une paire de sandales', joke:true},
+  {n:0.03, label:'Une paire de sandales', joke:true},
   {n:0.1, label:'0,100 DT'},
-  {n:0.4, label:'💨 Une chicha', joke:true},
+  {n:0.4, label:'Une chicha', joke:true},
   {n:1, label:'1 DT'},
-  {n:6, label:'🧈 Un kilo de smen', joke:true},
+  {n:6, label:'Un kilo de smen', joke:true},
   {n:10, label:'10 DT'},
-  {n:35, label:'👖 Un sirwal traditionnel', joke:true},
+  {n:35, label:'Un sirwal traditionnel', joke:true},
   {n:50, label:'50 DT'},
-  {n:65, label:'🥿 Une paire de babouches', joke:true},
+  {n:65, label:'Une paire de babouches', joke:true},
   {n:100, label:'100 DT'},
-  {n:180, label:'🫖 Un service à thé', joke:true},
+  {n:180, label:'Un service à thé', joke:true},
   {n:250, label:'250 DT'},
   {n:500, label:'500 DT'},
   {n:1000, label:'1 000 DT'},
@@ -307,10 +299,9 @@ const BOX_VALUES = [
   {n:200000, label:'200 000 DT'},
   {n:500000, label:'500 000 DT'},
   {n:1000000, label:'1 000 000 DT'},
-  {n:1000000000, label:'🎉 1 MILLIARD DT'}
+  {n:1000000000, label:'1 MILLIARD DT'}
 ];
 const ROUND_SCHEDULE = [6,5,4,3,2,1,1,1];
-const VALUE_SPLIT = 12;
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
 let renderedLadderCount = -1, renderedBoxKey = null, renderedOfferKey = null;
@@ -586,9 +577,9 @@ function renderGame(){
 
   if(renderedLadderCount !== state.openedBoxIds.length){
     const openedValueIdx = state.openedBoxIds.map(b=>state.assignment[b]);
-    const vlItem = (v, idx) => '<div class="vl-item'+(v.joke?' joke':'')+(openedValueIdx.includes(idx)?' used':'')+'">'+v.label+'</div>';
-    $('value-ladder-small').innerHTML = BOX_VALUES.slice(0, VALUE_SPLIT).map(vlItem).join('');
-    $('value-ladder-big').innerHTML = BOX_VALUES.slice(VALUE_SPLIT).map((v,i) => vlItem(v, i+VALUE_SPLIT)).join('');
+    $('value-ladder').innerHTML = BOX_VALUES.map((v,idx) =>
+      '<div class="vl-item'+(v.joke?' joke':'')+(openedValueIdx.includes(idx)?' used':'')+'">'+v.label+'</div>'
+    ).join('');
     renderedLadderCount = state.openedBoxIds.length;
   }
 
