@@ -180,7 +180,7 @@
     </div>
     <div class="card">
       <h2>Règles</h2>
-      <p class="muted">24 mallettes contiennent chacune un lot : des petits montants, quelques lots rigolos (<span lang="ar" dir="rtl">شيشة</span>, <span lang="ar" dir="rtl">سروال عربي</span>…) et de grosses sommes, jusqu'au mystérieux milliard. Le·la <b>candidat·e</b> choisit une mallette qui restera fermée jusqu'à la fin, puis ouvre les autres par lots. Après chaque lot, le·la <b>banquier·ère</b> propose un montant pour racheter la mallette du·de la candidat·e.<br>
+      <p class="muted">30 mallettes contiennent chacune un lot : des petits montants, quelques lots rigolos (<span lang="ar" dir="rtl">شيشة</span>, <span lang="ar" dir="rtl">سروال عربي</span>…) et de grosses sommes, jusqu'au mystérieux milliard. Le·la <b>candidat·e</b> choisit une mallette qui restera fermée jusqu'à la fin, puis ouvre les autres par lots. Après chaque lot, le·la <b>banquier·ère</b> propose un montant pour racheter la mallette du·de la candidat·e.<br>
       Le·la candidat·e répond <b>Dlilek</b> (je continue) ou <b>Mlek</b> (j'accepte l'offre). S'il·elle refuse toutes les offres jusqu'au bout, il·elle repart avec le contenu de sa propre mallette !</p>
     </div>
   </div>
@@ -276,15 +276,21 @@ const HEADERS = {
   "Content-Type": "application/json"
 };
 const BOX_VALUES = [
+  {n:0.02, label:'حلفة', joke:true},
   {n:0.03, label:'فردة صباط', joke:true},
   {n:0.1, label:'0,100 DT'},
   {n:0.4, label:'شيشة', joke:true},
+  {n:0.5, label:'شلاكة', joke:true},
   {n:1, label:'1 DT'},
   {n:6, label:'كيلو سمن', joke:true},
+  {n:8, label:'راكلات', joke:true},
   {n:10, label:'10 DT'},
+  {n:20, label:'سطل بغلي', joke:true},
   {n:35, label:'سروال عربي', joke:true},
+  {n:45, label:'برنوس', joke:true},
   {n:50, label:'50 DT'},
   {n:65, label:'كأس تاي', joke:true},
+  {n:90, label:'محبس', joke:true},
   {n:100, label:'100 DT'},
   {n:180, label:'سبحة', joke:true},
   {n:250, label:'250 DT'},
@@ -301,7 +307,7 @@ const BOX_VALUES = [
   {n:1000000, label:'1 000 000 DT'},
   {n:1000000000, label:'1 MILLIARD DT'}
 ];
-const ROUND_SCHEDULE = [6,5,4,3,2,1,1,1];
+const ROUND_SCHEDULE = [7,6,5,4,3,2,1,1];
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
 let renderedLadderCount = -1, renderedBoxKey = null, renderedOfferKey = null;
