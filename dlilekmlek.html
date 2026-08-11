@@ -129,12 +129,16 @@
   .status-text .rnd{font-size:.8rem;color:var(--chalk-dim)}
   .status-text .ph{font-size:.92rem;font-weight:600}
 
-  .value-ladder{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .value-groups{margin-bottom:14px}
+  .vg-label{font-size:.72rem;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:.04em;margin:8px 0 5px}
+  .vg-label:first-child{margin-top:0}
+  .value-ladder{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
   .vl-item{
     font-family:'Space Mono',monospace;font-size:.7rem;font-weight:600;
     padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.06);
     border:1px solid var(--line);color:var(--chalk-dim);
   }
+  .vl-item.joke{font-family:'Fredoka',sans-serif;font-weight:500}
   .vl-item.used{opacity:.3;text-decoration:line-through}
 
   .box-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:8px;margin-bottom:14px}
@@ -179,7 +183,7 @@
     </div>
     <div class="card">
       <h2>Règles</h2>
-      <p class="muted">22 mallettes contiennent chacune un montant, de 0,010 DT à 100 000 DT. Le·la <b>candidat·e</b> choisit une mallette qui restera fermée jusqu'à la fin, puis ouvre les autres par lots (6, puis 5, 4, 3, 2, 1). Après chaque lot, le·la <b>banquier·ère</b> propose un montant pour racheter la mallette du·de la candidat·e.<br>
+      <p class="muted">24 mallettes contiennent chacune un lot : des petits montants, quelques lots rigolos (une paire de babouches, une chicha…) et de grosses sommes, jusqu'au mystérieux milliard 🎉. Le·la <b>candidat·e</b> choisit une mallette qui restera fermée jusqu'à la fin, puis ouvre les autres par lots. Après chaque lot, le·la <b>banquier·ère</b> propose un montant pour racheter la mallette du·de la candidat·e.<br>
       Le·la candidat·e répond <b>Dlilek</b> (je continue) ou <b>Mlek</b> (j'accepte l'offre). S'il·elle refuse toutes les offres jusqu'au bout, il·elle repart avec le contenu de sa propre mallette !</p>
     </div>
   </div>
@@ -237,12 +241,17 @@
     <div class="status-bar">
       <div class="role-badge" id="role-badge">🎯</div>
       <div class="status-text">
-        <div class="rnd" id="round-label">Manche 1/6</div>
+        <div class="rnd" id="round-label">Manche 1/8</div>
         <div class="ph" id="phase-label">…</div>
       </div>
     </div>
 
-    <div class="value-ladder" id="value-ladder"></div>
+    <div class="value-groups">
+      <div class="vg-label">🎁 Petits lots</div>
+      <div class="value-ladder" id="value-ladder-small"></div>
+      <div class="vg-label">💰 Gros lots</div>
+      <div class="value-ladder" id="value-ladder-big"></div>
+    </div>
     <div class="box-grid" id="box-grid"></div>
     <div class="card hidden" id="offer-panel"></div>
 
@@ -275,30 +284,33 @@ const HEADERS = {
   "Content-Type": "application/json"
 };
 const BOX_VALUES = [
-  {n:0.01, label:'0,010 DT'},
+  {n:0.03, label:'👡 Une paire de sandales', joke:true},
   {n:0.1, label:'0,100 DT'},
-  {n:0.5, label:'0,500 DT'},
+  {n:0.4, label:'💨 Une chicha', joke:true},
   {n:1, label:'1 DT'},
-  {n:5, label:'5 DT'},
+  {n:6, label:'🧈 Un kilo de smen', joke:true},
   {n:10, label:'10 DT'},
-  {n:20, label:'20 DT'},
+  {n:35, label:'👖 Un sirwal traditionnel', joke:true},
   {n:50, label:'50 DT'},
-  {n:75, label:'75 DT'},
+  {n:65, label:'🥿 Une paire de babouches', joke:true},
   {n:100, label:'100 DT'},
-  {n:150, label:'150 DT'},
-  {n:200, label:'200 DT'},
-  {n:300, label:'300 DT'},
+  {n:180, label:'🫖 Un service à thé', joke:true},
+  {n:250, label:'250 DT'},
   {n:500, label:'500 DT'},
-  {n:750, label:'750 DT'},
   {n:1000, label:'1 000 DT'},
   {n:2000, label:'2 000 DT'},
   {n:5000, label:'5 000 DT'},
   {n:10000, label:'10 000 DT'},
-  {n:25000, label:'25 000 DT'},
+  {n:20000, label:'20 000 DT'},
   {n:50000, label:'50 000 DT'},
-  {n:100000, label:'100 000 DT'}
+  {n:100000, label:'100 000 DT'},
+  {n:200000, label:'200 000 DT'},
+  {n:500000, label:'500 000 DT'},
+  {n:1000000, label:'1 000 000 DT'},
+  {n:1000000000, label:'🎉 1 MILLIARD DT'}
 ];
-const ROUND_SCHEDULE = [6,5,4,3,2,1];
+const ROUND_SCHEDULE = [6,5,4,3,2,1,1,1];
+const VALUE_SPLIT = 12;
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
 let renderedLadderCount = -1, renderedBoxKey = null, renderedOfferKey = null;
@@ -361,7 +373,9 @@ async function saveResult(st){
         candidate_name: st.players.candidate.name,
         banker_name: st.players.banker.name,
         final_amount: st.finalAmount,
+        final_label: st.finalLabel,
         own_box_value: BOX_VALUES[st.assignment[st.ownBoxId]].n,
+        own_box_label: BOX_VALUES[st.assignment[st.ownBoxId]].label,
         accepted_offer: st.outcome==='accepted'
       })
     });
@@ -500,6 +514,7 @@ async function openBox(id){
     st.phase = 'finished';
     st.outcome = 'final_box';
     st.finalAmount = BOX_VALUES[st.assignment[st.ownBoxId]].n;
+    st.finalLabel = BOX_VALUES[st.assignment[st.ownBoxId]].label;
   } else if(st.toOpenThisRound <= 0){
     st.phase = 'offer_pending';
   }
@@ -538,6 +553,7 @@ async function respondOffer(accept){
     st.phase = 'finished';
     st.outcome = 'accepted';
     st.finalAmount = st.currentOffer;
+    st.finalLabel = fmtAmount(st.currentOffer);
   } else {
     st.roundIdx += 1;
     st.toOpenThisRound = ROUND_SCHEDULE[st.roundIdx];
@@ -569,11 +585,10 @@ function renderGame(){
   $('phase-label').textContent = phaseLabelText(state, isCandidate, candP.name, bankP.name);
 
   if(renderedLadderCount !== state.openedBoxIds.length){
-    $('value-ladder').innerHTML = BOX_VALUES.map((v,idx) => {
-      const openedValueIdx = state.openedBoxIds.map(b=>state.assignment[b]);
-      const used = openedValueIdx.includes(idx);
-      return '<div class="vl-item'+(used?' used':'')+'">'+v.label+'</div>';
-    }).join('');
+    const openedValueIdx = state.openedBoxIds.map(b=>state.assignment[b]);
+    const vlItem = (v, idx) => '<div class="vl-item'+(v.joke?' joke':'')+(openedValueIdx.includes(idx)?' used':'')+'">'+v.label+'</div>';
+    $('value-ladder-small').innerHTML = BOX_VALUES.slice(0, VALUE_SPLIT).map(vlItem).join('');
+    $('value-ladder-big').innerHTML = BOX_VALUES.slice(VALUE_SPLIT).map((v,i) => vlItem(v, i+VALUE_SPLIT)).join('');
     renderedLadderCount = state.openedBoxIds.length;
   }
 
@@ -631,8 +646,8 @@ async function renderEnd(){
   const big = state.finalAmount >= 1000;
   $('end-emoji').textContent = big ? '🏆' : '💼';
   $('end-title').textContent = state.outcome==='accepted' ? 'Offre acceptée !' : 'Mallette ouverte !';
-  $('end-detail').innerHTML = (isCandidate ? 'Tu repars' : esc(candName)+' repart') + ' avec <b>'+fmtAmount(state.finalAmount)+'</b>.' +
-    (state.outcome==='accepted' ? '<br>Sa mallette contenait '+ownValue+'.' : '');
+  $('end-detail').innerHTML = (isCandidate ? 'Tu repars' : esc(candName)+' repart') + ' avec <b>'+esc(state.finalLabel)+'</b>.' +
+    (state.outcome==='accepted' ? '<br>Sa mallette contenait '+esc(ownValue)+'.' : '');
   if(big && window.GYMFeedback) window.GYMFeedback.win();
 }
 

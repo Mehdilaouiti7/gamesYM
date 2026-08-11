@@ -191,11 +191,14 @@ function buildEntries(vt, sk, tm, cb, bw, dm){
     detail: (r.players||[]).map(esc).join(', '),
     result: '🏆 '+esc(r.winner_name)
   }));
-  dm.forEach(r => entries.push({
-    ts: r.finished_at, game:'dm', emoji:'💼', title:'Dlilek Mlek',
-    detail: esc(r.candidate_name)+' (candidat·e) vs '+esc(r.banker_name)+' (banquier·ère)',
-    result: (r.accepted_offer ? '🤝 Offre acceptée : ' : '💼 Mallette ouverte : ')+r.final_amount.toLocaleString('fr-FR')+' DT'
-  }));
+  dm.forEach(r => {
+    const won = r.final_label || (r.final_amount != null ? r.final_amount.toLocaleString('fr-FR')+' DT' : '?');
+    entries.push({
+      ts: r.finished_at, game:'dm', emoji:'💼', title:'Dlilek Mlek',
+      detail: esc(r.candidate_name)+' (candidat·e) vs '+esc(r.banker_name)+' (banquier·ère)',
+      result: (r.accepted_offer ? '🤝 Offre acceptée : ' : '💼 Mallette ouverte : ')+esc(won)
+    });
+  });
   entries.sort((a,b) => new Date(b.ts) - new Date(a.ts));
   return entries;
 }
