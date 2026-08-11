@@ -301,6 +301,7 @@ const BOX_VALUES = [
 const ROUND_SCHEDULE = [6,5,4,3,2,1];
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
+let renderedLadderCount = -1, renderedBoxKey = null, renderedOfferKey = null;
 
 const $ = id => document.getElementById(id);
 const screens = ['home','create','join','wait','game','end'];
@@ -567,28 +568,38 @@ function renderGame(){
   $('round-label').textContent = 'Manche ' + (state.roundIdx+1) + '/' + ROUND_SCHEDULE.length;
   $('phase-label').textContent = phaseLabelText(state, isCandidate, candP.name, bankP.name);
 
-  $('value-ladder').innerHTML = BOX_VALUES.map((v,idx) => {
-    const openedValueIdx = state.openedBoxIds.map(b=>state.assignment[b]);
-    const used = openedValueIdx.includes(idx);
-    return '<div class="vl-item'+(used?' used':'')+'">'+v.label+'</div>';
-  }).join('');
-
-  let boxesHtml = '';
-  for(let i=0;i<BOX_VALUES.length;i++){
-    const opened = state.openedBoxIds.includes(i);
-    const isOwn = state.ownBoxId===i;
-    let cls='box', content=String(i+1), handler='';
-    if(opened){ cls+=' opened'; content = BOX_VALUES[state.assignment[i]].label; }
-    else if(isOwn){ cls+=' own'; content='💼'; }
-    else if(isCandidate && state.phase==='pick_box'){ cls+=' tappable'; handler='pickBox('+i+')'; }
-    else if(isCandidate && state.phase==='opening'){ cls+=' tappable'; handler='openBox('+i+')'; }
-    boxesHtml += '<button type="button" class="'+cls+'"'+(handler?' onclick="'+handler+'"':' disabled')+'>'+content+'</button>';
+  if(renderedLadderCount !== state.openedBoxIds.length){
+    $('value-ladder').innerHTML = BOX_VALUES.map((v,idx) => {
+      const openedValueIdx = state.openedBoxIds.map(b=>state.assignment[b]);
+      const used = openedValueIdx.includes(idx);
+      return '<div class="vl-item'+(used?' used':'')+'">'+v.label+'</div>';
+    }).join('');
+    renderedLadderCount = state.openedBoxIds.length;
   }
-  $('box-grid').innerHTML = boxesHtml;
+
+  const boxKey = state.phase + '|' + state.openedBoxIds.length + '|' + state.ownBoxId;
+  if(renderedBoxKey !== boxKey){
+    let boxesHtml = '';
+    for(let i=0;i<BOX_VALUES.length;i++){
+      const opened = state.openedBoxIds.includes(i);
+      const isOwn = state.ownBoxId===i;
+      let cls='box', content=String(i+1), handler='';
+      if(opened){ cls+=' opened'; content = BOX_VALUES[state.assignment[i]].label; }
+      else if(isOwn){ cls+=' own'; content='💼'; }
+      else if(isCandidate && state.phase==='pick_box'){ cls+=' tappable'; handler='pickBox('+i+')'; }
+      else if(isCandidate && state.phase==='opening'){ cls+=' tappable'; handler='openBox('+i+')'; }
+      boxesHtml += '<button type="button" class="'+cls+'"'+(handler?' onclick="'+handler+'"':' disabled')+'>'+content+'</button>';
+    }
+    $('box-grid').innerHTML = boxesHtml;
+    renderedBoxKey = boxKey;
+  }
 
   renderOfferPanel(isCandidate);
 }
 function renderOfferPanel(isCandidate){
+  const key = state.phase + '|' + state.currentOffer;
+  if(key === renderedOfferKey) return;
+  renderedOfferKey = key;
   const panel = $('offer-panel');
   if(state.phase==='offer_pending' && !isCandidate){
     panel.classList.remove('hidden');
