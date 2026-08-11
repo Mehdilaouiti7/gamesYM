@@ -189,7 +189,7 @@
     </div>
     <div class="card">
       <h2>Règles</h2>
-      <p class="muted">30 mallettes contiennent chacune un lot : des petits montants, quelques lots rigolos (<span lang="ar" dir="rtl">شيشة</span>, <span lang="ar" dir="rtl">سروال عربي</span>…) et de grosses sommes, jusqu'au mystérieux milliard. Le·la <b>candidat·e</b> choisit une mallette qui restera fermée jusqu'à la fin, puis ouvre les autres par lots. Après chaque lot, le·la <b>banquier·ère</b> propose un montant pour racheter la mallette du·de la candidat·e.<br>
+      <p class="muted">24 mallettes (autant que de gouvernorats) contiennent chacune un lot, tiré au hasard à chaque partie parmi une grande liste de montants et de lots rigolos : des petits montants, quelques lots rigolos (<span lang="ar" dir="rtl">شيشة</span>, <span lang="ar" dir="rtl">سروال عربي</span>…) et de grosses sommes, jusqu'au mystérieux milliard. Le·la <b>candidat·e</b> choisit une mallette qui restera fermée jusqu'à la fin, puis ouvre les autres par lots. Après chaque lot, le·la <b>banquier·ère</b> propose un montant pour racheter la mallette du·de la candidat·e.<br>
       Le·la candidat·e répond <b>Dlilek</b> (je continue) ou <b>Mlek</b> (j'accepte l'offre). S'il·elle refuse toutes les offres jusqu'au bout, il·elle repart avec le contenu de sa propre mallette !</p>
     </div>
   </div>
@@ -320,8 +320,9 @@ const BOX_VALUES = [
   {n:1000000, label:'1 000 000 DT'},
   {n:1000000000, label:'1 MILLIARD DT'}
 ];
-const ROUND_SCHEDULE = [7,6,5,4,3,2,1,1];
-const VALUE_SPLIT = 15;
+const BOXES_PER_GAME = 24;
+const ROUND_SCHEDULE = [6,5,4,3,2,1,1,1];
+const VALUE_SPLIT = 12;
 const WILAYAS = [
   'تونس','أريانة','بن عروس','منوبة','نابل','زغوان',
   'بنزرت','باجة','جندوبة','الكاف','سليانة','القيروان',
@@ -354,12 +355,15 @@ function genCode(){
   return c;
 }
 function genAssignment(){
+  // pick BOXES_PER_GAME random values out of the full pool (this also
+  // randomizes which box gets which value, since a Fisher-Yates shuffle
+  // followed by a slice is already uniformly random for both selection and order)
   const arr = BOX_VALUES.map((v,i)=>i);
   for(let i=arr.length-1;i>0;i--){
     const j = Math.floor(Math.random()*(i+1));
     const tmp = arr[i]; arr[i]=arr[j]; arr[j]=tmp;
   }
-  return arr;
+  return arr.slice(0, BOXES_PER_GAME);
 }
 function saveRole(c, role){ try{ localStorage.setItem('dm-role-'+c, role); }catch(e){} }
 function loadRole(c){ try{ return localStorage.getItem('dm-role-'+c); }catch(e){ return null; } }
@@ -543,7 +547,7 @@ async function openBox(id){
   if(st.phase!=='opening' || id===st.ownBoxId || st.openedBoxIds.includes(id)){ state=st; busy=false; renderGame(); return; }
   st.openedBoxIds.push(id);
   st.toOpenThisRound -= 1;
-  const remaining = BOX_VALUES.length - 1 - st.openedBoxIds.length;
+  const remaining = st.assignment.length - 1 - st.openedBoxIds.length;
   if(remaining === 0){
     st.status = 'finished';
     st.phase = 'finished';
@@ -647,17 +651,18 @@ function renderGame(){
   renderedWilaya = false;
 
   if(renderedLadderCount !== state.openedBoxIds.length){
-    const openedValueIdx = state.openedBoxIds.map(b=>state.assignment[b]);
-    const vlItem = (v, idx) => '<div class="vl-item'+(v.joke?' joke':'')+(openedValueIdx.includes(idx)?' used':'')+'">'+labelHtml(v)+'</div>';
-    $('value-col-left').innerHTML = BOX_VALUES.slice(0, VALUE_SPLIT).map(vlItem).join('');
-    $('value-col-right').innerHTML = BOX_VALUES.slice(VALUE_SPLIT).map((v,i)=>vlItem(v, i+VALUE_SPLIT)).join('');
+    const openedPoolIdx = new Set(state.openedBoxIds.map(b=>state.assignment[b]));
+    const sortedEntries = state.assignment.map(poolIdx => ({poolIdx, v: BOX_VALUES[poolIdx]})).sort((a,b) => a.v.n - b.v.n);
+    const vlItem = e => '<div class="vl-item'+(e.v.joke?' joke':'')+(openedPoolIdx.has(e.poolIdx)?' used':'')+'">'+labelHtml(e.v)+'</div>';
+    $('value-col-left').innerHTML = sortedEntries.slice(0, VALUE_SPLIT).map(vlItem).join('');
+    $('value-col-right').innerHTML = sortedEntries.slice(VALUE_SPLIT).map(vlItem).join('');
     renderedLadderCount = state.openedBoxIds.length;
   }
 
   const boxKey = state.phase + '|' + state.openedBoxIds.length + '|' + state.ownBoxId;
   if(renderedBoxKey !== boxKey){
     let boxesHtml = '';
-    for(let i=0;i<BOX_VALUES.length;i++){
+    for(let i=0;i<state.assignment.length;i++){
       const opened = state.openedBoxIds.includes(i);
       const isOwn = state.ownBoxId===i;
       let cls='box', content=String(i+1), handler='';
