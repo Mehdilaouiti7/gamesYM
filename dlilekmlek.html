@@ -180,7 +180,7 @@
     </div>
     <div class="card">
       <h2>Règles</h2>
-      <p class="muted">24 mallettes contiennent chacune un lot : des petits montants, quelques lots rigolos (une paire de babouches, une chicha…) et de grosses sommes, jusqu'au mystérieux milliard 🎉. Le·la <b>candidat·e</b> choisit une mallette qui restera fermée jusqu'à la fin, puis ouvre les autres par lots. Après chaque lot, le·la <b>banquier·ère</b> propose un montant pour racheter la mallette du·de la candidat·e.<br>
+      <p class="muted">24 mallettes contiennent chacune un lot : des petits montants, quelques lots rigolos (<span lang="ar" dir="rtl">شيشة</span>, <span lang="ar" dir="rtl">سروال عربي</span>…) et de grosses sommes, jusqu'au mystérieux milliard. Le·la <b>candidat·e</b> choisit une mallette qui restera fermée jusqu'à la fin, puis ouvre les autres par lots. Après chaque lot, le·la <b>banquier·ère</b> propose un montant pour racheter la mallette du·de la candidat·e.<br>
       Le·la candidat·e répond <b>Dlilek</b> (je continue) ou <b>Mlek</b> (j'accepte l'offre). S'il·elle refuse toutes les offres jusqu'au bout, il·elle repart avec le contenu de sa propre mallette !</p>
     </div>
   </div>
@@ -276,17 +276,17 @@ const HEADERS = {
   "Content-Type": "application/json"
 };
 const BOX_VALUES = [
-  {n:0.03, label:'Une paire de sandales', joke:true},
+  {n:0.03, label:'فردة صباط', joke:true},
   {n:0.1, label:'0,100 DT'},
-  {n:0.4, label:'Une chicha', joke:true},
+  {n:0.4, label:'شيشة', joke:true},
   {n:1, label:'1 DT'},
-  {n:6, label:'Un kilo de smen', joke:true},
+  {n:6, label:'كيلو سمن', joke:true},
   {n:10, label:'10 DT'},
-  {n:35, label:'Un sirwal traditionnel', joke:true},
+  {n:35, label:'سروال عربي', joke:true},
   {n:50, label:'50 DT'},
-  {n:65, label:'Une paire de babouches', joke:true},
+  {n:65, label:'كأس تاي', joke:true},
   {n:100, label:'100 DT'},
-  {n:180, label:'Un service à thé', joke:true},
+  {n:180, label:'سبحة', joke:true},
   {n:250, label:'250 DT'},
   {n:500, label:'500 DT'},
   {n:1000, label:'1 000 DT'},
@@ -312,6 +312,9 @@ function show(name){ screens.forEach(s => $('screen-'+s).classList.toggle('hidde
 function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
 function pAvatar(p){ return p && p.avatar ? p.avatar : '🙂'; }
 function otherRole(r){ return r==='candidate' ? 'banker' : 'candidate'; }
+function labelHtml(v){
+  return v.joke ? '<span lang="ar" dir="rtl">'+esc(v.label)+'</span>' : esc(v.label);
+}
 function fmtAmount(n){
   n = Number(n);
   if(!isFinite(n)) return '0 DT';
@@ -578,7 +581,7 @@ function renderGame(){
   if(renderedLadderCount !== state.openedBoxIds.length){
     const openedValueIdx = state.openedBoxIds.map(b=>state.assignment[b]);
     $('value-ladder').innerHTML = BOX_VALUES.map((v,idx) =>
-      '<div class="vl-item'+(v.joke?' joke':'')+(openedValueIdx.includes(idx)?' used':'')+'">'+v.label+'</div>'
+      '<div class="vl-item'+(v.joke?' joke':'')+(openedValueIdx.includes(idx)?' used':'')+'">'+labelHtml(v)+'</div>'
     ).join('');
     renderedLadderCount = state.openedBoxIds.length;
   }
@@ -590,7 +593,7 @@ function renderGame(){
       const opened = state.openedBoxIds.includes(i);
       const isOwn = state.ownBoxId===i;
       let cls='box', content=String(i+1), handler='';
-      if(opened){ cls+=' opened'; content = BOX_VALUES[state.assignment[i]].label; }
+      if(opened){ cls+=' opened'; content = labelHtml(BOX_VALUES[state.assignment[i]]); }
       else if(isOwn){ cls+=' own'; content='💼'; }
       else if(isCandidate && state.phase==='pick_box'){ cls+=' tappable'; handler='pickBox('+i+')'; }
       else if(isCandidate && state.phase==='opening'){ cls+=' tappable'; handler='openBox('+i+')'; }
@@ -633,12 +636,14 @@ async function renderEnd(){
   show('end');
   const isCandidate = me==='candidate';
   const candName = state.players.candidate.name;
-  const ownValue = BOX_VALUES[state.assignment[state.ownBoxId]].label;
+  const ownBox = BOX_VALUES[state.assignment[state.ownBoxId]];
+  const finalIsJoke = state.outcome==='final_box' && ownBox.joke;
+  const finalHtml = finalIsJoke ? '<span lang="ar" dir="rtl">'+esc(state.finalLabel)+'</span>' : esc(state.finalLabel);
   const big = state.finalAmount >= 1000;
   $('end-emoji').textContent = big ? '🏆' : '💼';
   $('end-title').textContent = state.outcome==='accepted' ? 'Offre acceptée !' : 'Mallette ouverte !';
-  $('end-detail').innerHTML = (isCandidate ? 'Tu repars' : esc(candName)+' repart') + ' avec <b>'+esc(state.finalLabel)+'</b>.' +
-    (state.outcome==='accepted' ? '<br>Sa mallette contenait '+esc(ownValue)+'.' : '');
+  $('end-detail').innerHTML = (isCandidate ? 'Tu repars' : esc(candName)+' repart') + ' avec <b>'+finalHtml+'</b>.' +
+    (state.outcome==='accepted' ? '<br>Sa mallette contenait '+labelHtml(ownBox)+'.' : '');
   if(big && window.GYMFeedback) window.GYMFeedback.win();
 }
 
