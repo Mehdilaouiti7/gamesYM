@@ -202,7 +202,7 @@
     <div class="card">
       <h2>Règles</h2>
       <p class="muted">24 mallettes (autant que de gouvernorats) contiennent chacune un lot, tiré au hasard à chaque partie parmi une grande liste de montants et de lots rigolos : des petits montants, quelques lots rigolos (<span lang="ar" dir="rtl">شيشة</span>, <span lang="ar" dir="rtl">سروال عربي</span>…) et de grosses sommes, jusqu'au mystérieux milliard. Le·la <b>candidat·e</b> choisit une mallette qui restera fermée jusqu'à la fin, puis ouvre les autres, une par une.<br>
-      À tout moment, le·la <b>banquier·ère</b> peut faire une offre : de l'argent, un objet surprise (pour tester le·la candidat·e !), ou un échange de mallette. Le·la candidat·e répond <b>Dlilek</b> (je continue) ou <b>Mlek</b> (j'accepte) — sauf pour un échange, qui ne met pas fin à la partie, juste à l'incertitude sur sa mallette ! S'il·elle refuse toutes les offres jusqu'au bout, il·elle repart avec le contenu de sa propre mallette !</p>
+      À tout moment, le·la <b>banquier·ère</b> peut faire une offre : de l'argent, un objet surprise (pour tester le·la candidat·e !), ou un échange de mallette. Le·la candidat·e répond <span lang="ar" dir="rtl"><b>نرفض</b></span> (je continue) ou <span lang="ar" dir="rtl"><b>نقبل</b></span> (j'accepte) — sauf pour un échange, qui ne met pas fin à la partie, juste à l'incertitude sur sa mallette ! S'il·elle refuse toutes les offres jusqu'au bout, il·elle repart avec le contenu de sa propre mallette !</p>
     </div>
   </div>
 
@@ -560,6 +560,20 @@ async function pickBox(id){
   state = st;
   renderGame();
 }
+async function pickSwapBox(id){
+  if(busy || !state || me!=='candidate' || state.phase!=='swap_pick') return;
+  if(id===state.ownBoxId || state.openedBoxIds.includes(id)) return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='swap_pick' || id===st.ownBoxId || st.openedBoxIds.includes(id)){ state=st; busy=false; renderGame(); return; }
+  st.ownBoxId = id;
+  st.phase = 'opening';
+  const ok = await saveState(st);
+  busy = false;
+  if(!ok) return;
+  state = st;
+  renderGame();
+}
 async function openBox(id){
   if(busy || !state || me!=='candidate' || state.phase!=='opening') return;
   if(id===state.ownBoxId || state.openedBoxIds.includes(id)) return;
@@ -636,10 +650,10 @@ async function respondOffer(accept){
   if(st.phase!=='offer_made'){ state=st; busy=false; renderGame(); return; }
   if(st.offerType==='swap'){
     if(accept){
-      const others = st.assignment.map((_,i)=>i).filter(i => i!==st.ownBoxId && !st.openedBoxIds.includes(i));
-      if(others.length) st.ownBoxId = others[Math.floor(Math.random()*others.length)];
+      st.phase = 'swap_pick';
+    } else {
+      st.phase = 'opening';
     }
-    st.phase = 'opening';
     st.offerType = null;
     st.currentOffer = null;
     st.currentOfferLabel = null;
@@ -668,9 +682,10 @@ function phaseLabelText(st, isCandidate, candName, bankName){
   if(st.phase==='pick_wilaya') return isCandidate ? '📍 Choisis ta wilaya' : '⏳ '+candName+' choisit sa wilaya…';
   if(st.phase==='pick_box') return isCandidate ? '🎯 Choisis ta mallette' : '⏳ '+candName+' choisit sa mallette…';
   if(st.phase==='opening') return isCandidate ? '📦 Ouvre une mallette' : '👀 Observe, et fais une offre quand tu veux';
+  if(st.phase==='swap_pick') return isCandidate ? '🔄 Choisis ta nouvelle mallette' : '⏳ '+candName+' choisit sa nouvelle mallette…';
   if(st.phase==='offer_made'){
     if(st.offerType==='swap') return isCandidate ? '🔄 Le/la banquier·ère te propose un échange' : '⏳ En attente de la décision…';
-    return isCandidate ? '🤔 Dlilek ou Mlek ?' : '⏳ En attente de la décision…';
+    return isCandidate ? '🤔 نقبل ولا نرفض ؟' : '⏳ En attente de la décision…';
   }
   return '';
 }
@@ -740,6 +755,7 @@ function renderGame(){
       else if(isOwn){ cls+=' own'; content='💼'; }
       else if(isCandidate && state.phase==='pick_box'){ cls+=' tappable'; handler='pickBox('+i+')'; }
       else if(isCandidate && state.phase==='opening'){ cls+=' tappable'; handler='openBox('+i+')'; }
+      else if(isCandidate && state.phase==='swap_pick'){ cls+=' tappable'; handler='pickSwapBox('+i+')'; }
       boxesHtml += '<button type="button" class="'+cls+'"'+(handler?' onclick="'+handler+'"':' disabled')+'>'+content+'</button>';
     }
     $('box-grid').innerHTML = boxesHtml;
@@ -791,9 +807,9 @@ function renderOfferPanel(isCandidate){
     if(state.offerType==='swap'){
       panel.innerHTML = '<h2>🔄 Le/la banquier·ère te propose d\'échanger ta mallette</h2><p class="muted">Contre une autre mallette fermée, sans connaître son contenu.</p><div class="offer-btns"><button class="btn-ghost" onclick="respondOffer(false)">Non merci</button><button class="btn-main" onclick="respondOffer(true)">Oui, échanger</button></div>';
     } else if(state.offerType==='gift'){
-      panel.innerHTML = '<h2>🎁 Offre du banquier·ère : '+esc(state.currentOfferLabel)+'</h2><div class="offer-btns"><button class="btn-ghost" onclick="respondOffer(false)">✊ Dlilek</button><button class="btn-main" onclick="respondOffer(true)">🤝 Mlek</button></div>';
+      panel.innerHTML = '<h2>🎁 Offre du banquier·ère : '+esc(state.currentOfferLabel)+'</h2><div class="offer-btns"><button class="btn-ghost" onclick="respondOffer(false)"><span lang="ar" dir="rtl">✊ نرفض</span></button><button class="btn-main" onclick="respondOffer(true)"><span lang="ar" dir="rtl">🤝 نقبل</span></button></div>';
     } else {
-      panel.innerHTML = '<h2>💰 Offre du banquier·ère : '+fmtAmount(state.currentOffer)+'</h2><div class="offer-btns"><button class="btn-ghost" onclick="respondOffer(false)">✊ Dlilek</button><button class="btn-main" onclick="respondOffer(true)">🤝 Mlek</button></div>';
+      panel.innerHTML = '<h2>💰 Offre du banquier·ère : '+fmtAmount(state.currentOffer)+'</h2><div class="offer-btns"><button class="btn-ghost" onclick="respondOffer(false)"><span lang="ar" dir="rtl">✊ نرفض</span></button><button class="btn-main" onclick="respondOffer(true)"><span lang="ar" dir="rtl">🤝 نقبل</span></button></div>';
     }
   } else if(state.phase==='offer_made' && !isCandidate){
     panel.classList.remove('hidden');
