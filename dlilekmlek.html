@@ -332,7 +332,7 @@ const BOX_VALUES = [
   {n:200000, label:'200 000 DT'},
   {n:500000, label:'500 000 DT'},
   {n:700000, label:'700 000 DT'},
-  {n:1000000000, label:'مليار', joke:true}
+  {n:1000000000, label:'مليار', joke:true, guaranteed:true}
 ];
 const BOXES_PER_GAME = 24;
 const VALUE_SPLIT = 12;
@@ -369,15 +369,22 @@ function genCode(){
   return c;
 }
 function genAssignment(){
-  // pick BOXES_PER_GAME random values out of the full pool (this also
-  // randomizes which box gets which value, since a Fisher-Yates shuffle
-  // followed by a slice is already uniformly random for both selection and order)
-  const arr = BOX_VALUES.map((v,i)=>i);
+  // guaranteed entries (e.g. مليار) are in every game; the rest of the
+  // BOXES_PER_GAME slots are filled by a random draw from the remaining pool.
+  // A Fisher-Yates shuffle followed by a slice is uniformly random for both
+  // selection and order, so this also randomizes each box's position.
+  const guaranteed = BOX_VALUES.map((v,i)=>i).filter(i => BOX_VALUES[i].guaranteed);
+  const rest = BOX_VALUES.map((v,i)=>i).filter(i => !BOX_VALUES[i].guaranteed);
+  for(let i=rest.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    const tmp = rest[i]; rest[i]=rest[j]; rest[j]=tmp;
+  }
+  const arr = guaranteed.concat(rest.slice(0, BOXES_PER_GAME - guaranteed.length));
   for(let i=arr.length-1;i>0;i--){
     const j = Math.floor(Math.random()*(i+1));
     const tmp = arr[i]; arr[i]=arr[j]; arr[j]=tmp;
   }
-  return arr.slice(0, BOXES_PER_GAME);
+  return arr;
 }
 function saveRole(c, role){ try{ localStorage.setItem('dm-role-'+c, role); }catch(e){} }
 function loadRole(c){ try{ return localStorage.getItem('dm-role-'+c); }catch(e){ return null; } }
