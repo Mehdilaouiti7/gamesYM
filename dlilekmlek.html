@@ -161,9 +161,21 @@
 
   .offer-btns{display:flex;gap:8px}
   .offer-btns button{margin-top:0}
+  .offer-type-grid{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+  .offer-type-grid button{margin-top:0}
 
   .win-card{text-align:center}
   .win-card .big{font-size:2.6rem;margin:6px 0}
+
+  .reveal-badge{
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.7);
+    background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;
+    border-radius:16px;padding:22px 30px;box-shadow:0 14px 40px rgba(0,0,0,.4);
+    font-family:'Space Mono',monospace;font-weight:700;font-size:1.3rem;text-align:center;
+    z-index:50;opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;
+    max-width:80vw;
+  }
+  .reveal-badge.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 </style>
 <link rel="stylesheet" href="responsive.css">
 <link rel="stylesheet" href="avatar.css">
@@ -189,8 +201,8 @@
     </div>
     <div class="card">
       <h2>Règles</h2>
-      <p class="muted">24 mallettes (autant que de gouvernorats) contiennent chacune un lot, tiré au hasard à chaque partie parmi une grande liste de montants et de lots rigolos : des petits montants, quelques lots rigolos (<span lang="ar" dir="rtl">شيشة</span>, <span lang="ar" dir="rtl">سروال عربي</span>…) et de grosses sommes, jusqu'au mystérieux milliard. Le·la <b>candidat·e</b> choisit une mallette qui restera fermée jusqu'à la fin, puis ouvre les autres par lots. Après chaque lot, le·la <b>banquier·ère</b> propose un montant pour racheter la mallette du·de la candidat·e.<br>
-      Le·la candidat·e répond <b>Dlilek</b> (je continue) ou <b>Mlek</b> (j'accepte l'offre). S'il·elle refuse toutes les offres jusqu'au bout, il·elle repart avec le contenu de sa propre mallette !</p>
+      <p class="muted">24 mallettes (autant que de gouvernorats) contiennent chacune un lot, tiré au hasard à chaque partie parmi une grande liste de montants et de lots rigolos : des petits montants, quelques lots rigolos (<span lang="ar" dir="rtl">شيشة</span>, <span lang="ar" dir="rtl">سروال عربي</span>…) et de grosses sommes, jusqu'au mystérieux milliard. Le·la <b>candidat·e</b> choisit une mallette qui restera fermée jusqu'à la fin, puis ouvre les autres, une par une.<br>
+      À tout moment, le·la <b>banquier·ère</b> peut faire une offre : de l'argent, un objet surprise (pour tester le·la candidat·e !), ou un échange de mallette. Le·la candidat·e répond <b>Dlilek</b> (je continue) ou <b>Mlek</b> (j'accepte) — sauf pour un échange, qui ne met pas fin à la partie, juste à l'incertitude sur sa mallette ! S'il·elle refuse toutes les offres jusqu'au bout, il·elle repart avec le contenu de sa propre mallette !</p>
     </div>
   </div>
 
@@ -263,6 +275,8 @@
     <p class="muted" style="text-align:center;margin-top:10px">Code de la partie : <b id="game-code-label"></b></p>
   </div>
 
+  <div class="reveal-badge hidden" id="reveal-badge"><div id="reveal-label"></div></div>
+
   <div id="screen-end" class="hidden">
     <div class="card win-card">
       <div class="big" id="end-emoji">🏆</div>
@@ -317,11 +331,10 @@ const BOX_VALUES = [
   {n:100000, label:'100 000 DT'},
   {n:200000, label:'200 000 DT'},
   {n:500000, label:'500 000 DT'},
-  {n:1000000, label:'1 000 000 DT'},
+  {n:700000, label:'700 000 DT'},
   {n:1000000000, label:'مليار', joke:true}
 ];
 const BOXES_PER_GAME = 24;
-const ROUND_SCHEDULE = [6,5,4,3,2,1,1,1];
 const VALUE_SPLIT = 12;
 const WILAYAS = [
   'تونس','أريانة','بن عروس','منوبة','نابل','زغوان',
@@ -332,6 +345,7 @@ const WILAYAS = [
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
 let renderedLadderCount = -1, renderedBoxKey = null, renderedOfferKey = null;
+let offerDraftType = null, lastOpenedCount = -1, revealTimer = null;
 
 const $ = id => document.getElementById(id);
 const screens = ['home','create','join','wait','game','end'];
@@ -464,9 +478,9 @@ async function joinGame(){
   st.openedBoxIds = [];
   st.phase = 'pick_wilaya';
   st.candidateWilaya = null;
-  st.roundIdx = 0;
-  st.toOpenThisRound = ROUND_SCHEDULE[0];
+  st.offerType = null;
   st.currentOffer = null;
+  st.currentOfferLabel = null;
   st.offerHistory = [];
   st.outcome = null;
   st.finalAmount = null;
@@ -546,7 +560,6 @@ async function openBox(id){
   let st = await loadState(code) || state;
   if(st.phase!=='opening' || id===st.ownBoxId || st.openedBoxIds.includes(id)){ state=st; busy=false; renderGame(); return; }
   st.openedBoxIds.push(id);
-  st.toOpenThisRound -= 1;
   const remaining = st.assignment.length - 1 - st.openedBoxIds.length;
   if(remaining === 0){
     st.status = 'finished';
@@ -554,8 +567,6 @@ async function openBox(id){
     st.outcome = 'final_box';
     st.finalAmount = BOX_VALUES[st.assignment[st.ownBoxId]].n;
     st.finalLabel = BOX_VALUES[st.assignment[st.ownBoxId]].label;
-  } else if(st.toOpenThisRound <= 0){
-    st.phase = 'offer_pending';
   }
   const ok = await saveState(st);
   busy = false;
@@ -564,21 +575,50 @@ async function openBox(id){
   if(st.status==='finished'){ await saveResult(st); renderEnd(); }
   else renderGame();
 }
+function openOfferChooser(){
+  if(busy || !state || me!=='banker' || state.phase!=='opening' || state.openedBoxIds.length<1) return;
+  offerDraftType = 'choose';
+  renderedOfferKey = null;
+  renderGame();
+}
+function chooseOfferType(type){
+  offerDraftType = type;
+  renderedOfferKey = null;
+  renderGame();
+}
+function cancelOfferDraft(){
+  offerDraftType = null;
+  renderedOfferKey = null;
+  renderGame();
+}
 async function submitOffer(){
-  if(busy || !state || me!=='banker' || state.phase!=='offer_pending') return;
-  const raw = $('offer-input').value.trim().replace(',', '.');
-  const amount = parseFloat(raw);
-  if(!raw || isNaN(amount) || amount < 0){ $('offer-err').textContent = "Entre un montant valide."; return; }
-  $('offer-err').textContent = "";
+  if(busy || !state || me!=='banker' || state.phase!=='opening' || !offerDraftType || offerDraftType==='choose') return;
+  const type = offerDraftType;
+  let offerAmount = null, offerLabel = null;
+  if(type==='cash'){
+    const raw = $('offer-input').value.trim().replace(',', '.');
+    const amount = parseFloat(raw);
+    if(!raw || isNaN(amount) || amount < 0){ $('offer-err').textContent = "Entre un montant valide."; return; }
+    offerAmount = amount;
+    offerLabel = fmtAmount(amount);
+  } else if(type==='gift'){
+    const text = $('offer-gift-input').value.trim();
+    if(!text){ $('offer-err').textContent = "Décris le cadeau."; return; }
+    offerAmount = 0;
+    offerLabel = text;
+  }
   busy = true;
   let st = await loadState(code) || state;
-  if(st.phase!=='offer_pending'){ state=st; busy=false; renderGame(); return; }
-  st.currentOffer = amount;
-  st.offerHistory.push({round: st.roundIdx+1, amount});
+  if(st.phase!=='opening'){ state=st; busy=false; offerDraftType=null; renderedOfferKey=null; renderGame(); return; }
+  st.offerType = type;
+  st.currentOffer = offerAmount;
+  st.currentOfferLabel = offerLabel;
+  st.offerHistory.push({offerType: type, offer: offerAmount, label: offerLabel});
   st.phase = 'offer_made';
   const ok = await saveState(st);
   busy = false;
-  if(!ok){ $('offer-err').textContent = "Erreur réseau, réessaie."; return; }
+  if(!ok){ renderedOfferKey=null; renderGame(); return; }
+  offerDraftType = null;
   state = st;
   renderGame();
 }
@@ -587,17 +627,26 @@ async function respondOffer(accept){
   busy = true;
   let st = await loadState(code) || state;
   if(st.phase!=='offer_made'){ state=st; busy=false; renderGame(); return; }
-  if(accept){
+  if(st.offerType==='swap'){
+    if(accept){
+      const others = st.assignment.map((_,i)=>i).filter(i => i!==st.ownBoxId && !st.openedBoxIds.includes(i));
+      if(others.length) st.ownBoxId = others[Math.floor(Math.random()*others.length)];
+    }
+    st.phase = 'opening';
+    st.offerType = null;
+    st.currentOffer = null;
+    st.currentOfferLabel = null;
+  } else if(accept){
     st.status = 'finished';
     st.phase = 'finished';
     st.outcome = 'accepted';
     st.finalAmount = st.currentOffer;
-    st.finalLabel = fmtAmount(st.currentOffer);
+    st.finalLabel = st.currentOfferLabel;
   } else {
-    st.roundIdx += 1;
-    st.toOpenThisRound = ROUND_SCHEDULE[st.roundIdx];
     st.phase = 'opening';
+    st.offerType = null;
     st.currentOffer = null;
+    st.currentOfferLabel = null;
   }
   const ok = await saveState(st);
   busy = false;
@@ -611,9 +660,11 @@ async function respondOffer(accept){
 function phaseLabelText(st, isCandidate, candName, bankName){
   if(st.phase==='pick_wilaya') return isCandidate ? '📍 Choisis ta wilaya' : '⏳ '+candName+' choisit sa wilaya…';
   if(st.phase==='pick_box') return isCandidate ? '🎯 Choisis ta mallette' : '⏳ '+candName+' choisit sa mallette…';
-  if(st.phase==='opening') return isCandidate ? '📦 Ouvre encore '+st.toOpenThisRound+' mallette'+(st.toOpenThisRound>1?'s':'') : '⏳ '+candName+' ouvre les mallettes…';
-  if(st.phase==='offer_pending') return isCandidate ? '⏳ '+bankName+' réfléchit à son offre…' : '💼 Fais ton offre';
-  if(st.phase==='offer_made') return isCandidate ? '🤔 Dlilek ou Mlek ?' : '⏳ En attente de la décision…';
+  if(st.phase==='opening') return isCandidate ? '📦 Ouvre une mallette' : '👀 Observe, et fais une offre quand tu veux';
+  if(st.phase==='offer_made'){
+    if(st.offerType==='swap') return isCandidate ? '🔄 Le/la banquier·ère te propose un échange' : '⏳ En attente de la décision…';
+    return isCandidate ? '🤔 Dlilek ou Mlek ?' : '⏳ En attente de la décision…';
+  }
   return '';
 }
 let renderedWilaya = false;
@@ -635,7 +686,8 @@ function renderGame(){
   if(state.phase==='pick_wilaya'){
     $('round-label').textContent = 'Choix de la wilaya';
   } else {
-    $('round-label').innerHTML = 'Manche ' + (state.roundIdx+1) + '/' + ROUND_SCHEDULE.length +
+    const totalToOpen = state.assignment.length - 1;
+    $('round-label').innerHTML = state.openedBoxIds.length + '/' + totalToOpen + ' mallettes ouvertes' +
       (state.candidateWilaya ? ' · <span lang="ar" dir="rtl">'+esc(state.candidateWilaya)+'</span>' : '');
   }
   $('phase-label').textContent = phaseLabelText(state, isCandidate, candP.name, bankP.name);
@@ -646,9 +698,20 @@ function renderGame(){
   if(inWilayaPhase){
     if(!renderedWilaya){ renderWilayaPanel(isCandidate); renderedWilaya = true; }
     $('offer-panel').classList.add('hidden');
+    lastOpenedCount = state.openedBoxIds.length;
     return;
   }
   renderedWilaya = false;
+
+  if(lastOpenedCount===-1 || state.phase==='pick_box'){
+    lastOpenedCount = state.openedBoxIds.length;
+  } else if(state.openedBoxIds.length > lastOpenedCount){
+    const lastBoxId = state.openedBoxIds[state.openedBoxIds.length-1];
+    showReveal(BOX_VALUES[state.assignment[lastBoxId]]);
+    lastOpenedCount = state.openedBoxIds.length;
+  } else if(state.openedBoxIds.length < lastOpenedCount){
+    lastOpenedCount = state.openedBoxIds.length;
+  }
 
   if(renderedLadderCount !== state.openedBoxIds.length){
     const openedPoolIdx = new Set(state.openedBoxIds.map(b=>state.assignment[b]));
@@ -678,23 +741,57 @@ function renderGame(){
 
   renderOfferPanel(isCandidate);
 }
+function showReveal(v){
+  const el = $('reveal-badge');
+  $('reveal-label').innerHTML = labelHtml(v);
+  el.classList.remove('hidden');
+  requestAnimationFrame(()=> el.classList.add('show'));
+  if(revealTimer) clearTimeout(revealTimer);
+  revealTimer = setTimeout(()=>{
+    el.classList.remove('show');
+    setTimeout(()=> el.classList.add('hidden'), 260);
+  }, 1600);
+}
 function renderOfferPanel(isCandidate){
-  const key = state.phase + '|' + state.currentOffer;
+  const composing = offerDraftType==='cash' || offerDraftType==='gift';
+  const key = state.phase + '|' + state.offerType + '|' + state.currentOffer + '|' + state.currentOfferLabel + '|' + offerDraftType + (composing ? '' : '|'+state.openedBoxIds.length);
   if(key === renderedOfferKey) return;
   renderedOfferKey = key;
   const panel = $('offer-panel');
-  if(state.phase==='offer_pending' && !isCandidate){
+  if(state.phase==='opening' && !isCandidate){
+    if(state.openedBoxIds.length < 1){ panel.classList.add('hidden'); panel.innerHTML=''; return; }
     panel.classList.remove('hidden');
-    panel.innerHTML = '<h2>💼 Ton offre</h2><input type="tel" inputmode="decimal" id="offer-input" placeholder="Montant en DT"><div class="error" id="offer-err"></div><button class="btn-main" onclick="submitOffer()">Envoyer l\'offre</button>';
-  } else if(state.phase==='offer_pending' && isCandidate){
-    panel.classList.remove('hidden');
-    panel.innerHTML = '<p class="muted" style="text-align:center">⏳ Le/la banquier·ère réfléchit à son offre…</p>';
+    if(!offerDraftType){
+      panel.innerHTML = '<button class="btn-main" onclick="openOfferChooser()">💼 Faire une offre</button>';
+    } else if(offerDraftType==='choose'){
+      panel.innerHTML = '<h2>Quel type d\'offre ?</h2><div class="offer-type-grid">' +
+        '<button class="btn-ghost" onclick="chooseOfferType(\'cash\')">💰 Offre en argent</button>' +
+        '<button class="btn-ghost" onclick="chooseOfferType(\'gift\')">🎁 Offre d\'objet</button>' +
+        '<button class="btn-ghost" onclick="chooseOfferType(\'swap\')">🔄 Offre d\'échange</button>' +
+        '</div><button class="btn-ghost btn-small" onclick="cancelOfferDraft()">Annuler</button>';
+    } else if(offerDraftType==='cash'){
+      panel.innerHTML = '<h2>💰 Ton offre en argent</h2><input type="tel" inputmode="decimal" id="offer-input" placeholder="Montant en DT"><div class="error" id="offer-err"></div><button class="btn-main" onclick="submitOffer()">Envoyer l\'offre</button><button class="btn-ghost btn-small" onclick="cancelOfferDraft()">Annuler</button>';
+    } else if(offerDraftType==='gift'){
+      panel.innerHTML = '<h2>🎁 Ton offre d\'objet</h2><input type="text" id="offer-gift-input" placeholder="Ex. une voiture, un voyage…"><div class="error" id="offer-err"></div><button class="btn-main" onclick="submitOffer()">Envoyer l\'offre</button><button class="btn-ghost btn-small" onclick="cancelOfferDraft()">Annuler</button>';
+    } else if(offerDraftType==='swap'){
+      panel.innerHTML = '<h2>🔄 Offre d\'échange</h2><p class="muted">Le/la candidat·e pourra échanger sa mallette contre une autre mallette fermée, sans connaître son contenu.</p><button class="btn-main" onclick="submitOffer()">Proposer l\'échange</button><button class="btn-ghost btn-small" onclick="cancelOfferDraft()">Annuler</button>';
+    }
+  } else if(state.phase==='opening' && isCandidate){
+    panel.classList.add('hidden');
+    panel.innerHTML = '';
   } else if(state.phase==='offer_made' && isCandidate){
     panel.classList.remove('hidden');
-    panel.innerHTML = '<h2>💰 Offre du banquier·ère : '+fmtAmount(state.currentOffer)+'</h2><div class="offer-btns"><button class="btn-ghost" onclick="respondOffer(false)">✊ Dlilek</button><button class="btn-main" onclick="respondOffer(true)">🤝 Mlek</button></div>';
+    if(state.offerType==='swap'){
+      panel.innerHTML = '<h2>🔄 Le/la banquier·ère te propose d\'échanger ta mallette</h2><p class="muted">Contre une autre mallette fermée, sans connaître son contenu.</p><div class="offer-btns"><button class="btn-ghost" onclick="respondOffer(false)">Non merci</button><button class="btn-main" onclick="respondOffer(true)">Oui, échanger</button></div>';
+    } else if(state.offerType==='gift'){
+      panel.innerHTML = '<h2>🎁 Offre du banquier·ère : '+esc(state.currentOfferLabel)+'</h2><div class="offer-btns"><button class="btn-ghost" onclick="respondOffer(false)">✊ Dlilek</button><button class="btn-main" onclick="respondOffer(true)">🤝 Mlek</button></div>';
+    } else {
+      panel.innerHTML = '<h2>💰 Offre du banquier·ère : '+fmtAmount(state.currentOffer)+'</h2><div class="offer-btns"><button class="btn-ghost" onclick="respondOffer(false)">✊ Dlilek</button><button class="btn-main" onclick="respondOffer(true)">🤝 Mlek</button></div>';
+    }
   } else if(state.phase==='offer_made' && !isCandidate){
     panel.classList.remove('hidden');
-    panel.innerHTML = '<h2>💰 Ton offre : '+fmtAmount(state.currentOffer)+'</h2><p class="muted" style="text-align:center">⏳ En attente de la décision…</p>';
+    const lbl = state.offerType==='swap' ? 'Proposition d\'échange envoyée' : state.offerType==='gift' ? 'Ton offre : '+esc(state.currentOfferLabel) : 'Ton offre : '+fmtAmount(state.currentOffer);
+    panel.innerHTML = '<h2>'+lbl+'</h2><p class="muted" style="text-align:center">⏳ En attente de la décision…</p>';
   } else {
     panel.classList.add('hidden');
     panel.innerHTML = '';
