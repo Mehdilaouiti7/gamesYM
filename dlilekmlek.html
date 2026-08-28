@@ -153,6 +153,8 @@
   .box.tappable:active{transform:scale(.92)}
   .box.opened{background:rgba(0,0,0,.4);color:var(--chalk-dim);font-size:.6rem;border-style:dashed;opacity:.65}
   .box.own{background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;border-color:var(--butter);font-size:1.15rem}
+  .box.own.revealed{font-size:.62rem}
+  .box.peeked{background:rgba(0,0,0,.18);border-style:dashed;border-color:var(--butter);color:var(--chalk-dim);font-size:.6rem;opacity:.85}
 
   .wilaya-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
   .wilaya-btn{
@@ -765,7 +767,12 @@ function renderGame(){
       const isOwn = state.ownBoxId===i;
       let cls='box', content=String(i+1), handler='';
       if(opened){ cls+=' opened'; content = labelHtml(BOX_VALUES[state.assignment[i]]); }
-      else if(isOwn){ cls+=' own'; content='💼'; }
+      else if(isOwn){
+        cls+=' own';
+        if(!isCandidate){ cls+=' revealed'; content = labelHtml(BOX_VALUES[state.assignment[i]]); }
+        else content='💼';
+      }
+      else if(!isCandidate){ cls+=' peeked'; content = labelHtml(BOX_VALUES[state.assignment[i]]); }
       else if(isCandidate && state.phase==='pick_box'){ cls+=' tappable'; handler='pickBox('+i+')'; }
       else if(isCandidate && state.phase==='opening'){ cls+=' tappable'; handler='openBox('+i+')'; }
       else if(isCandidate && state.phase==='swap_pick'){ cls+=' tappable'; handler='pickSwapBox('+i+')'; }
