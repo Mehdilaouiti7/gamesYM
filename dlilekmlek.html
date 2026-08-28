@@ -118,6 +118,9 @@
   .wait-role-chip .val{font-size:.9rem;font-weight:600}
 
   .status-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  #banker-peek{border:1.5px dashed var(--butter);padding:10px 12px}
+  #banker-peek .lbl{color:var(--chalk-dim);font-size:.78rem;margin-bottom:2px}
+  #banker-peek .val{font-weight:700;font-size:1.05rem;color:var(--butter)}
   .role-badge{
     width:52px;height:52px;border-radius:16px;flex-shrink:0;
     background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;
@@ -264,6 +267,7 @@
       </div>
     </div>
 
+    <div class="card hidden" id="banker-peek" style="text-align:center"></div>
     <div class="card hidden" id="wilaya-panel"></div>
     <div class="dm-layout hidden" id="dm-layout">
       <div class="value-col" id="value-col-left"></div>
@@ -330,6 +334,7 @@ const BOX_VALUES = [
   {n:50000, label:'50 000 DT'},
   {n:100000, label:'100 000 DT'},
   {n:200000, label:'200 000 DT'},
+  {n:300000, label:'300 000 DT'},
   {n:500000, label:'500 000 DT'},
   {n:700000, label:'700 000 DT'},
   {n:1000000000, label:'مليار', joke:true, guaranteed:true}
@@ -720,10 +725,18 @@ function renderGame(){
   if(inWilayaPhase){
     if(!renderedWilaya){ renderWilayaPanel(isCandidate); renderedWilaya = true; }
     $('offer-panel').classList.add('hidden');
+    $('banker-peek').classList.add('hidden');
     lastOpenedCount = state.openedBoxIds.length;
     return;
   }
   renderedWilaya = false;
+
+  const showPeek = !isCandidate && state.ownBoxId !== null && state.ownBoxId !== undefined;
+  $('banker-peek').classList.toggle('hidden', !showPeek);
+  if(showPeek){
+    const ownVal = BOX_VALUES[state.assignment[state.ownBoxId]];
+    $('banker-peek').innerHTML = '<div class="lbl">💼 Mallette du/de la candidat·e</div><div class="val">'+labelHtml(ownVal)+'</div>';
+  }
 
   if(lastOpenedCount===-1 || state.phase==='pick_box'){
     lastOpenedCount = state.openedBoxIds.length;
