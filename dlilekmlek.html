@@ -181,6 +181,32 @@
     max-width:80vw;
   }
   .reveal-badge.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+
+  /* Desktop / TV: widen the board so all 24 boxes + both value ladders
+     fit on one screen at once, no scrolling needed to compare boxes. */
+  @media (min-width: 700px){
+    .frame.wide-board{ max-width: 760px; }
+    .frame.wide-board .dm-layout{ gap: 10px; }
+    .frame.wide-board .box-grid{ grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .frame.wide-board .value-col{ flex: 0 0 104px; }
+    .frame.wide-board .vl-item{ font-size: .68rem; padding: 6px 4px; }
+  }
+  @media (min-width: 1000px){
+    .frame.wide-board{ max-width: 1000px; }
+    .frame.wide-board .box-grid{ grid-template-columns: repeat(6, 1fr); gap: 9px; }
+    .frame.wide-board .value-col{ flex: 0 0 126px; }
+    .frame.wide-board .vl-item{ font-size: .75rem; padding: 7px 5px; }
+    .frame.wide-board .box{ font-size: .95rem; }
+    .frame.wide-board .box.opened, .frame.wide-board .box.peeked{ font-size: .66rem; }
+  }
+  @media (min-width: 1400px){
+    .frame.wide-board{ max-width: 1260px; }
+    .frame.wide-board .box-grid{ grid-template-columns: repeat(8, 1fr); gap: 10px; }
+    .frame.wide-board .value-col{ flex: 0 0 146px; }
+    .frame.wide-board .vl-item{ font-size: .82rem; padding: 8px 6px; }
+    .frame.wide-board .box{ font-size: 1.05rem; }
+    .frame.wide-board .box.opened, .frame.wide-board .box.peeked{ font-size: .72rem; }
+  }
 </style>
 <link rel="stylesheet" href="responsive.css">
 <link rel="stylesheet" href="avatar.css">
@@ -356,7 +382,10 @@ let offerDraftType = null, lastOpenedCount = -1, revealTimer = null;
 
 const $ = id => document.getElementById(id);
 const screens = ['home','create','join','wait','game','end'];
-function show(name){ screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name)); }
+function show(name){
+  screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name));
+  document.querySelector('.frame').classList.toggle('wide-board', name==='game');
+}
 function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
 function pAvatar(p){ return p && p.avatar ? p.avatar : '🙂'; }
 function otherRole(r){ return r==='candidate' ? 'banker' : 'candidate'; }
