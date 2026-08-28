@@ -285,7 +285,8 @@
         </div>
       </div>
       <div class="card taboo-card ref-mode hidden" id="referee-card">
-        <p class="muted" style="margin-bottom:8px">👀 Mode arbitre — vérifie qu'aucun de ces mots n'est prononcé !</p>
+        <p class="muted" style="margin-bottom:8px">👀 Mode arbitre — vérifie qu'aucun mot tabou n'est prononcé !</p>
+        <div class="taboo-word" id="referee-word" lang="ar" dir="rtl"></div>
         <ul class="taboo-list" id="referee-list"></ul>
       </div>
       <div class="card hidden" id="watcher-card" style="text-align:center">
@@ -909,6 +910,7 @@ function renderGame(){
       $('taboo-list').innerHTML = card.taboo.map(w => '<li><span class="no">🚫</span><span lang="ar" dir="rtl">'+esc(w)+'</span></li>').join('');
     } else if(isReferee){
       const card = WORD_BANK[state.currentCardIdx];
+      $('referee-word').textContent = card.word;
       $('referee-list').innerHTML = card.taboo.map(w => '<li><span class="no">🚫</span><span lang="ar" dir="rtl">'+esc(w)+'</span></li>').join('');
     } else {
       $('watcher-text').innerHTML = '👀 ' + pAvatar(giverP) + ' <b>' + esc(giverP.name) + '</b> (équipe ' + esc(TEAM_NAMES[team]) + ') fait deviner un mot à son équipe…';
