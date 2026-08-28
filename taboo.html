@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Games Room · Taboo</title>
+<meta name="theme-color" content="#233a2f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Games Room">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board:#24382e;
+    --board-deep:#1b2c24;
+    --chalk:#f3efe4;
+    --chalk-dim:#c9c4b4;
+    --butter:#e9c46a;
+    --red-chalk:#e76f51;
+    --blue-chalk:#8ecae6;
+    --green-chalk:#7bb274;
+    --line:rgba(243,239,228,.18);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%}
+  body{
+    font-family:'Fredoka',system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(233,196,106,.07), transparent 60%),
+      linear-gradient(var(--board), var(--board-deep));
+    background-repeat: no-repeat;
+    color:var(--chalk);
+    min-height:100dvh;
+    display:flex;flex-direction:column;align-items:center;
+    padding:20px 16px 40px;
+  }
+  .frame{width:100%;max-width:460px}
+  header{text-align:center;margin-bottom:14px;position:relative}
+  h1{font-weight:700;font-size:1.9rem;letter-spacing:.5px}
+  .tagline{color:var(--chalk-dim);font-size:.9rem;margin-top:2px}
+  .back-link{display:inline-block;margin-top:8px;color:var(--chalk-dim);font-size:.82rem;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+  .back-link:active{opacity:.7}
+  .quit-match-btn{
+    display:inline-block;width:auto;margin:0 0 10px;padding:6px 12px;
+    background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:999px;
+    color:var(--chalk-dim);font-size:.78rem;font-weight:500;cursor:pointer;
+  }
+  .quit-match-btn:active{opacity:.7}
+  .card{
+    background:linear-gradient(160deg, rgba(52,74,62,.9), rgba(30,46,38,.88));
+    border:1px solid rgba(243,239,228,.13);
+    border-radius:var(--radius);
+    padding:18px 16px;
+    margin-bottom:14px;
+    box-shadow:0 10px 26px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .card h2{font-size:1.05rem;font-weight:600;margin-bottom:10px}
+  label{display:block;font-size:.85rem;color:var(--chalk-dim);margin:10px 0 4px}
+  input[type=text]{
+    width:100%;
+    background:rgba(0,0,0,.25);
+    border:1.5px dashed var(--line);
+    border-radius:10px;
+    color:var(--chalk);
+    font-family:'Fredoka',sans-serif;
+    font-size:1rem;
+    padding:11px 12px;
+    outline:none;
+  }
+  input[type=text].code-input{
+    font-family:'Space Mono',monospace;font-size:1.15rem;letter-spacing:.25em;text-transform:uppercase;
+  }
+  input:focus{border-color:var(--butter)}
+  button{
+    font-family:'Fredoka',sans-serif;
+    font-weight:600;font-size:1rem;
+    border:none;border-radius:13px;
+    padding:13px 16px;width:100%;
+    cursor:pointer;margin-top:12px;
+    transition:transform .12s cubic-bezier(.22,1,.36,1), filter .15s, opacity .15s;
+  }
+  button:active{transform:scale(.97);filter:brightness(.96)}
+  button:disabled{opacity:.45;cursor:default}
+  .btn-main{background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;box-shadow:0 6px 16px rgba(233,196,106,.18)}
+  .btn-ghost{background:rgba(255,255,255,.04);color:var(--chalk);border:1.5px solid var(--line)}
+  .btn-small{width:auto;padding:8px 14px;font-size:.85rem;margin-top:0}
+  .muted{color:var(--chalk-dim);font-size:.85rem;line-height:1.45}
+  .error{color:var(--red-chalk);font-size:.85rem;margin-top:8px;min-height:1.2em}
+  .hidden{display:none !important}
+
+  .code-big{
+    font-family:'Space Mono',monospace;
+    font-size:2.4rem;font-weight:700;
+    letter-spacing:.35em;text-align:center;
+    color:var(--butter);
+    padding:10px 0 4px;
+    text-indent:.35em;
+  }
+  .pulse{animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+  .joined-list{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:12px 0}
+  .joined-chip{background:rgba(0,0,0,.2);border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;font-size:.85rem;display:flex;align-items:center;gap:5px}
+  .joined-chip.host{box-shadow:inset 0 0 0 1px var(--butter)}
+  .joined-chip.team-0{border-color:var(--red-chalk)}
+  .joined-chip.team-1{border-color:var(--blue-chalk)}
+  .joined-chip.me{cursor:pointer}
+  .joined-chip .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .joined-chip.team-0 .dot{background:var(--red-chalk)}
+  .joined-chip.team-1 .dot{background:var(--blue-chalk)}
+
+  .status-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .team-badge{
+    width:52px;height:52px;border-radius:16px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.5rem;color:#1a1006;
+    box-shadow:0 6px 16px rgba(0,0,0,.25);
+  }
+  .team-badge.team-0{background:linear-gradient(160deg,#f4a68f,var(--red-chalk))}
+  .team-badge.team-1{background:linear-gradient(160deg,#c3e6f7,var(--blue-chalk))}
+  .status-text{flex:1}
+  .status-text .rnd{font-size:.8rem;color:var(--chalk-dim)}
+  .status-text .ph{font-size:.92rem;font-weight:600}
+
+  .scoreboard-row{display:flex;gap:8px;margin-bottom:10px}
+  .team-score{flex:1;border-radius:12px;padding:10px;text-align:center;border:1.5px solid var(--line);background:rgba(0,0,0,.2)}
+  .team-score.team-0{border-color:var(--red-chalk)}
+  .team-score.team-1{border-color:var(--blue-chalk)}
+  .team-score .lbl{font-size:.72rem;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:.03em}
+  .team-score .n{font-family:'Space Mono',monospace;font-weight:700;font-size:1.5rem}
+
+  .timer-badge{
+    font-family:'Space Mono',monospace;font-weight:700;font-size:1.4rem;
+    text-align:center;color:var(--butter);margin-bottom:10px;
+  }
+  .timer-badge.low{color:var(--red-chalk)}
+
+  .taboo-card{text-align:center}
+  .taboo-word{
+    font-size:1.7rem;font-weight:700;color:var(--butter);
+    padding:10px 0;border-bottom:1px dashed var(--line);margin-bottom:12px;
+  }
+  .taboo-list{list-style:none}
+  .taboo-list li{
+    display:flex;align-items:center;gap:8px;
+    padding:6px 4px;font-size:1rem;color:var(--chalk-dim);
+    border-bottom:1px solid rgba(243,239,228,.08);
+  }
+  .taboo-list li:last-child{border-bottom:none}
+  .taboo-list .no{color:var(--red-chalk);flex-shrink:0}
+
+  .action-btns{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+  .action-btns button{margin-top:0}
+  .btn-found{background:linear-gradient(160deg,#96d49a,var(--green-chalk));color:#0f2b12}
+  .btn-taboo{background:linear-gradient(160deg,#f08a72,var(--red-chalk));color:#3a0f05}
+  .btn-pass{background:rgba(255,255,255,.04);color:var(--chalk);border:1.5px solid var(--line)}
+
+  .turnlog-list{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+  .turnlog-row{display:flex;align-items:center;gap:8px;font-size:.9rem;padding:5px 8px;border-radius:8px;background:rgba(0,0,0,.15)}
+  .turnlog-row .ic{width:20px;text-align:center;flex-shrink:0}
+  .turnlog-row.found .ic{color:var(--green-chalk)}
+  .turnlog-row.taboo .ic{color:var(--red-chalk)}
+  .turnlog-row.pass .ic{color:var(--chalk-dim)}
+
+  .rank-list{display:flex;flex-direction:column;gap:6px;margin:14px 0 4px}
+  .rank-list .row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:rgba(0,0,0,.18);font-size:.9rem}
+  .rank-list .row.win{border:1px solid var(--butter)}
+  .rank-list .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .rank-list .dot.team-0{background:var(--red-chalk)}
+  .rank-list .dot.team-1{background:var(--blue-chalk)}
+  .rank-list .nm{flex:1}
+  .rank-list .sc{font-family:'Space Mono',monospace;font-weight:700}
+  .win-card{text-align:center}
+  .win-card .big{font-size:2.6rem;margin:6px 0}
+</style>
+<link rel="stylesheet" href="responsive.css">
+<link rel="stylesheet" href="avatar.css">
+</head>
+<body>
+<div class="frame">
+  <header>
+    <h1>🚫 Taboo</h1>
+    <div class="tagline"><span lang="ar" dir="rtl">الكلمة الممنوعة</span> — devine le mot en équipe, sans les mots interdits</div>
+    <a class="back-link" href="index.html">← Retour à l'accueil</a>
+  </header>
+
+  <div id="screen-home">
+    <div class="card">
+      <h2>Nouvelle partie</h2>
+      <p class="muted">Crée une partie et envoie le code à tes ami·e·s. Deux équipes, autant de joueurs que vous voulez !</p>
+      <button class="btn-main" onclick="show('create')">Créer une partie</button>
+    </div>
+    <div class="card">
+      <h2>Rejoindre</h2>
+      <p class="muted">Tu as reçu un code ? Entre-le ici.</p>
+      <button class="btn-ghost" onclick="show('join')">Rejoindre avec un code</button>
+    </div>
+    <div class="card">
+      <h2>Règles</h2>
+      <p class="muted">Vous êtes répartis en deux équipes (<span style="color:var(--red-chalk)">■</span> et <span style="color:var(--blue-chalk)">■</span>), assignées automatiquement — tu peux changer d'équipe dans la salle d'attente en touchant ta pastille.<br>
+      Chacun·e son tour, un·e joueur·se voit un mot à faire deviner à son équipe, à l'oral, en <b>60 secondes</b> — sans jamais dire ce mot ni les mots tabous affichés en dessous. Le reste du groupe écoute et devine à voix haute.<br>
+      Pour chaque mot : <b>✅ Trouvé</b> (+1 point), <b>⛔ Tabou</b> si un mot interdit a échappé (-1 point), ou <b>⏭️ Passer</b> (0 point, mot suivant).<br>
+      Le chrono épuisé, le tour passe à l'équipe adverse. Après une manche complète (chacun·e a eu son tour), vous choisissez de continuer ou de terminer — l'équipe avec le plus de points gagne !</p>
+    </div>
+  </div>
+
+  <div id="screen-create" class="hidden">
+    <div class="card">
+      <h2>Créer une partie</h2>
+      <label>Ton prénom</label>
+      <input type="text" id="create-name" maxlength="12" placeholder="Ex. Léa">
+      <label>Ton avatar</label>
+      <div class="avatar-row" id="create-avatar-row"></div>
+      <div class="error" id="create-err"></div>
+      <button class="btn-main" id="btn-create" onclick="createGame()">Créer et obtenir le code</button>
+      <button class="btn-ghost" onclick="show('home')">Retour</button>
+    </div>
+  </div>
+
+  <div id="screen-join" class="hidden">
+    <div class="card">
+      <h2>Rejoindre une partie</h2>
+      <label>Code de la partie</label>
+      <input type="text" class="code-input" id="join-code" maxlength="4" placeholder="ABCD">
+      <label>Ton prénom</label>
+      <input type="text" id="join-name" maxlength="12" placeholder="Ex. Emma">
+      <label>Ton avatar</label>
+      <div class="avatar-row" id="join-avatar-row"></div>
+      <div class="error" id="join-err"></div>
+      <button class="btn-main" id="btn-join" onclick="joinGame()">Rejoindre</button>
+      <button class="btn-ghost" onclick="show('home')">Retour</button>
+    </div>
+  </div>
+
+  <div id="screen-wait" class="hidden">
+    <div class="card" style="text-align:center">
+      <h2>Partie créée !</h2>
+      <p class="muted">Envoie ce code à tes ami·e·s :</p>
+      <div class="code-big" id="wait-code">····</div>
+      <button class="btn-main btn-small hidden" id="share-btn" onclick="shareCode()">📤 Partager le code</button>
+      <button class="btn-ghost btn-small" onclick="copyCode()" id="copy-btn">Copier le lien</button>
+      <p class="muted" style="margin-top:12px">Touche ta pastille pour changer d'équipe :</p>
+      <div class="joined-list" id="joined-list"></div>
+      <button class="btn-main hidden" id="btn-start" onclick="startGame()">Démarrer la partie</button>
+      <p class="muted pulse hidden" id="wait-note" style="margin-top:10px">En attente que l'hôte démarre…</p>
+    </div>
+  </div>
+
+  <div id="screen-game" class="hidden">
+    <button class="quit-match-btn" onclick="confirmQuitMatch()">✕ Quitter</button>
+    <div class="status-bar">
+      <div class="team-badge" id="team-badge">🚫</div>
+      <div class="status-text">
+        <div class="rnd" id="round-label">Manche 1</div>
+        <div class="ph" id="phase-label">…</div>
+      </div>
+    </div>
+    <div class="scoreboard-row">
+      <div class="team-score team-0"><div class="lbl">Rouge</div><div class="n" id="score-0">0</div></div>
+      <div class="team-score team-1"><div class="lbl">Bleu</div><div class="n" id="score-1">0</div></div>
+    </div>
+
+    <div id="turn-ready-zone" class="hidden">
+      <div class="card" style="text-align:center">
+        <p id="turn-ready-text" class="muted"></p>
+        <button class="btn-main hidden" id="btn-start-turn" onclick="startTurn()">🚀 Commencer mon tour (60s)</button>
+      </div>
+    </div>
+
+    <div id="turn-active-zone" class="hidden">
+      <div class="timer-badge" id="timer-badge">60s</div>
+      <div class="card taboo-card hidden" id="giver-card">
+        <div class="taboo-word" id="taboo-word" lang="ar" dir="rtl"></div>
+        <ul class="taboo-list" id="taboo-list"></ul>
+        <div class="action-btns">
+          <button class="btn-found" onclick="markOutcome('found')">✅ Trouvé</button>
+          <button class="btn-taboo" onclick="markOutcome('taboo')">⛔ Tabou</button>
+          <button class="btn-pass" onclick="markOutcome('pass')">⏭️ Passer</button>
+        </div>
+      </div>
+      <div class="card hidden" id="watcher-card" style="text-align:center">
+        <p class="muted" id="watcher-text"></p>
+        <p class="muted" id="watcher-tally" style="margin-top:8px"></p>
+      </div>
+    </div>
+
+    <div id="turn-summary-zone" class="hidden">
+      <div class="card">
+        <h2 id="summary-title">Tour terminé !</h2>
+        <div class="turnlog-list" id="turnlog-list"></div>
+        <button class="btn-main" onclick="continueAfterTurn()">Continuer</button>
+      </div>
+    </div>
+
+    <div id="round-end-zone" class="hidden">
+      <div class="card" style="text-align:center">
+        <h2 id="round-end-title">Manche terminée !</h2>
+        <p class="muted" id="round-end-text"></p>
+        <button class="btn-main" onclick="nextRound()">Manche suivante</button>
+        <button class="btn-ghost" onclick="endGame()">Terminer la partie</button>
+      </div>
+    </div>
+
+    <p class="muted" style="text-align:center;margin-top:10px">Code de la partie : <b id="game-code-label"></b></p>
+  </div>
+
+  <div id="screen-end" class="hidden">
+    <div class="card win-card">
+      <div class="big" id="end-emoji">🏆</div>
+      <h2 id="end-title">…</h2>
+      <p class="muted" id="end-detail"></p>
+      <div class="rank-list" id="rank-list"></div>
+      <button class="btn-main" onclick="location.reload()">Nouvelle partie</button>
+    </div>
+  </div>
+</div>
+
+<script src="realtime.js"></script>
+<script src="leave-guard.js"></script>
+<script src="recent-games.js"></script>
+<script src="feedback.js"></script>
+<script src="connection-banner.js"></script>
+<script src="avatar-picker.js"></script>
+<script src="game-link.js"></script>
+<script>
+const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
+const HEADERS = {
+  "apikey": SB_KEY,
+  "Authorization": "Bearer " + SB_KEY,
+  "Content-Type": "application/json"
+};
+const TEAM_NAMES = ['Rouge','Bleu'];
+const MAX_PLAYERS = 12;
+const TURN_MS = 60000;
+const WORD_BANK = [
+  {word:'كسكسي', taboo:['أكلة','قمح','مرقة','تونسي']},
+  {word:'شيشة', taboo:['تدخين','دخان','نفس','قهوة']},
+  {word:'كرهبة', taboo:['طريق','بنزين','سواقة','تسوق']},
+  {word:'تلفزة', taboo:['تفرج','مسلسل','ريموت','صالة']},
+  {word:'تلفون', taboo:['تكلم','رنة','تطبيقة','باتري']},
+  {word:'بابور', taboo:['كوجينة','نار','طباخ','غاز']},
+  {word:'جمل', taboo:['صحراء','حيوان','صبر','ركوب']},
+  {word:'قطوس', taboo:['حيوان','دار','فار','ونيسة']},
+  {word:'كلب', taboo:['حيوان','عوى','وفي','دار']},
+  {word:'مطر', taboo:['سماء','شتا','مظلة','غيم']},
+  {word:'شمس', taboo:['سخانة','صيف','نهار','سماء']},
+  {word:'مدرسة', taboo:['تلاميذ','أستاذ','قسم','تعلم']},
+  {word:'طبيب', taboo:['مستشفى','مريض','دواء','كشف']},
+  {word:'بوليس', taboo:['قانون','كرهبة','لص','حجز']},
+  {word:'عرس', taboo:['عروسة','فرح','حفلة','خاتم']},
+  {word:'مقهى', taboo:['قهوة','جلسة','أصحاب','نرجيلة']},
+  {word:'دوش', taboo:['ماء','غسيل','صابون','نظافة']},
+  {word:'بحر', taboo:['عوم','رمل','صيف','موج']},
+  {word:'جبل', taboo:['طالع','صخر','هواء','تسلق']},
+  {word:'مطار', taboo:['طيارة','سفر','جواز','بواب']},
+  {word:'فلوس', taboo:['بنك','شراء','جيب','غالي']},
+  {word:'عيد', taboo:['فرحة','لباس جديد','حلويات','صلاة']},
+  {word:'رمضان', taboo:['صيام','فطور','تراويح','هلال']},
+  {word:'برد', taboo:['شتا','كسوة','ثلج','رعشة']},
+  {word:'سخانة', taboo:['صيف','عرق','شمس','مروحة']},
+  {word:'فرن', taboo:['خبز','كوجينة','حرارة','طباخة']},
+  {word:'سوق', taboo:['خضرة','بياع','حانوت','ثمن']},
+  {word:'حفلة', taboo:['موسيقى','رقص','أصحاب','فرح']},
+  {word:'كورة', taboo:['ملعب','لاعب','هدف','رياضة']},
+  {word:'سباحة', taboo:['بحر','ماء','مسبح','عوم']},
+  {word:'نوم', taboo:['فراش','ليل','تعب','حلم']},
+  {word:'جوع', taboo:['أكل','معدة','وجبة','مطعم']},
+  {word:'عطش', taboo:['ماء','شراب','حر','كأس']},
+  {word:'لبلابي', taboo:['حمص','فطور','خبز','حريف']},
+  {word:'مقروض', taboo:['حلويات','عيد','تمر','عسل']},
+  {word:'فريكاسي', taboo:['ساندويتش','مقلي','حريف','خبز']},
+  {word:'جبة', taboo:['لباس','عيد','قماش','تفصيل']},
+  {word:'مكتبة', taboo:['كتب','قراءة','أستاذ','مدرسة']}
+];
+
+let code = null, me = null, state = null, pollTimer = null, busy = false;
+let turnWatchKey = null, turnTimerInterval = null;
+let renderedTurnLogKey = null;
+
+const $ = id => document.getElementById(id);
+const screens = ['home','create','join','wait','game','end'];
+function show(name){ screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name)); }
+function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
+function pAvatar(p){ return p && p.avatar ? p.avatar : '🙂'; }
+
+function genCode(){
+  const letters="ABCDEFGHJKMNPQRSTUVWXYZ";
+  let c="";
+  for(let i=0;i<4;i++) c += letters[Math.floor(Math.random()*letters.length)];
+  return c;
+}
+function saveRole(c, idx){ try{ localStorage.setItem('tb-role-'+c, String(idx)); }catch(e){} }
+function loadRole(c){ try{ const v=localStorage.getItem('tb-role-'+c); return v===null?null:parseInt(v,10); }catch(e){ return null; } }
+function shuffledIndices(n){
+  const arr = Array.from({length:n}, (_,i)=>i);
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    const tmp = arr[i]; arr[i]=arr[j]; arr[j]=tmp;
+  }
+  return arr;
+}
+
+async function loadState(c){
+  try{
+    const r = await fetch(SB_URL+"/rest/v1/tb_games?code=eq."+encodeURIComponent(c)+"&select=state", {headers:HEADERS});
+    if(!r.ok){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return null; }
+    if(window.GYMConnection) window.GYMConnection.reportSuccess();
+    const rows = await r.json();
+    return rows.length ? rows[0].state : null;
+  }catch(e){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return null; }
+}
+async function saveState(st){
+  try{
+    const r = await fetch(SB_URL+"/rest/v1/tb_games", {
+      method:"POST",
+      headers:{...HEADERS, "Prefer":"resolution=merge-duplicates"},
+      body: JSON.stringify({code:st.code, state:st, updated_at:new Date().toISOString()})
+    });
+    if(window.GYMConnection) (r.ok ? window.GYMConnection.reportSuccess() : window.GYMConnection.reportFailure());
+    return r.ok;
+  }catch(e){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return false; }
+}
+async function saveResult(st){
+  try{
+    const winner = st.scores[0]===st.scores[1] ? 'tie' : (st.scores[0]>st.scores[1] ? 'Rouge' : 'Bleu');
+    await fetch(SB_URL+"/rest/v1/tb_results", {
+      method:"POST", headers:HEADERS,
+      body: JSON.stringify({
+        code: st.code,
+        players: st.players.map(p=>p.name),
+        teams: st.teams,
+        scores: st.scores,
+        winner_team: winner,
+        rounds: st.round
+      })
+    });
+  }catch(e){}
+}
+
+/* ---------- rules helpers ---------- */
+function buildTurnOrder(players, teams){
+  const byTeam = [[], []];
+  players.forEach((p,i) => byTeam[teams[i]].push(i));
+  byTeam.forEach(arr => {
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      const tmp = arr[i]; arr[i]=arr[j]; arr[j]=tmp;
+    }
+  });
+  const order = [];
+  const maxLen = Math.max(byTeam[0].length, byTeam[1].length);
+  for(let i=0;i<maxLen;i++){
+    if(byTeam[0][i]!==undefined) order.push(byTeam[0][i]);
+    if(byTeam[1][i]!==undefined) order.push(byTeam[1][i]);
+  }
+  return order;
+}
+function drawCard(st){
+  if(!st.deck || st.deckIdx >= st.deck.length){
+    st.deck = shuffledIndices(WORD_BANK.length);
+    st.deckIdx = 0;
+  }
+  const cardIdx = st.deck[st.deckIdx];
+  st.deckIdx += 1;
+  return cardIdx;
+}
+function setupTurn(st){
+  st.currentGiverIdx = st.turnOrder[st.turnIdx];
+  st.phase = 'turn_ready';
+  st.turnEndsAt = null;
+  st.currentCardIdx = null;
+  st.turnLog = [];
+}
+function startNewRound(st, roundNum){
+  st.round = roundNum;
+  st.turnOrder = buildTurnOrder(st.players, st.teams);
+  st.turnIdx = 0;
+  setupTurn(st);
+}
+
+/* ---------- create / join ---------- */
+const createAvatarPicker = window.GYMAvatarPicker.render('create-avatar-row');
+const joinAvatarPicker = window.GYMAvatarPicker.render('join-avatar-row');
+async function createGame(){
+  const name = $('create-name').value.trim() || "Joueur 1";
+  const avatar = createAvatarPicker.get();
+  $('btn-create').disabled = true; busy = true;
+  code = genCode();
+  state = { v:1, code, status:'waiting', players:[{name, avatar}], teams:[0], scores:[0,0], round:0 };
+  const ok = await saveState(state);
+  busy = false; $('btn-create').disabled = false;
+  if(!ok){ $('create-err').textContent = "Connexion impossible. Vérifie ton réseau et réessaie."; return; }
+  me = 0;
+  saveRole(code, 0);
+  if(window.GYMRecent) window.GYMRecent.record('tb', code, 'Taboo');
+  $('wait-code').textContent = code;
+  renderWait();
+  show('wait');
+  startPolling();
+}
+async function joinGame(){
+  const c = $('join-code').value.trim().toUpperCase();
+  const name = $('join-name').value.trim() || "Joueur";
+  const avatar = joinAvatarPicker.get();
+  if(!/^[A-Z]{4}$/.test(c)){ $('join-err').textContent = "Le code fait 4 lettres."; return; }
+  $('join-err').textContent = "";
+  $('btn-join').disabled = true; busy = true;
+
+  const st = await loadState(c);
+  if(!st){
+    $('join-err').textContent = "Partie introuvable. Vérifie le code.";
+    $('btn-join').disabled = false; busy = false; return;
+  }
+  const existing = loadRole(c);
+  if(existing!==null && st.players[existing]){
+    code = c; me = existing; state = st;
+    busy = false; $('btn-join').disabled = false;
+    if(st.status==='waiting'){ $('wait-code').textContent = c; renderWait(); show('wait'); startPolling(); }
+    else if(st.status==='finished'){ code=c; state=st; renderEnd(); }
+    else { enterGame(); startPolling(); }
+    return;
+  }
+  if(st.status!=='waiting'){
+    $('join-err').textContent = "Cette partie a déjà commencé.";
+    $('btn-join').disabled = false; busy = false; return;
+  }
+  if(st.players.length >= MAX_PLAYERS){
+    $('join-err').textContent = "Cette partie est complète.";
+    $('btn-join').disabled = false; busy = false; return;
+  }
+  const newIdx = st.players.length;
+  st.players.push({name, avatar});
+  st.teams.push(newIdx % 2);
+  const ok = await saveState(st);
+  busy = false; $('btn-join').disabled = false;
+  if(!ok){ $('join-err').textContent = "Erreur d'enregistrement. Réessaie."; return; }
+  code = c; me = newIdx; state = st;
+  saveRole(c, newIdx);
+  if(window.GYMRecent) window.GYMRecent.record('tb', c, 'Taboo');
+  $('wait-code').textContent = c;
+  renderWait();
+  show('wait');
+  startPolling();
+}
+async function toggleMyTeam(){
+  if(busy || !state || state.status!=='waiting' || me===null) return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.status!=='waiting'){ state=st; busy=false; renderWait(); return; }
+  st.teams[me] = st.teams[me]===0 ? 1 : 0;
+  const ok = await saveState(st);
+  busy = false;
+  if(!ok) return;
+  state = st;
+  renderWait();
+}
+async function startGame(){
+  if(busy || !state || me!==0 || state.status!=='waiting' || state.players.length<2) return;
+  if(!state.teams.includes(0) || !state.teams.includes(1)) return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.status!=='waiting'){ state=st; busy=false; renderWait(); return; }
+  st.status = 'playing';
+  st.deck = shuffledIndices(WORD_BANK.length);
+  st.deckIdx = 0;
+  startNewRound(st, 1);
+  const ok = await saveState(st);
+  busy = false;
+  if(!ok) return;
+  state = st;
+  enterGame();
+}
+
+function startPolling(){
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(refresh, 2000);
+  window.GYMRealtime.subscribe(SB_URL, SB_KEY, 'tb_games', code, applyIncomingState);
+}
+function applyIncomingState(st){
+  if(busy || !st) return;
+  state = st;
+  if(st.status==='waiting'){ renderWait(); return; }
+  if($('screen-game').classList.contains('hidden') && $('screen-end').classList.contains('hidden')) enterGame();
+  renderCurrent();
+}
+async function refresh(){
+  if(busy || !code) return;
+  const st = await loadState(code);
+  applyIncomingState(st);
+}
+function renderWait(){
+  $('joined-list').innerHTML = state.players.map((p,idx) =>
+    '<span class="joined-chip team-'+state.teams[idx]+(idx===0?' host':'')+(idx===me?' me':'')+'"'+
+    (idx===me?' onclick="toggleMyTeam()"':'')+'>'+
+    '<span class="dot"></span>'+(idx===0?'👑 ':'')+pAvatar(p)+' '+esc(p.name)+'</span>'
+  ).join('');
+  const isHost = me===0;
+  const bothTeams = state.teams.includes(0) && state.teams.includes(1);
+  $('btn-start').classList.toggle('hidden', !isHost);
+  $('btn-start').disabled = state.players.length < 2 || !bothTeams;
+  $('wait-note').classList.toggle('hidden', isHost);
+  if(!isHost) $('wait-note').textContent = "En attente que " + esc(state.players[0].name) + " démarre…";
+}
+function enterGame(){
+  $('game-code-label').textContent = code;
+  show('game');
+  renderCurrent();
+}
+function renderCurrent(){
+  if(!state) return;
+  if(state.status==='finished'){ window.GYMLeaveGuard.disable(); renderEnd(); }
+  else if(state.status==='playing'){ window.GYMLeaveGuard.enable(); renderGame(); }
+}
+
+/* ---------- actions ---------- */
+async function finalizeAction(st){
+  const ok = await saveState(st);
+  if(!ok){ busy = false; renderCurrent(); return; }
+  state = st;
+  busy = false;
+  if(st.status==='finished'){ await saveResult(st); }
+  renderCurrent();
+}
+async function startTurn(){
+  if(busy || !state || state.phase!=='turn_ready' || me!==state.currentGiverIdx) return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='turn_ready'){ state=st; busy=false; renderCurrent(); return; }
+  st.turnEndsAt = Date.now() + TURN_MS;
+  st.currentCardIdx = drawCard(st);
+  st.phase = 'turn_active';
+  await finalizeAction(st);
+}
+async function markOutcome(outcome){
+  if(busy || !state || state.phase!=='turn_active' || me!==state.currentGiverIdx) return;
+  if(Date.now() >= state.turnEndsAt) return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='turn_active'){ state=st; busy=false; renderCurrent(); return; }
+  st.turnLog.push({cardIdx: st.currentCardIdx, outcome});
+  const team = st.teams[st.currentGiverIdx];
+  if(outcome==='found') st.scores[team] += 1;
+  else if(outcome==='taboo') st.scores[team] = Math.max(0, st.scores[team] - 1);
+  st.currentCardIdx = drawCard(st);
+  await finalizeAction(st);
+}
+async function endTurn(){
+  if(busy || !state || state.phase!=='turn_active' || me!==state.currentGiverIdx) return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='turn_active'){ state=st; busy=false; renderCurrent(); return; }
+  st.phase = 'turn_summary';
+  await finalizeAction(st);
+}
+async function continueAfterTurn(){
+  if(busy || !state || state.phase!=='turn_summary') return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='turn_summary'){ state=st; busy=false; renderCurrent(); return; }
+  st.turnIdx += 1;
+  if(st.turnIdx >= st.turnOrder.length) st.phase = 'round_end';
+  else setupTurn(st);
+  await finalizeAction(st);
+}
+async function nextRound(){
+  if(busy || !state || state.phase!=='round_end') return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='round_end'){ state=st; busy=false; renderCurrent(); return; }
+  startNewRound(st, st.round+1);
+  await finalizeAction(st);
+}
+async function endGame(){
+  if(busy || !state || state.phase!=='round_end') return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='round_end'){ state=st; busy=false; renderCurrent(); return; }
+  st.status = 'finished';
+  await finalizeAction(st);
+}
+
+/* ---------- rendering ---------- */
+function zone(name){
+  ['turn-ready-zone','turn-active-zone','turn-summary-zone','round-end-zone'].forEach(z =>
+    $(z).classList.toggle('hidden', z!==name)
+  );
+}
+function watchTurnTimer(){
+  const key = state.turnEndsAt;
+  if(turnWatchKey === key) return;
+  turnWatchKey = key;
+  if(turnTimerInterval){ clearInterval(turnTimerInterval); turnTimerInterval = null; }
+  if(!key) return;
+  turnTimerInterval = setInterval(() => {
+    if(!state || state.phase!=='turn_active' || state.turnEndsAt!==key){
+      clearInterval(turnTimerInterval); turnTimerInterval = null; return;
+    }
+    const remaining = Math.max(0, Math.ceil((state.turnEndsAt - Date.now())/1000));
+    const badge = $('timer-badge');
+    if(badge){ badge.textContent = remaining + 's'; badge.classList.toggle('low', remaining<=10); }
+    if(remaining<=0){
+      clearInterval(turnTimerInterval); turnTimerInterval = null;
+      if(me===state.currentGiverIdx) endTurn();
+    }
+  }, 250);
+}
+function renderGame(){
+  if(!state || state.status!=='playing') return;
+  const isGiver = me===state.currentGiverIdx;
+  const giverP = state.players[state.currentGiverIdx];
+  const team = state.teams[state.currentGiverIdx];
+  $('team-badge').className = 'team-badge team-'+team;
+  $('team-badge').textContent = team===0 ? '🔴' : '🔵';
+  $('round-label').textContent = 'Manche ' + state.round;
+  $('score-0').textContent = state.scores[0];
+  $('score-1').textContent = state.scores[1];
+
+  if(state.phase==='turn_ready'){
+    $('phase-label').textContent = isGiver ? '🚀 C\'est ton tour !' : '⏳ Tour de ' + esc(giverP.name) + '…';
+    zone('turn-ready-zone');
+    $('turn-ready-text').innerHTML = isGiver
+      ? 'C\'est ton tour ! Équipe <b>' + esc(TEAM_NAMES[team]) + '</b>. Tiens le téléphone, tes coéquipier·ère·s devinent à voix haute.'
+      : '⏳ ' + pAvatar(giverP) + ' ' + esc(giverP.name) + ' (équipe ' + esc(TEAM_NAMES[team]) + ') va faire deviner un mot…';
+    $('btn-start-turn').classList.toggle('hidden', !isGiver);
+  } else if(state.phase==='turn_active'){
+    $('phase-label').textContent = isGiver ? '🎤 À toi de faire deviner !' : '👀 ' + esc(giverP.name) + ' fait deviner…';
+    zone('turn-active-zone');
+    $('giver-card').classList.toggle('hidden', !isGiver);
+    $('watcher-card').classList.toggle('hidden', isGiver);
+    if(isGiver){
+      const card = WORD_BANK[state.currentCardIdx];
+      $('taboo-word').textContent = card.word;
+      $('taboo-list').innerHTML = card.taboo.map(w => '<li><span class="no">🚫</span><span lang="ar" dir="rtl">'+esc(w)+'</span></li>').join('');
+    } else {
+      $('watcher-text').innerHTML = '👀 ' + pAvatar(giverP) + ' <b>' + esc(giverP.name) + '</b> (équipe ' + esc(TEAM_NAMES[team]) + ') fait deviner un mot à son équipe…';
+      const found = state.turnLog.filter(l=>l.outcome==='found').length;
+      const taboo = state.turnLog.filter(l=>l.outcome==='taboo').length;
+      $('watcher-tally').textContent = '✅ ' + found + '   ⛔ ' + taboo;
+    }
+    watchTurnTimer();
+  } else if(state.phase==='turn_summary'){
+    $('phase-label').textContent = '🏁 Tour terminé';
+    zone('turn-summary-zone');
+    const logKey = state.currentGiverIdx + '|' + state.turnLog.length;
+    if(renderedTurnLogKey !== logKey){
+      const found = state.turnLog.filter(l=>l.outcome==='found').length;
+      const taboo = state.turnLog.filter(l=>l.outcome==='taboo').length;
+      const passed = state.turnLog.filter(l=>l.outcome==='pass').length;
+      $('summary-title').textContent = 'Tour de ' + giverP.name + ' terminé !';
+      $('turnlog-list').innerHTML =
+        '<div class="turnlog-row found"><span class="ic">✅</span>' + found + ' trouvé' + (found>1?'s':'') + '</div>' +
+        '<div class="turnlog-row taboo"><span class="ic">⛔</span>' + taboo + ' tabou' + (taboo>1?'s':'') + '</div>' +
+        '<div class="turnlog-row pass"><span class="ic">⏭️</span>' + passed + ' passé' + (passed>1?'s':'') + '</div>';
+      renderedTurnLogKey = logKey;
+    }
+  } else if(state.phase==='round_end'){
+    $('phase-label').textContent = '🏁 Fin de manche';
+    zone('round-end-zone');
+    $('round-end-title').textContent = 'Manche ' + state.round + ' terminée !';
+    $('round-end-text').innerHTML = '🔴 Rouge : <b>' + state.scores[0] + '</b> pts &nbsp;·&nbsp; 🔵 Bleu : <b>' + state.scores[1] + '</b> pts';
+  }
+}
+async function renderEnd(){
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  if(turnTimerInterval){ clearInterval(turnTimerInterval); turnTimerInterval = null; }
+  window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
+  if(!$('screen-end').classList.contains('hidden')) return;
+  if(window.GYMRecent) window.GYMRecent.remove('tb', code);
+  const myTeam = me!==null ? state.teams[me] : null;
+  const tie = state.scores[0]===state.scores[1];
+  const winnerTeam = tie ? null : (state.scores[0]>state.scores[1] ? 0 : 1);
+  const iWon = !tie && myTeam===winnerTeam;
+  if(iWon && window.GYMFeedback) window.GYMFeedback.win();
+  $('end-emoji').textContent = tie ? '🤝' : '🏆';
+  $('end-title').textContent = tie ? 'Égalité !' : 'Équipe ' + TEAM_NAMES[winnerTeam] + ' gagne !';
+  $('end-detail').textContent = 'Partie en ' + state.round + ' manche' + (state.round>1?'s':'') + '.';
+  const ranking = state.players.map((p, idx) => ({name:p.name, avatar:pAvatar(p), team:state.teams[idx], idx}));
+  $('rank-list').innerHTML =
+    '<div class="row'+(!tie && winnerTeam===0?' win':'')+'"><span class="dot team-0"></span><span class="nm">Équipe Rouge</span><span class="sc">'+state.scores[0]+' pts</span></div>' +
+    ranking.filter(r=>r.team===0).map(r => '<div class="row"><span class="dot team-0"></span><span class="nm">'+r.avatar+' '+esc(r.name)+(r.idx===me?' (toi)':'')+'</span></div>').join('') +
+    '<div class="row'+(!tie && winnerTeam===1?' win':'')+'" style="margin-top:8px"><span class="dot team-1"></span><span class="nm">Équipe Bleu</span><span class="sc">'+state.scores[1]+' pts</span></div>' +
+    ranking.filter(r=>r.team===1).map(r => '<div class="row"><span class="dot team-1"></span><span class="nm">'+r.avatar+' '+esc(r.name)+(r.idx===me?' (toi)':'')+'</span></div>').join('');
+  show('end');
+}
+function confirmQuitMatch(){
+  if(!state) return;
+  if(!confirm("Es-tu sûr de vouloir quitter ? Tu ne pourras plus reprendre cette partie.")) return;
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  if(turnTimerInterval){ clearInterval(turnTimerInterval); turnTimerInterval = null; }
+  window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
+  window.GYMLeaveGuard.disable();
+  if(window.GYMRecent) window.GYMRecent.remove('tb', code);
+  location.href = 'index.html';
+}
+function copyCode(){
+  const link = window.GYMGameLink.build(code);
+  navigator.clipboard && navigator.clipboard.writeText(link).then(()=>{
+    $('copy-btn').textContent = "Lien copié ✓";
+    setTimeout(()=>$('copy-btn').textContent="Copier le lien", 1500);
+  });
+}
+function shareCode(){
+  if(!navigator.share) return;
+  navigator.share({
+    title: 'Games Room',
+    text: 'Rejoins ma partie de Taboo sur Games Room !',
+    url: window.GYMGameLink.build(code)
+  }).catch(()=>{});
+}
+if($('share-btn')) $('share-btn').classList.toggle('hidden', !navigator.share);
+
+(function(){
+  const qcode = (new URLSearchParams(location.search).get('code')||'').toUpperCase();
+  if(/^[A-Z]{4}$/.test(qcode)){
+    show('join');
+    $('join-code').value = qcode;
+    if(loadRole(qcode)!==null) joinGame();
+  }
+})();
+</script>
+<script src="install-tutorial.js" defer></script>
+</body>
+</html>

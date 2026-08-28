@@ -334,6 +334,11 @@
         <p class="muted">بنت ولد — autant de joueurs que tu veux. Une lettre, une course pour remplir les catégories !</p>
         <button class="btn-main" onclick="location.href='bentwalad.html'">Jouer à Bent Walad</button>
       </div>
+      <div class="card">
+        <div class="card-head"><span class="card-icon">🚫</span><h2>Taboo</h2></div>
+        <p class="muted">الكلمة الممنوعة — deux équipes, un chrono. Fais deviner le mot sans dire les mots interdits !</p>
+        <button class="btn-main" onclick="location.href='taboo.html'">Jouer à Taboo</button>
+      </div>
     </div>
   </div>
 
@@ -922,7 +927,8 @@ const RECENT_META = {
   tm: {emoji:'🧠', label:'The Mind', url:'the-mind.html'},
   cb: {emoji:'🃏', label:'Chkobba', url:'chkobba.html'},
   bw: {emoji:'📖', label:'Bent Walad', url:'bentwalad.html'},
-  dm: {emoji:'💼', label:'Dlilek Mlek', url:'dlilekmlek.html'}
+  dm: {emoji:'💼', label:'Dlilek Mlek', url:'dlilekmlek.html'},
+  tb: {emoji:'🚫', label:'Taboo', url:'taboo.html'}
 };
 function renderRecent(){
   const list = window.GYMRecent ? window.GYMRecent.getAll() : [];
