@@ -311,6 +311,11 @@
       <p class="muted">دليلك ملك — un·e candidat·e, un·e banquier·ère, 24 mallettes. Dlilek ou Mlek ? À deux uniquement.</p>
       <button class="btn-main" onclick="location.href='dlilekmlek.html'">Jouer à Dlilek Mlek</button>
     </div>
+    <div class="card">
+      <div class="card-head"><span class="card-icon">⭕</span><h2>Morpion</h2></div>
+      <p class="muted">Le classique X contre O, en manches enchaînées. À deux uniquement.</p>
+      <button class="btn-main" onclick="location.href='tictactoe.html'">Jouer au Morpion</button>
+    </div>
 
     <div class="section-label">👥 En groupe</div>
     <div class="group-grid">
@@ -928,7 +933,8 @@ const RECENT_META = {
   cb: {emoji:'🃏', label:'Chkobba', url:'chkobba.html'},
   bw: {emoji:'📖', label:'Bent Walad', url:'bentwalad.html'},
   dm: {emoji:'💼', label:'Dlilek Mlek', url:'dlilekmlek.html'},
-  tb: {emoji:'🚫', label:'Taboo', url:'taboo.html'}
+  tb: {emoji:'🚫', label:'Taboo', url:'taboo.html'},
+  ttt: {emoji:'⭕', label:'Morpion', url:'tictactoe.html'}
 };
 function renderRecent(){
   const list = window.GYMRecent ? window.GYMRecent.getAll() : [];
