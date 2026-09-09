@@ -147,7 +147,8 @@ const GAME_FILTERS = [
   {key:'bw', label:'📖 Bent Walad'},
   {key:'dm', label:'💼 Dlilek Mlek'},
   {key:'tb', label:'🚫 Taboo'},
-  {key:'ttt', label:'⭕ Morpion'}
+  {key:'ttt', label:'⭕ Morpion'},
+  {key:'mot', label:'🔤 1, 2, 3 Mot !'}
 ];
 let activeFilter = 'all';
 let allEntries = [];
@@ -161,7 +162,7 @@ async function fetchResults(table){
   }catch(e){ return []; }
 }
 
-function buildEntries(vt, sk, tm, cb, bw, dm, tb, ttt){
+function buildEntries(vt, sk, tm, cb, bw, dm, tb, ttt, mot){
   const entries = [];
   vt.forEach(r => entries.push({
     ts: r.finished_at, game:'vt', emoji:'🐄', title:'Vache &amp; Taureau',
@@ -217,6 +218,14 @@ function buildEntries(vt, sk, tm, cb, bw, dm, tb, ttt){
       ts: r.finished_at, game:'ttt', emoji:'⭕', title:'Morpion'+(r.rounds>1?' · '+r.rounds+' manches':''),
       detail: esc(r.x_name)+' (X) vs '+esc(r.o_name)+' (O)',
       result: '🏆 '+esc(winner)+' · '+r.x_score+'–'+r.o_score
+    });
+  });
+  mot.forEach(r => {
+    const winner = r.winner_name || 'Égalité';
+    entries.push({
+      ts: r.finished_at, game:'mot', emoji:'🔤', title:'1, 2, 3 Mot !'+(r.rounds>1?' · '+r.rounds+' manches':''),
+      detail: esc(r.p1_name)+' vs '+esc(r.p2_name),
+      result: '🏆 '+esc(winner)+' · '+r.p1_score+'–'+r.p2_score
     });
   });
   entries.sort((a,b) => new Date(b.ts) - new Date(a.ts));
@@ -280,12 +289,12 @@ function renderList(){
 async function loadAll(isRefresh){
   if(isRefresh) $('refresh-btn').classList.add('spin');
   if(!allEntries.length) $('sec-loading').classList.remove('hidden');
-  const [vt, sk, tm, cb, bw, dm, tb, ttt] = await Promise.all([
+  const [vt, sk, tm, cb, bw, dm, tb, ttt, mot] = await Promise.all([
     fetchResults('vt_results'), fetchResults('sk_results'), fetchResults('tm_results'),
     fetchResults('cb_results'), fetchResults('bw_results'), fetchResults('dm_results'), fetchResults('tb_results'),
-    fetchResults('ttt_results')
+    fetchResults('ttt_results'), fetchResults('mot_results')
   ]);
-  allEntries = buildEntries(vt, sk, tm, cb, bw, dm, tb, ttt);
+  allEntries = buildEntries(vt, sk, tm, cb, bw, dm, tb, ttt, mot);
   renderChips();
   renderList();
   if(isRefresh) setTimeout(()=>$('refresh-btn').classList.remove('spin'), 700);

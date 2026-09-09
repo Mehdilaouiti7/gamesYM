@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Games Room · 1, 2, 3 Mot !</title>
+<meta name="theme-color" content="#233a2f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Games Room">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board:#24382e;
+    --board-deep:#1b2c24;
+    --chalk:#f3efe4;
+    --chalk-dim:#c9c4b4;
+    --butter:#e9c46a;
+    --red-chalk:#e76f51;
+    --blue-chalk:#8ecae6;
+    --green-chalk:#7bb274;
+    --line:rgba(243,239,228,.18);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%}
+  body{
+    font-family:'Fredoka',system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(233,196,106,.07), transparent 60%),
+      linear-gradient(var(--board), var(--board-deep));
+    background-repeat: no-repeat;
+    color:var(--chalk);
+    min-height:100dvh;
+    display:flex;flex-direction:column;align-items:center;
+    padding:20px 16px 40px;
+  }
+  .frame{width:100%;max-width:460px}
+  header{text-align:center;margin-bottom:14px;position:relative}
+  h1{font-weight:700;font-size:1.9rem;letter-spacing:.5px}
+  .tagline{color:var(--chalk-dim);font-size:.9rem;margin-top:2px}
+  .back-link{display:inline-block;margin-top:8px;color:var(--chalk-dim);font-size:.82rem;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+  .back-link:active{opacity:.7}
+  .quit-match-btn{
+    display:inline-block;width:auto;margin:0 0 10px;padding:6px 12px;
+    background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:999px;
+    color:var(--chalk-dim);font-size:.78rem;font-weight:500;cursor:pointer;
+  }
+  .quit-match-btn:active{opacity:.7}
+  .card{
+    background:linear-gradient(160deg, rgba(52,74,62,.9), rgba(30,46,38,.88));
+    border:1px solid rgba(243,239,228,.13);
+    border-radius:var(--radius);
+    padding:18px 16px;
+    margin-bottom:14px;
+    box-shadow:0 10px 26px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .card h2{font-size:1.05rem;font-weight:600;margin-bottom:10px}
+  label{display:block;font-size:.85rem;color:var(--chalk-dim);margin:10px 0 4px}
+  input[type=text]{
+    width:100%;
+    background:rgba(0,0,0,.25);
+    border:1.5px dashed var(--line);
+    border-radius:10px;
+    color:var(--chalk);
+    font-family:'Fredoka',sans-serif;
+    font-size:1rem;
+    padding:11px 12px;
+    outline:none;
+  }
+  input[type=text].code-input{
+    font-family:'Space Mono',monospace;font-size:1.15rem;letter-spacing:.25em;text-transform:uppercase;
+  }
+  input:focus{border-color:var(--butter)}
+  button{
+    font-family:'Fredoka',sans-serif;
+    font-weight:600;font-size:1rem;
+    border:none;border-radius:13px;
+    padding:13px 16px;width:100%;
+    cursor:pointer;margin-top:12px;
+    transition:transform .12s cubic-bezier(.22,1,.36,1), filter .15s, opacity .15s;
+  }
+  button:active{transform:scale(.97);filter:brightness(.96)}
+  button:disabled{opacity:.45;cursor:default}
+  .btn-main{background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;box-shadow:0 6px 16px rgba(233,196,106,.18)}
+  .btn-ghost{background:rgba(255,255,255,.04);color:var(--chalk);border:1.5px solid var(--line)}
+  .btn-small{width:auto;padding:8px 14px;font-size:.85rem;margin-top:0}
+  .muted{color:var(--chalk-dim);font-size:.85rem;line-height:1.45}
+  .error{color:var(--red-chalk);font-size:.85rem;margin-top:8px;min-height:1.2em}
+  .hidden{display:none !important}
+
+  .code-big{
+    font-family:'Space Mono',monospace;
+    font-size:2.4rem;font-weight:700;
+    letter-spacing:.35em;text-align:center;
+    color:var(--butter);
+    padding:10px 0 4px;
+    text-indent:.35em;
+  }
+  .pulse{animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+  .wait-roles{display:flex;gap:8px;justify-content:center;margin:12px 0}
+  .wait-role-chip{flex:1;background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+  .wait-role-chip .lbl{font-size:.72rem;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+  .wait-role-chip .val{font-size:.9rem;font-weight:600}
+
+  .status-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .round-badge{
+    width:52px;height:52px;border-radius:16px;flex-shrink:0;
+    background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Mono',monospace;font-weight:700;font-size:1.3rem;
+    box-shadow:0 6px 16px rgba(233,196,106,.25);
+  }
+  .status-text{flex:1}
+  .status-text .rnd{font-size:.8rem;color:var(--chalk-dim)}
+  .status-text .ph{font-size:.92rem;font-weight:600}
+
+  .score-row{display:flex;gap:8px;margin-bottom:14px}
+  .p-score{flex:1;border-radius:12px;padding:10px;text-align:center;border:1.5px solid var(--line);background:rgba(0,0,0,.2)}
+  .p-score.me{border-color:var(--butter)}
+  .p-score .lbl{font-size:.72rem;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .p-score .n{font-family:'Space Mono',monospace;font-weight:700;font-size:1.5rem}
+
+  .category-badge{
+    text-align:center;font-size:1.3rem;font-weight:700;color:var(--butter);
+    padding:14px 0;margin-bottom:14px;border:1.5px dashed var(--butter);border-radius:var(--radius);
+  }
+  .letters-row{display:flex;gap:10px;justify-content:center;margin-bottom:14px}
+  .letter-chip{
+    flex:1;max-width:140px;border-radius:var(--radius);padding:14px 8px;text-align:center;
+    border:1.5px solid var(--line);background:rgba(0,0,0,.2);
+  }
+  .letter-chip.me{border-color:var(--butter)}
+  .letter-chip .nm{font-size:.75rem;color:var(--chalk-dim);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .letter-chip .lt{font-family:'Space Mono',monospace;font-weight:700;font-size:2.2rem;color:var(--chalk)}
+  .letter-chip .lt.empty{color:var(--chalk-dim);font-size:1.4rem}
+
+  .btn-stop{
+    background:linear-gradient(160deg,#f08a72,var(--red-chalk));color:#3a0f05;
+    font-size:1.4rem;font-weight:700;padding:26px 16px;box-shadow:0 8px 22px rgba(231,111,81,.3);
+  }
+  .judge-btns{display:flex;gap:8px}
+  .judge-btns button{margin-top:0}
+  .btn-valid{background:linear-gradient(160deg,#96d49a,var(--green-chalk));color:#0f2b12}
+  .btn-invalid{background:linear-gradient(160deg,#f08a72,var(--red-chalk));color:#3a0f05}
+
+  .win-card{text-align:center}
+  .win-card .big{font-size:2.6rem;margin:6px 0}
+  .rank-list{display:flex;flex-direction:column;gap:6px;margin:14px 0 4px}
+  .rank-list .row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:rgba(0,0,0,.18);font-size:.9rem}
+  .rank-list .row.win{border:1px solid var(--butter)}
+  .rank-list .nm{flex:1}
+  .rank-list .sc{font-family:'Space Mono',monospace;font-weight:700}
+</style>
+<link rel="stylesheet" href="responsive.css">
+<link rel="stylesheet" href="avatar.css">
+</head>
+<body>
+<div class="frame">
+  <header>
+    <h1>🔤 1, 2, 3 Mot !</h1>
+    <div class="tagline">Trouve le mot avec les deux lettres, avant l'autre !</div>
+    <a class="back-link" href="index.html">← Retour à l'accueil</a>
+  </header>
+
+  <div id="screen-home">
+    <div class="card">
+      <h2>Nouvelle partie</h2>
+      <p class="muted">Crée une partie et envoie le code à ton ami·e. À deux uniquement.</p>
+      <button class="btn-main" onclick="show('create')">Créer une partie</button>
+    </div>
+    <div class="card">
+      <h2>Rejoindre</h2>
+      <p class="muted">Tu as reçu un code ? Entre-le ici.</p>
+      <button class="btn-ghost" onclick="show('join')">Rejoindre avec un code</button>
+    </div>
+    <div class="card">
+      <h2>Règles</h2>
+      <p class="muted">À chaque manche, une carte catégorie est tirée (animal, pays, prénom…). Chacun·e tire ensuite sa propre lettre, au hasard.<br>
+      Les deux réfléchissent en même temps à un mot de cette catégorie qui contient les <b>deux lettres</b> affichées. Dès que quelqu'un l'a trouvé, il·elle appuie sur <b>STOP !</b> pour couper court à l'autre — puis annonce son mot à voix haute.<br>
+      L'autre joueur·se valide ou invalide sa réponse : bonne réponse, un point pour celui·celle qui a buzzé ; mauvaise réponse, un point pour l'autre. Enchaînez les manches, le score le plus haut gagne !</p>
+    </div>
+  </div>
+
+  <div id="screen-create" class="hidden">
+    <div class="card">
+      <h2>Créer une partie</h2>
+      <label>Ton prénom</label>
+      <input type="text" id="create-name" maxlength="12" placeholder="Ex. Léa">
+      <label>Ton avatar</label>
+      <div class="avatar-row" id="create-avatar-row"></div>
+      <div class="error" id="create-err"></div>
+      <button class="btn-main" id="btn-create" onclick="createGame()">Créer et obtenir le code</button>
+      <button class="btn-ghost" onclick="show('home')">Retour</button>
+    </div>
+  </div>
+
+  <div id="screen-join" class="hidden">
+    <div class="card">
+      <h2>Rejoindre une partie</h2>
+      <label>Code de la partie</label>
+      <input type="text" class="code-input" id="join-code" maxlength="4" placeholder="ABCD">
+      <label>Ton prénom</label>
+      <input type="text" id="join-name" maxlength="12" placeholder="Ex. Emma">
+      <label>Ton avatar</label>
+      <div class="avatar-row" id="join-avatar-row"></div>
+      <div class="error" id="join-err"></div>
+      <button class="btn-main" id="btn-join" onclick="joinGame()">Rejoindre</button>
+      <button class="btn-ghost" onclick="show('home')">Retour</button>
+    </div>
+  </div>
+
+  <div id="screen-wait" class="hidden">
+    <div class="card" style="text-align:center">
+      <h2>Partie créée !</h2>
+      <p class="muted">Envoie ce code à ton ami·e :</p>
+      <div class="code-big" id="wait-code">····</div>
+      <button class="btn-main btn-small hidden" id="share-btn" onclick="shareCode()">📤 Partager le code</button>
+      <button class="btn-ghost btn-small" onclick="copyCode()" id="copy-btn">Copier le lien</button>
+      <div class="wait-roles">
+        <div class="wait-role-chip"><div class="lbl">Joueur·se 1</div><div class="val" id="wait-role-p1">—</div></div>
+        <div class="wait-role-chip"><div class="lbl">Joueur·se 2</div><div class="val" id="wait-role-p2">—</div></div>
+      </div>
+      <p class="muted pulse" style="margin-top:6px">En attente de ton ami·e…</p>
+    </div>
+  </div>
+
+  <div id="screen-game" class="hidden">
+    <button class="quit-match-btn" onclick="confirmQuitMatch()">✕ Quitter</button>
+    <div class="status-bar">
+      <div class="round-badge" id="round-badge">1</div>
+      <div class="status-text">
+        <div class="rnd" id="round-label">Manche 1</div>
+        <div class="ph" id="phase-label">…</div>
+      </div>
+    </div>
+    <div class="score-row">
+      <div class="p-score" id="score-p1-box"><div class="lbl" id="score-p1-name">Joueur 1</div><div class="n" id="score-p1">0</div></div>
+      <div class="p-score" id="score-p2-box"><div class="lbl" id="score-p2-name">Joueur 2</div><div class="n" id="score-p2">0</div></div>
+    </div>
+
+    <div id="game-zone"></div>
+
+    <p class="muted" style="text-align:center;margin-top:10px">Code de la partie : <b id="game-code-label"></b></p>
+  </div>
+
+  <div id="screen-end" class="hidden">
+    <div class="card win-card">
+      <div class="big" id="end-emoji">🏆</div>
+      <h2 id="end-title">…</h2>
+      <p class="muted" id="end-detail"></p>
+      <div class="rank-list" id="rank-list"></div>
+      <button class="btn-main" onclick="location.reload()">Nouvelle partie</button>
+    </div>
+  </div>
+</div>
+
+<script src="realtime.js"></script>
+<script src="leave-guard.js"></script>
+<script src="recent-games.js"></script>
+<script src="feedback.js"></script>
+<script src="connection-banner.js"></script>
+<script src="avatar-picker.js"></script>
+<script src="game-link.js"></script>
+<script>
+const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
+const HEADERS = {
+  "apikey": SB_KEY,
+  "Authorization": "Bearer " + SB_KEY,
+  "Content-Type": "application/json"
+};
+const LETTERS = ['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','هـ','و','ي'];
+const CATEGORIES = [
+  {key:'balad', label:'بلاد'},
+  {key:'mdina', label:'مدينة'},
+  {key:'hayawan', label:'حيوان'},
+  {key:'akla', label:'أكلة'},
+  {key:'nabta', label:'نبتة/فاكهة'},
+  {key:'grabetha', label:'جماد'},
+  {key:'shakhsia', label:'شخصية مشهورة'},
+  {key:'bent', label:'بنت'},
+  {key:'walad', label:'ولد'},
+  {key:'riyada', label:'رياضة'},
+  {key:'mihna', label:'مهنة'},
+  {key:'lawn', label:'لون'}
+];
+
+let code = null, me = null, state = null, pollTimer = null, busy = false;
+let renderedZoneKey = null;
+
+const $ = id => document.getElementById(id);
+const screens = ['home','create','join','wait','game','end'];
+function show(name){ screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name)); }
+function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
+function pAvatar(p){ return p && p.avatar ? p.avatar : '🙂'; }
+function otherRole(r){ return r==='p1' ? 'p2' : 'p1'; }
+
+function genCode(){
+  const letters="ABCDEFGHJKMNPQRSTUVWXYZ";
+  let c="";
+  for(let i=0;i<4;i++) c += letters[Math.floor(Math.random()*letters.length)];
+  return c;
+}
+function saveRole(c, role){ try{ localStorage.setItem('mot-role-'+c, role); }catch(e){} }
+function loadRole(c){ try{ return localStorage.getItem('mot-role-'+c); }catch(e){ return null; } }
+function startRound(st, roundNum){
+  st.round = roundNum;
+  st.cardDrawer = roundNum % 2 === 1 ? 'p1' : 'p2';
+  st.phase = 'card_pending';
+  st.category = null;
+  st.letters = {p1:null, p2:null};
+  st.buzzedBy = null;
+  st.outcome = null;
+}
+
+async function loadState(c){
+  try{
+    const r = await fetch(SB_URL+"/rest/v1/mot_games?code=eq."+encodeURIComponent(c)+"&select=state", {headers:HEADERS});
+    if(!r.ok){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return null; }
+    if(window.GYMConnection) window.GYMConnection.reportSuccess();
+    const rows = await r.json();
+    return rows.length ? rows[0].state : null;
+  }catch(e){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return null; }
+}
+async function saveState(st){
+  try{
+    const r = await fetch(SB_URL+"/rest/v1/mot_games", {
+      method:"POST",
+      headers:{...HEADERS, "Prefer":"resolution=merge-duplicates"},
+      body: JSON.stringify({code:st.code, state:st, updated_at:new Date().toISOString()})
+    });
+    if(window.GYMConnection) (r.ok ? window.GYMConnection.reportSuccess() : window.GYMConnection.reportFailure());
+    return r.ok;
+  }catch(e){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return false; }
+}
+async function saveResult(st){
+  try{
+    const winnerName = st.overallWinner==='draw' ? null : st.players[st.overallWinner].name;
+    await fetch(SB_URL+"/rest/v1/mot_results", {
+      method:"POST", headers:HEADERS,
+      body: JSON.stringify({
+        code: st.code,
+        p1_name: st.players.p1.name,
+        p2_name: st.players.p2.name,
+        p1_score: st.scores.p1,
+        p2_score: st.scores.p2,
+        winner_name: winnerName,
+        rounds: st.round
+      })
+    });
+  }catch(e){}
+}
+
+/* ---------- create / join ---------- */
+const createAvatarPicker = window.GYMAvatarPicker.render('create-avatar-row');
+const joinAvatarPicker = window.GYMAvatarPicker.render('join-avatar-row');
+async function createGame(){
+  const name = $('create-name').value.trim() || "Joueur 1";
+  const avatar = createAvatarPicker.get();
+  $('btn-create').disabled = true; busy = true;
+
+  code = genCode();
+  const players = {p1:{name, avatar}, p2:null};
+  state = { v:1, code, status:'waiting', players };
+  const ok = await saveState(state);
+  busy = false; $('btn-create').disabled = false;
+  if(!ok){ $('create-err').textContent = "Connexion impossible. Vérifie ton réseau et réessaie."; return; }
+  me = 'p1';
+  saveRole(code, 'p1');
+  if(window.GYMRecent) window.GYMRecent.record('mot', code, '1, 2, 3 Mot !');
+  $('wait-code').textContent = code;
+  renderWait();
+  show('wait');
+  startPolling();
+}
+async function joinGame(){
+  const c = $('join-code').value.trim().toUpperCase();
+  if(!/^[A-Z]{4}$/.test(c)){ $('join-err').textContent = "Le code fait 4 lettres."; return; }
+  $('join-err').textContent = "";
+  $('btn-join').disabled = true; busy = true;
+
+  const st = await loadState(c);
+  if(!st){
+    $('join-err').textContent = "Partie introuvable. Vérifie le code.";
+    $('btn-join').disabled = false; busy = false; return;
+  }
+  const existing = loadRole(c);
+  if(existing && st.players[existing]){
+    code = c; me = existing; state = st;
+    busy = false; $('btn-join').disabled = false;
+    if(window.GYMRecent) window.GYMRecent.record('mot', c, '1, 2, 3 Mot !');
+    if(st.status==='finished'){ renderEnd(); } else if(st.status==='waiting'){ $('wait-code').textContent=c; renderWait(); show('wait'); startPolling(); } else { enterGame(); startPolling(); }
+    return;
+  }
+  if(st.players.p2){
+    $('join-err').textContent = "Cette partie a déjà ses deux joueurs.";
+    $('btn-join').disabled = false; busy = false; return;
+  }
+  const name = $('join-name').value.trim() || "Joueur 2";
+  const avatar = joinAvatarPicker.get();
+  st.players.p2 = {name, avatar};
+  st.status = 'playing';
+  st.scores = {p1:0, p2:0};
+  startRound(st, 1);
+  const ok = await saveState(st);
+  busy = false; $('btn-join').disabled = false;
+  if(!ok){ $('join-err').textContent = "Erreur d'enregistrement. Réessaie."; return; }
+  code = c; me = 'p2'; state = st;
+  saveRole(c, 'p2');
+  if(window.GYMRecent) window.GYMRecent.record('mot', c, '1, 2, 3 Mot !');
+  enterGame(); startPolling();
+}
+
+function startPolling(){
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(refresh, 2000);
+  window.GYMRealtime.subscribe(SB_URL, SB_KEY, 'mot_games', code, applyIncomingState);
+}
+function applyIncomingState(st){
+  if(busy || !st) return;
+  state = st;
+  if(st.status==='waiting'){ renderWait(); return; }
+  if($('screen-game').classList.contains('hidden') && $('screen-end').classList.contains('hidden')) enterGame();
+  renderCurrent();
+}
+async function refresh(){
+  if(busy || !code) return;
+  const st = await loadState(code);
+  applyIncomingState(st);
+}
+function renderWait(){
+  const p1 = state.players.p1, p2 = state.players.p2;
+  $('wait-role-p1').textContent = p1 ? pAvatar(p1)+' '+esc(p1.name) : '— en attente —';
+  $('wait-role-p2').textContent = p2 ? pAvatar(p2)+' '+esc(p2.name) : '— en attente —';
+}
+function enterGame(){
+  $('game-code-label').textContent = code;
+  show('game');
+  renderCurrent();
+}
+function renderCurrent(){
+  if(!state) return;
+  if(state.status==='finished'){ window.GYMLeaveGuard.disable(); renderEnd(); }
+  else if(state.status==='playing'){ window.GYMLeaveGuard.enable(); renderGame(); }
+}
+
+/* ---------- actions ---------- */
+async function finalizeAction(st){
+  const ok = await saveState(st);
+  if(!ok){ busy = false; renderCurrent(); return; }
+  state = st;
+  busy = false;
+  renderCurrent();
+}
+async function drawCard(){
+  if(busy || !state || state.phase!=='card_pending' || me!==state.cardDrawer) return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='card_pending'){ state=st; busy=false; renderCurrent(); return; }
+  st.category = CATEGORIES[Math.floor(Math.random()*CATEGORIES.length)];
+  st.phase = 'letters_pending';
+  await finalizeAction(st);
+}
+async function drawLetter(){
+  if(busy || !state || state.phase!=='letters_pending' || state.letters[me]) return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='letters_pending' || st.letters[me]){ state=st; busy=false; renderCurrent(); return; }
+  st.letters[me] = LETTERS[Math.floor(Math.random()*LETTERS.length)];
+  if(st.letters.p1 && st.letters.p2) st.phase = 'thinking';
+  await finalizeAction(st);
+}
+async function buzz(){
+  if(busy || !state || state.phase!=='thinking') return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='thinking'){ state=st; busy=false; renderCurrent(); return; }
+  st.buzzedBy = me;
+  st.phase = 'buzzed';
+  await finalizeAction(st);
+}
+async function judgeResolve(valid){
+  if(busy || !state || state.phase!=='buzzed' || me===state.buzzedBy) return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='buzzed'){ state=st; busy=false; renderCurrent(); return; }
+  const judge = otherRole(st.buzzedBy);
+  if(valid){ st.scores[st.buzzedBy] += 1; st.outcome = 'valid'; }
+  else { st.scores[judge] += 1; st.outcome = 'invalid'; }
+  st.phase = 'round_end';
+  await finalizeAction(st);
+}
+async function nextRound(){
+  if(busy || !state || state.phase!=='round_end') return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='round_end'){ state=st; busy=false; renderCurrent(); return; }
+  startRound(st, st.round+1);
+  await finalizeAction(st);
+}
+async function endMatch(){
+  if(busy || !state || state.phase!=='round_end') return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='round_end'){ state=st; busy=false; renderCurrent(); return; }
+  st.status = 'finished';
+  st.overallWinner = st.scores.p1===st.scores.p2 ? 'draw' : (st.scores.p1>st.scores.p2 ? 'p1' : 'p2');
+  const ok = await saveState(st);
+  busy = false;
+  if(!ok) return;
+  state = st;
+  await saveResult(st);
+  renderEnd();
+}
+
+/* ---------- rendering ---------- */
+function renderGame(){
+  if(!state || state.status!=='playing') return;
+  const p1 = state.players.p1, p2 = state.players.p2;
+  $('round-badge').textContent = state.round;
+  $('round-label').textContent = 'Manche ' + state.round;
+  $('score-p1-name').textContent = pAvatar(p1)+' '+esc(p1.name);
+  $('score-p2-name').textContent = pAvatar(p2)+' '+esc(p2.name);
+  $('score-p1-box').classList.toggle('me', me==='p1');
+  $('score-p2-box').classList.toggle('me', me==='p2');
+  $('score-p1').textContent = state.scores.p1;
+  $('score-p2').textContent = state.scores.p2;
+
+  const drawerName = state.players[state.cardDrawer].name;
+  const isDrawer = me===state.cardDrawer;
+  if(state.phase==='card_pending'){
+    $('phase-label').textContent = isDrawer ? '🎴 Tire une carte catégorie' : '⏳ ' + esc(drawerName) + ' tire une carte…';
+  } else if(state.phase==='letters_pending'){
+    $('phase-label').textContent = state.letters[me] ? '⏳ En attente de l\'adversaire…' : '🔤 Tire ta lettre';
+  } else if(state.phase==='thinking'){
+    $('phase-label').textContent = '🤔 Trouve le mot… et appuie sur STOP !';
+  } else if(state.phase==='buzzed'){
+    const buzzerName = state.players[state.buzzedBy].name;
+    $('phase-label').textContent = me===state.buzzedBy ? '⏳ ' + esc(state.players[otherRole(me)].name) + ' vérifie ta réponse…' : '🛎 ' + esc(buzzerName) + ' a buzzé !';
+  } else if(state.phase==='round_end'){
+    $('phase-label').textContent = '🏁 Manche terminée';
+  }
+
+  const zoneKey = state.phase + '|' + (state.category?state.category.key:'') + '|' + state.letters.p1 + '|' + state.letters.p2 + '|' + state.buzzedBy + '|' + state.outcome;
+  if(renderedZoneKey === zoneKey) return;
+  renderedZoneKey = zoneKey;
+  const zone = $('game-zone');
+
+  if(state.phase==='card_pending'){
+    zone.innerHTML = isDrawer
+      ? '<button class="btn-main" onclick="drawCard()">🎴 Tirer une carte</button>'
+      : '<div class="card" style="text-align:center"><p class="muted">⏳ ' + esc(drawerName) + ' tire la carte catégorie…</p></div>';
+  } else if(state.phase==='letters_pending'){
+    const catHtml = '<div class="category-badge" lang="ar" dir="rtl">' + esc(state.category.label) + '</div>';
+    const myLetter = state.letters[me];
+    const btnHtml = myLetter ? '<div class="card" style="text-align:center"><p class="muted">⏳ En attente de la lettre de l\'adversaire…</p></div>' : '<button class="btn-main" onclick="drawLetter()">🔤 Tirer ma lettre</button>';
+    zone.innerHTML = catHtml + btnHtml;
+  } else if(state.phase==='thinking' || state.phase==='buzzed' || state.phase==='round_end'){
+    const catHtml = '<div class="category-badge" lang="ar" dir="rtl">' + esc(state.category.label) + '</div>';
+    const lettersHtml = '<div class="letters-row">' +
+      '<div class="letter-chip'+(me==='p1'?' me':'')+'"><div class="nm">'+esc(p1.name)+'</div><div class="lt" lang="ar" dir="rtl">'+esc(state.letters.p1||'?')+'</div></div>' +
+      '<div class="letter-chip'+(me==='p2'?' me':'')+'"><div class="nm">'+esc(p2.name)+'</div><div class="lt" lang="ar" dir="rtl">'+esc(state.letters.p2||'?')+'</div></div>' +
+      '</div>';
+    let actionHtml = '';
+    if(state.phase==='thinking'){
+      actionHtml = '<button class="btn-stop" onclick="buzz()">🛑 STOP !</button>';
+    } else if(state.phase==='buzzed'){
+      const buzzerName = state.players[state.buzzedBy].name;
+      if(me===state.buzzedBy){
+        actionHtml = '<div class="card" style="text-align:center"><p class="muted">⏳ Annonce ton mot à voix haute, ' + esc(state.players[otherRole(me)].name) + ' vérifie…</p></div>';
+      } else {
+        actionHtml = '<div class="card" style="text-align:center"><h2>🛎 ' + esc(buzzerName) + ' a buzzé !</h2><p class="muted" style="margin-bottom:10px">Son mot est-il correct ?</p><div class="judge-btns"><button class="btn-invalid" onclick="judgeResolve(false)">❌ Invalide</button><button class="btn-valid" onclick="judgeResolve(true)">✅ Valide</button></div></div>';
+      }
+    } else if(state.phase==='round_end'){
+      const buzzerName = state.players[state.buzzedBy].name;
+      const resultText = state.outcome==='valid' ? '✅ ' + esc(buzzerName) + ' avait raison !' : '❌ ' + esc(buzzerName) + ' s\'est trompé·e !';
+      actionHtml = '<div class="card" style="text-align:center"><h2>' + resultText + '</h2>' +
+        '<button class="btn-main" onclick="nextRound()">Manche suivante</button>' +
+        '<button class="btn-ghost" onclick="endMatch()">Terminer la partie</button></div>';
+    }
+    zone.innerHTML = catHtml + lettersHtml + actionHtml;
+  }
+}
+async function renderEnd(){
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
+  if(!$('screen-end').classList.contains('hidden')) return;
+  window.GYMLeaveGuard.disable();
+  if(window.GYMRecent) window.GYMRecent.remove('mot', code);
+  show('end');
+  const tie = state.overallWinner==='draw';
+  const iWon = !tie && state.overallWinner===me;
+  if(iWon && window.GYMFeedback) window.GYMFeedback.win();
+  const winName = tie ? null : state.players[state.overallWinner].name;
+  $('end-emoji').textContent = tie ? '🤝' : '🏆';
+  $('end-title').textContent = tie ? 'Égalité !' : esc(winName) + ' gagne la partie !';
+  $('end-detail').textContent = 'Partie en ' + state.round + ' manche' + (state.round>1?'s':'') + '.';
+  $('rank-list').innerHTML =
+    '<div class="row'+(!tie && state.overallWinner==='p1'?' win':'')+'"><span class="nm">'+pAvatar(state.players.p1)+' '+esc(state.players.p1.name)+(me==='p1'?' (toi)':'')+'</span><span class="sc">'+state.scores.p1+' pts</span></div>' +
+    '<div class="row'+(!tie && state.overallWinner==='p2'?' win':'')+'"><span class="nm">'+pAvatar(state.players.p2)+' '+esc(state.players.p2.name)+(me==='p2'?' (toi)':'')+'</span><span class="sc">'+state.scores.p2+' pts</span></div>';
+}
+function confirmQuitMatch(){
+  if(!state) return;
+  if(!confirm("Es-tu sûr de vouloir quitter ? Tu ne pourras plus reprendre cette partie.")) return;
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
+  window.GYMLeaveGuard.disable();
+  if(window.GYMRecent) window.GYMRecent.remove('mot', code);
+  location.href = 'index.html';
+}
+function copyCode(){
+  const link = window.GYMGameLink.build(code);
+  navigator.clipboard && navigator.clipboard.writeText(link).then(()=>{
+    $('copy-btn').textContent = "Lien copié ✓";
+    setTimeout(()=>$('copy-btn').textContent="Copier le lien", 1500);
+  });
+}
+function shareCode(){
+  if(!navigator.share) return;
+  navigator.share({
+    title: 'Games Room',
+    text: 'Rejoins ma partie de 1, 2, 3 Mot ! sur Games Room !',
+    url: window.GYMGameLink.build(code)
+  }).catch(()=>{});
+}
+if($('share-btn')) $('share-btn').classList.toggle('hidden', !navigator.share);
+
+(function(){
+  const qcode = (new URLSearchParams(location.search).get('code')||'').toUpperCase();
+  if(/^[A-Z]{4}$/.test(qcode)){
+    show('join');
+    $('join-code').value = qcode;
+    if(loadRole(qcode)!==null) joinGame();
+  }
+})();
+</script>
+<script src="install-tutorial.js" defer></script>
+</body>
+</html>

@@ -316,6 +316,11 @@
       <p class="muted">Le classique X contre O, en manches enchaînées. À deux uniquement.</p>
       <button class="btn-main" onclick="location.href='tictactoe.html'">Jouer au Morpion</button>
     </div>
+    <div class="card">
+      <div class="card-head"><span class="card-icon">🔤</span><h2>1, 2, 3 Mot !</h2></div>
+      <p class="muted">Une catégorie, deux lettres tirées au sort, et le premier qui trouve le mot buzze ! À deux uniquement.</p>
+      <button class="btn-main" onclick="location.href='123mot.html'">Jouer à 1, 2, 3 Mot !</button>
+    </div>
 
     <div class="section-label">👥 En groupe</div>
     <div class="group-grid">
@@ -934,7 +939,8 @@ const RECENT_META = {
   bw: {emoji:'📖', label:'Bent Walad', url:'bentwalad.html'},
   dm: {emoji:'💼', label:'Dlilek Mlek', url:'dlilekmlek.html'},
   tb: {emoji:'🚫', label:'Taboo', url:'taboo.html'},
-  ttt: {emoji:'⭕', label:'Morpion', url:'tictactoe.html'}
+  ttt: {emoji:'⭕', label:'Morpion', url:'tictactoe.html'},
+  mot: {emoji:'🔤', label:'1, 2, 3 Mot !', url:'123mot.html'}
 };
 function renderRecent(){
   const list = window.GYMRecent ? window.GYMRecent.getAll() : [];
