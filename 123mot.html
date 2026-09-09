@@ -145,6 +145,8 @@
     background:linear-gradient(160deg,#f08a72,var(--red-chalk));color:#3a0f05;
     font-size:1.4rem;font-weight:700;padding:26px 16px;box-shadow:0 8px 22px rgba(231,111,81,.3);
   }
+  .reroll-row{display:flex;gap:8px;margin-top:8px}
+  .reroll-row button{margin-top:0;font-size:.8rem;padding:9px 10px}
   .judge-btns{display:flex;gap:8px}
   .judge-btns button{margin-top:0}
   .btn-valid{background:linear-gradient(160deg,#96d49a,var(--green-chalk));color:#0f2b12}
@@ -486,6 +488,24 @@ async function buzz(){
   st.phase = 'buzzed';
   await finalizeAction(st);
 }
+async function rerollCategory(){
+  if(busy || !state || state.phase!=='thinking') return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='thinking'){ state=st; busy=false; renderCurrent(); return; }
+  const choices = CATEGORIES.filter(c => c.key !== st.category.key);
+  st.category = choices[Math.floor(Math.random()*choices.length)];
+  await finalizeAction(st);
+}
+async function rerollLetters(){
+  if(busy || !state || state.phase!=='thinking') return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.phase!=='thinking'){ state=st; busy=false; renderCurrent(); return; }
+  st.letters.p1 = LETTERS[Math.floor(Math.random()*LETTERS.length)];
+  st.letters.p2 = LETTERS[Math.floor(Math.random()*LETTERS.length)];
+  await finalizeAction(st);
+}
 async function judgeResolve(valid){
   if(busy || !state || state.phase!=='buzzed' || me===state.buzzedBy) return;
   busy = true;
@@ -570,7 +590,11 @@ function renderGame(){
       '</div>';
     let actionHtml = '';
     if(state.phase==='thinking'){
-      actionHtml = '<button class="btn-stop" onclick="buzz()">🛑 STOP !</button>';
+      actionHtml = '<button class="btn-stop" onclick="buzz()">🛑 STOP !</button>' +
+        '<div class="reroll-row">' +
+        '<button class="btn-ghost btn-small" onclick="rerollCategory()">🔄 Changer le thème</button>' +
+        '<button class="btn-ghost btn-small" onclick="rerollLetters()">🔄 Changer les lettres</button>' +
+        '</div>';
     } else if(state.phase==='buzzed'){
       const buzzerName = state.players[state.buzzedBy].name;
       if(me===state.buzzedBy){
