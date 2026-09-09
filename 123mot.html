@@ -276,20 +276,20 @@ const HEADERS = {
   "Authorization": "Bearer " + SB_KEY,
   "Content-Type": "application/json"
 };
-const LETTERS = ['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','هـ','و','ي'];
+const LETTERS = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
 const CATEGORIES = [
-  {key:'balad', label:'بلاد'},
-  {key:'mdina', label:'مدينة'},
-  {key:'hayawan', label:'حيوان'},
-  {key:'akla', label:'أكلة'},
-  {key:'nabta', label:'نبتة/فاكهة'},
-  {key:'grabetha', label:'جماد'},
-  {key:'shakhsia', label:'شخصية مشهورة'},
-  {key:'bent', label:'بنت'},
-  {key:'walad', label:'ولد'},
-  {key:'riyada', label:'رياضة'},
-  {key:'mihna', label:'مهنة'},
-  {key:'lawn', label:'لون'}
+  {key:'pays', label:'Pays'},
+  {key:'ville', label:'Ville'},
+  {key:'animal', label:'Animal'},
+  {key:'plat', label:'Plat / Nourriture'},
+  {key:'plante', label:'Plante / Fruit'},
+  {key:'objet', label:'Objet'},
+  {key:'celebrite', label:'Personnalité célèbre'},
+  {key:'prenom_fille', label:'Prénom de fille'},
+  {key:'prenom_garcon', label:'Prénom de garçon'},
+  {key:'sport', label:'Sport'},
+  {key:'metier', label:'Métier'},
+  {key:'couleur', label:'Couleur'}
 ];
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
@@ -558,15 +558,15 @@ function renderGame(){
       ? '<button class="btn-main" onclick="drawCard()">🎴 Tirer une carte</button>'
       : '<div class="card" style="text-align:center"><p class="muted">⏳ ' + esc(drawerName) + ' tire la carte catégorie…</p></div>';
   } else if(state.phase==='letters_pending'){
-    const catHtml = '<div class="category-badge" lang="ar" dir="rtl">' + esc(state.category.label) + '</div>';
+    const catHtml = '<div class="category-badge">' + esc(state.category.label) + '</div>';
     const myLetter = state.letters[me];
     const btnHtml = myLetter ? '<div class="card" style="text-align:center"><p class="muted">⏳ En attente de la lettre de l\'adversaire…</p></div>' : '<button class="btn-main" onclick="drawLetter()">🔤 Tirer ma lettre</button>';
     zone.innerHTML = catHtml + btnHtml;
   } else if(state.phase==='thinking' || state.phase==='buzzed' || state.phase==='round_end'){
-    const catHtml = '<div class="category-badge" lang="ar" dir="rtl">' + esc(state.category.label) + '</div>';
+    const catHtml = '<div class="category-badge">' + esc(state.category.label) + '</div>';
     const lettersHtml = '<div class="letters-row">' +
-      '<div class="letter-chip'+(me==='p1'?' me':'')+'"><div class="nm">'+esc(p1.name)+'</div><div class="lt" lang="ar" dir="rtl">'+esc(state.letters.p1||'?')+'</div></div>' +
-      '<div class="letter-chip'+(me==='p2'?' me':'')+'"><div class="nm">'+esc(p2.name)+'</div><div class="lt" lang="ar" dir="rtl">'+esc(state.letters.p2||'?')+'</div></div>' +
+      '<div class="letter-chip'+(me==='p1'?' me':'')+'"><div class="nm">'+esc(p1.name)+'</div><div class="lt">'+esc(state.letters.p1||'?')+'</div></div>' +
+      '<div class="letter-chip'+(me==='p2'?' me':'')+'"><div class="nm">'+esc(p2.name)+'</div><div class="lt">'+esc(state.letters.p2||'?')+'</div></div>' +
       '</div>';
     let actionHtml = '';
     if(state.phase==='thinking'){
