@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Games Room · 1, 2, 3 Mot !</title>
-<meta name="theme-color" content="#233a2f">
+<meta name="theme-color" content="#ff6b2c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Games Room">
@@ -12,254 +12,238 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Lilita+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gym-ui.css">
 <style>
+  /* ---------- 1, 2, 3 Mot ! — « Jeu de lettres » ---------- */
   :root{
-    --board:#24382e;
-    --board-deep:#1b2c24;
-    --chalk:#f3efe4;
-    --chalk-dim:#c9c4b4;
-    --butter:#e9c46a;
-    --red-chalk:#e76f51;
-    --blue-chalk:#8ecae6;
-    --green-chalk:#7bb274;
-    --line:rgba(243,239,228,.18);
-    --radius:14px;
+    --cream:#fff3df; --orange:#ff6b2c; --orange-sh:#d84f14; --brown:#7a2a08;
+    --bg:#ff6b2c; --bg-solid:#ff6b2c; --fg:#fff; --dim:#ffe2cf;
+    --surface:rgba(0,0,0,.14); --surface-2:#ffe2cf; --soft:rgba(255,255,255,.2); --line:rgba(255,255,255,.4);
+    --accent:#7a2a08; --accent-fg:#fff; --accent-sh:#4a1903;
+    --sel:#7a2a08; --sel-fg:#fff; --ok:#fff; --danger:#fff3df;
+    --display:'Lilita One',sans-serif; --display-weight:400;
+    --seg-on:#fff3df; --seg-on-fg:#c2410c;
+    --code-bg:#fff3df; --code-fg:#ff6b2c; --code-sh:#d84f14; --code-font:'Lilita One',sans-serif;
+    --scrim:rgba(74,25,3,.5); --sheet:#fff3df; --hero:#fff;
+    --end-bg:#fff3df; --end-solid:#fff3df; --end-fg:#7a2a08; --end-soft:#ffe2cf;
+    --end-btn-bg:#ff6b2c; --end-btn-fg:#fff; --end-btn-sh:#d84f14;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{min-height:100%}
-  body{
-    font-family:'Fredoka',system-ui,sans-serif;
-    background:
-      radial-gradient(1200px 600px at 50% -10%, rgba(233,196,106,.07), transparent 60%),
-      linear-gradient(var(--board), var(--board-deep));
-    background-repeat: no-repeat;
-    color:var(--chalk);
-    min-height:100dvh;
-    display:flex;flex-direction:column;align-items:center;
-    padding:20px 16px 40px;
+  .ui-seg{background:rgba(0,0,0,.14)}
+  .ui-field input[type=text]{background:var(--cream);color:var(--brown)}
+  .ui-field input:focus{border-color:var(--brown)}
+  .ui-field input::placeholder{color:#c98a64}
+  .avatar-opt.sel{background:var(--cream);box-shadow:0 0 0 3px var(--orange),0 0 0 5px var(--cream)}
+  .ui-hero-title{font-size:50px;line-height:1}
+  .ui-code span{font-size:46px;width:66px;height:76px;border-radius:14px;box-shadow:0 7px 0 var(--orange-sh)}
+  .ui-player .st{color:#fff}
+  .tiles{display:flex;gap:8px;justify-content:center}
+  .tile{
+    width:56px;height:62px;border-radius:12px;background:var(--cream);color:var(--orange);
+    font-family:'Lilita One',sans-serif;font-size:40px;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 0 var(--orange-sh);
   }
-  .frame{width:100%;max-width:460px}
-  header{text-align:center;margin-bottom:14px;position:relative}
-  h1{font-weight:700;font-size:1.9rem;letter-spacing:.5px}
-  .tagline{color:var(--chalk-dim);font-size:.9rem;margin-top:2px}
-  .back-link{display:inline-block;margin-top:8px;color:var(--chalk-dim);font-size:.82rem;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
-  .back-link:active{opacity:.7}
-  .quit-match-btn{
-    display:inline-block;width:auto;margin:0 0 10px;padding:6px 12px;
-    background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:999px;
-    color:var(--chalk-dim);font-size:.78rem;font-weight:500;cursor:pointer;
-  }
-  .quit-match-btn:active{opacity:.7}
-  .card{
-    background:linear-gradient(160deg, rgba(52,74,62,.9), rgba(30,46,38,.88));
-    border:1px solid rgba(243,239,228,.13);
-    border-radius:var(--radius);
-    padding:18px 16px;
-    margin-bottom:14px;
-    box-shadow:0 10px 26px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.05);
-  }
-  .card h2{font-size:1.05rem;font-weight:600;margin-bottom:10px}
-  label{display:block;font-size:.85rem;color:var(--chalk-dim);margin:10px 0 4px}
-  input[type=text]{
-    width:100%;
-    background:rgba(0,0,0,.25);
-    border:1.5px dashed var(--line);
-    border-radius:10px;
-    color:var(--chalk);
-    font-family:'Fredoka',sans-serif;
-    font-size:1rem;
-    padding:11px 12px;
-    outline:none;
-  }
-  input[type=text].code-input{
-    font-family:'Space Mono',monospace;font-size:1.15rem;letter-spacing:.25em;text-transform:uppercase;
-  }
-  input:focus{border-color:var(--butter)}
-  button{
-    font-family:'Fredoka',sans-serif;
-    font-weight:600;font-size:1rem;
-    border:none;border-radius:13px;
-    padding:13px 16px;width:100%;
-    cursor:pointer;margin-top:12px;
-    transition:transform .12s cubic-bezier(.22,1,.36,1), filter .15s, opacity .15s;
-  }
-  button:active{transform:scale(.97);filter:brightness(.96)}
-  button:disabled{opacity:.45;cursor:default}
-  .btn-main{background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;box-shadow:0 6px 16px rgba(233,196,106,.18)}
-  .btn-ghost{background:rgba(255,255,255,.04);color:var(--chalk);border:1.5px solid var(--line)}
-  .btn-small{width:auto;padding:8px 14px;font-size:.85rem;margin-top:0}
-  .muted{color:var(--chalk-dim);font-size:.85rem;line-height:1.45}
-  .error{color:var(--red-chalk);font-size:.85rem;margin-top:8px;min-height:1.2em}
-  .hidden{display:none !important}
+  .tiles .tile:first-child{transform:rotate(-6deg)}
+  .tiles .tile:last-child{transform:rotate(6deg)}
 
-  .code-big{
-    font-family:'Space Mono',monospace;
-    font-size:2.4rem;font-weight:700;
-    letter-spacing:.35em;text-align:center;
-    color:var(--butter);
-    padding:10px 0 4px;
-    text-indent:.35em;
+  #screen-game{min-height:calc(100dvh - env(safe-area-inset-top));display:flex;flex-direction:column}
+  .mot-score{display:flex;align-items:center;gap:10px;justify-content:center}
+  .mot-score .av{font-size:18px}
+  .mot-score .n{font-family:'Lilita One',sans-serif;font-size:24px;font-weight:400}
+  .mot-score .lbl{font-size:12px;color:var(--dim);font-weight:500}
+  .mot-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:8px 6px}
+  .mot-cat{
+    width:100%;border-radius:24px;background:var(--cream);color:var(--brown);padding:18px;
+    display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 8px 0 var(--orange-sh);text-align:center;
   }
-  .pulse{animation:pulse 1.6s ease-in-out infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
-
-  .wait-roles{display:flex;gap:8px;justify-content:center;margin:12px 0}
-  .wait-role-chip{flex:1;background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
-  .wait-role-chip .lbl{font-size:.72rem;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
-  .wait-role-chip .val{font-size:.9rem;font-weight:600}
-
-  .status-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-  .round-badge{
-    width:52px;height:52px;border-radius:16px;flex-shrink:0;
-    background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;
-    display:flex;align-items:center;justify-content:center;
-    font-family:'Space Mono',monospace;font-weight:700;font-size:1.3rem;
-    box-shadow:0 6px 16px rgba(233,196,106,.25);
+  .mot-cat small{font-size:13px;font-weight:600;color:#c2410c;text-transform:uppercase;letter-spacing:.12em}
+  .mot-cat b{font-family:'Lilita One',sans-serif;font-weight:400;font-size:clamp(26px,8vw,36px);line-height:1.1}
+  .mot-cat.empty b{opacity:.35}
+  .mot-letters{display:flex;align-items:center;gap:14px}
+  .mot-letter{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .mot-letter .tile{width:104px;height:116px;border-radius:20px;font-size:80px;box-shadow:0 9px 0 var(--orange-sh);transform:none}
+  .mot-letter .tile.empty{background:rgba(255,243,223,.35);color:rgba(255,255,255,.8);box-shadow:none;border:3px dashed rgba(255,255,255,.6)}
+  .mot-letter small{font-size:12px;color:var(--dim);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mot-plus{font-family:'Lilita One',sans-serif;font-size:38px}
+  @media (prefers-reduced-motion:no-preference){ .mot-letter .tile.pop{animation:uiPop .45s cubic-bezier(.22,1,.36,1)} }
+  .mot-hint{font-size:15px;color:var(--dim);text-align:center;text-wrap:balance}
+  .mot-foot{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0 calc(28px + env(safe-area-inset-bottom))}
+  .mot-stop{
+    width:200px;height:200px;border-radius:50%;
+    background:radial-gradient(circle at 40% 35%,#ff5a5f,#d6182a);
+    box-shadow:0 12px 0 #8e0d1a,0 20px 40px rgba(0,0,0,.3),inset 0 -8px 0 rgba(0,0,0,.12);
+    font-family:'Lilita One',sans-serif;font-size:52px;color:#fff;letter-spacing:1px;
+    transition:transform .08s, box-shadow .08s;
   }
-  .status-text{flex:1}
-  .status-text .rnd{font-size:.8rem;color:var(--chalk-dim)}
-  .status-text .ph{font-size:.92rem;font-weight:600}
+  .mot-stop:active{transform:translateY(9px);box-shadow:0 3px 0 #8e0d1a,0 8px 20px rgba(0,0,0,.3),inset 0 -8px 0 rgba(0,0,0,.12)}
+  .mot-foot .muted{color:var(--dim);font-size:13px}
+  .mot-reroll{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .mot-reroll button{height:38px;padding:0 14px;border-radius:999px;background:rgba(0,0,0,.14);font-size:13px;font-weight:600}
+  .mot-wait{font-size:15px;color:var(--dim);text-align:center}
 
-  .score-row{display:flex;gap:8px;margin-bottom:14px}
-  .p-score{flex:1;border-radius:12px;padding:10px;text-align:center;border:1.5px solid var(--line);background:rgba(0,0,0,.2)}
-  .p-score.me{border-color:var(--butter)}
-  .p-score .lbl{font-size:.72rem;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .p-score .n{font-family:'Space Mono',monospace;font-weight:700;font-size:1.5rem}
+  body[data-screen=judge]{background:#7a2a08}
+  .mot-judge{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:0 8px 140px}
+  .mot-judge .emo{font-size:72px;line-height:1}
+  .mot-judge .ttl{font-family:'Lilita One',sans-serif;font-size:38px;line-height:1.05}
+  .mot-judge .sub{font-size:15px;color:#ffd1b8;text-wrap:balance}
+  .mot-chips{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;justify-content:center}
+  .mot-chips span{padding:8px 14px;border-radius:12px;background:var(--cream);color:var(--brown);font-weight:600}
+  .mot-chips span.l{color:var(--orange);font-family:'Lilita One',sans-serif;font-weight:400;font-size:18px}
+  .mot-judge-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .mot-judge-btns button{height:72px;border-radius:22px;font-size:18px;font-weight:600;color:#fff}
+  .mot-judge-btns .no{background:#3a1303}
+  .mot-judge-btns .yes{background:#2fbf71;box-shadow:0 5px 0 #17703f}
+  .mot-judge-btns button:active{transform:translateY(3px)}
+  body[data-screen=judge] .ui-dock{background:linear-gradient(transparent,#7a2a08 35%)}
+  body[data-screen=judge] .ui-round{background:rgba(255,255,255,.14)}
 
-  .category-badge{
-    text-align:center;font-size:1.3rem;font-weight:700;color:var(--butter);
-    padding:14px 0;margin-bottom:14px;border:1.5px dashed var(--butter);border-radius:var(--radius);
-  }
-  .letters-row{display:flex;gap:10px;justify-content:center;margin-bottom:14px}
-  .letter-chip{
-    flex:1;max-width:140px;border-radius:var(--radius);padding:14px 8px;text-align:center;
-    border:1.5px solid var(--line);background:rgba(0,0,0,.2);
-  }
-  .letter-chip.me{border-color:var(--butter)}
-  .letter-chip .nm{font-size:.75rem;color:var(--chalk-dim);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .letter-chip .lt{font-family:'Space Mono',monospace;font-weight:700;font-size:2.2rem;color:var(--chalk)}
-  .letter-chip .lt.empty{color:var(--chalk-dim);font-size:1.4rem}
+  .mot-end{display:flex;flex-direction:column;align-items:center;gap:14px;padding:50px 0 0;text-align:center}
+  .mot-end .tile{width:48px;height:54px;border-radius:10px;background:var(--orange);color:#fff;font-size:32px;box-shadow:0 5px 0 var(--orange-sh)}
+  .mot-end .tiles .tile:nth-child(3){transform:rotate(4deg)}
+  .mot-end .tiles .tile:nth-child(2),.mot-end .tiles .tile:nth-child(4){transform:none}
+  .mot-end .ttl{font-family:'Lilita One',sans-serif;font-size:40px;line-height:1.05;margin-top:10px;text-wrap:balance}
+  .mot-end .sub{font-size:15px;opacity:.85}
+  .mot-big{display:flex;align-items:center;gap:22px;margin-top:6px}
+  .mot-big .n{font-family:'Lilita One',sans-serif;font-size:72px;line-height:1}
+  .mot-big .n.me{color:var(--orange)}
+  .mot-big .who{font-size:14px}
+  .mot-big .dash{font-family:'Lilita One',sans-serif;font-size:30px;color:#f0cfae}
+  body[data-screen=round]{background:#fff3df;color:#7a2a08}
+  body[data-screen=round] .ui-round{background:#ffe2cf}
+  body[data-screen=round] .mot-score .lbl{color:#c2410c}
+  body[data-screen=round] .ui-dock{background:linear-gradient(transparent,#fff3df 35%)}
+  body[data-screen=round] .ui-btn{background:var(--orange);box-shadow:0 5px 0 var(--orange-sh)}
+  body[data-screen=round] .ui-btn.alt{background:#ffe2cf;color:#7a2a08;box-shadow:0 5px 0 #f0cfae}
+  .ui-dock-row .ui-btn.alt{flex:0 0 auto;width:auto;padding:0 18px;font-size:16px}
 
-  .btn-stop{
-    background:linear-gradient(160deg,#f08a72,var(--red-chalk));color:#3a0f05;
-    font-size:1.4rem;font-weight:700;padding:26px 16px;box-shadow:0 8px 22px rgba(231,111,81,.3);
-  }
-  .reroll-row{display:flex;gap:8px;margin-top:8px;justify-content:center}
-  .reroll-row button{margin-top:0;font-size:.8rem;padding:9px 14px;width:auto;flex:0 0 auto}
-  .judge-btns{display:flex;gap:8px}
-  .judge-btns button{margin-top:0}
-  .btn-valid{background:linear-gradient(160deg,#96d49a,var(--green-chalk));color:#0f2b12}
-  .btn-invalid{background:linear-gradient(160deg,#f08a72,var(--red-chalk));color:#3a0f05}
-
-  .win-card{text-align:center}
-  .win-card .big{font-size:2.6rem;margin:6px 0}
-  .rank-list{display:flex;flex-direction:column;gap:6px;margin:14px 0 4px}
-  .rank-list .row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:rgba(0,0,0,.18);font-size:.9rem}
-  .rank-list .row.win{border:1px solid var(--butter)}
-  .rank-list .nm{flex:1}
-  .rank-list .sc{font-family:'Space Mono',monospace;font-weight:700}
+  .ui-sheet-body{color:#7a2a08}
+  .ui-sheet-title{color:var(--orange);font-size:30px}
+  .ui-step > b:first-child{background:var(--orange);color:#fff;border-radius:8px;font-family:'Lilita One',sans-serif;font-weight:400;box-shadow:0 3px 0 var(--orange-sh)}
+  .ui-sheet .ui-btn{background:var(--orange);color:#fff}
 </style>
-<link rel="stylesheet" href="responsive.css">
-<link rel="stylesheet" href="avatar.css">
 </head>
-<body>
+<body data-screen="create">
 <div class="frame">
-  <header>
-    <h1>🔤 1, 2, 3 Mot !</h1>
-    <div class="tagline">Trouve le mot avec les deux lettres, avant l'autre !</div>
-    <a class="back-link" href="index.html">← Retour à l'accueil</a>
-  </header>
-
-  <div id="screen-home">
-    <div class="card">
-      <h2>Nouvelle partie</h2>
-      <p class="muted">Crée une partie et envoie le code à ton ami·e. À deux uniquement.</p>
-      <button class="btn-main" onclick="show('create')">Créer une partie</button>
+  <div id="screen-create" class="ui-screen has-dock">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
     </div>
-    <div class="card">
-      <h2>Rejoindre</h2>
-      <p class="muted">Tu as reçu un code ? Entre-le ici.</p>
-      <button class="btn-ghost" onclick="show('join')">Rejoindre avec un code</button>
+    <div class="ui-hero ">
+      <div class="ui-hero-art"><span class="tiles"><span class="tile">1</span><span class="tile">2</span><span class="tile">3</span></span></div>
+      <h1 class="ui-hero-title">MOT !</h1>
+      <div class="ui-hero-sub">Une catégorie, deux lettres, le premier qui buzze</div>
     </div>
-    <div class="card">
-      <h2>Règles</h2>
-      <p class="muted">À chaque manche, une carte catégorie est tirée (animal, pays, prénom…). Chacun·e tire ensuite sa propre lettre, au hasard.<br>
-      Les deux réfléchissent en même temps à un mot de cette catégorie qui contient les <b>deux lettres</b> affichées. Dès que quelqu'un l'a trouvé, il·elle appuie sur <b>STOP !</b> pour couper court à l'autre — puis annonce son mot à voix haute.<br>
-      L'autre joueur·se valide ou invalide sa réponse : bonne réponse, un point pour celui·celle qui a buzzé ; mauvaise réponse, un point pour l'autre. Enchaînez les manches, le score le plus haut gagne !</p>
+    <div class="ui-seg" role="tablist">
+      <button type="button" class="on" aria-selected="true">Créer</button>
+      <button type="button" onclick="show('join')">Rejoindre</button>
     </div>
-  </div>
-
-  <div id="screen-create" class="hidden">
-    <div class="card">
-      <h2>Créer une partie</h2>
-      <label>Ton prénom</label>
-      <input type="text" id="create-name" maxlength="12" placeholder="Ex. Léa">
-      <label>Ton avatar</label>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="create-name" maxlength="12" placeholder="Ex. Léa" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
       <div class="avatar-row" id="create-avatar-row"></div>
+    </div>
+    <div class="ui-dock">
       <div class="error" id="create-err"></div>
-      <button class="btn-main" id="btn-create" onclick="createGame()">Créer et obtenir le code</button>
-      <button class="btn-ghost" onclick="show('home')">Retour</button>
+      <button class="ui-btn" id="btn-create" onclick="createGame()">Créer la partie</button>
     </div>
   </div>
 
-  <div id="screen-join" class="hidden">
-    <div class="card">
-      <h2>Rejoindre une partie</h2>
-      <label>Code de la partie</label>
-      <input type="text" class="code-input" id="join-code" maxlength="4" placeholder="ABCD">
-      <label>Ton prénom</label>
-      <input type="text" id="join-name" maxlength="12" placeholder="Ex. Emma">
-      <label>Ton avatar</label>
+  <div id="screen-join" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
+    </div>
+    <div class="ui-hero ">
+      <div class="ui-hero-art"><span class="tiles"><span class="tile">1</span><span class="tile">2</span><span class="tile">3</span></span></div>
+      <h1 class="ui-hero-title">MOT !</h1>
+      <div class="ui-hero-sub">Une catégorie, deux lettres, le premier qui buzze</div>
+    </div>
+    <div class="ui-seg" role="tablist">
+      <button type="button" onclick="show('create')">Créer</button>
+      <button type="button" class="on" aria-selected="true">Rejoindre</button>
+    </div>
+    <label class="ui-field">
+      <span class="ui-label">Code de la partie</span>
+      <input type="text" id="join-code" class="code-input" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    </label>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="join-name" maxlength="12" placeholder="Ex. Emma" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
       <div class="avatar-row" id="join-avatar-row"></div>
+    </div>
+    <div class="ui-dock">
       <div class="error" id="join-err"></div>
-      <button class="btn-main" id="btn-join" onclick="joinGame()">Rejoindre</button>
-      <button class="btn-ghost" onclick="show('home')">Retour</button>
+      <button class="ui-btn" id="btn-join" onclick="joinGame()">Rejoindre</button>
     </div>
   </div>
 
-  <div id="screen-wait" class="hidden">
-    <div class="card" style="text-align:center">
-      <h2>Partie créée !</h2>
-      <p class="muted">Envoie ce code à ton ami·e :</p>
-      <div class="code-big" id="wait-code">····</div>
-      <button class="btn-main btn-small hidden" id="share-btn" onclick="shareCode()">📤 Partager le code</button>
-      <button class="btn-ghost btn-small" onclick="copyCode()" id="copy-btn">Copier le lien</button>
-      <div class="wait-roles">
-        <div class="wait-role-chip"><div class="lbl">Joueur·se 1</div><div class="val" id="wait-role-p1">—</div></div>
-        <div class="wait-role-chip"><div class="lbl">Joueur·se 2</div><div class="val" id="wait-role-p2">—</div></div>
+  <div id="screen-wait" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <button class="ui-round" onclick="cancelWait()" aria-label="Annuler">✕</button>
+      <div class="ui-top-mid">Partie créée</div>
+      <span class="ui-round ghost"></span>
+    </div>
+    <div class="ui-wait">
+      <div class="muted" style="font-size:15px">Envoie ce code à ton ami·e</div>
+      <button class="ui-code" id="wait-code"></button>
+      <div class="ui-code-hint" id="wait-hint">Touche pour copier</div>
+      <div class="ui-players" id="wait-players"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="ui-dock-row">
+        <button class="ui-sq" onclick="copyCode()" aria-label="Copier le lien">🔗</button>
+        <button class="ui-btn" onclick="shareCode()">📤 Envoyer l'invitation</button>
       </div>
-      <p class="muted pulse" style="margin-top:6px">En attente de ton ami·e…</p>
     </div>
   </div>
 
   <div id="screen-game" class="hidden">
-    <button class="quit-match-btn" onclick="confirmQuitMatch()">✕ Quitter</button>
-    <div class="status-bar">
-      <div class="round-badge" id="round-badge">1</div>
-      <div class="status-text">
-        <div class="rnd" id="round-label">Manche 1</div>
-        <div class="ph" id="phase-label">…</div>
+    <div class="ui-top">
+      <button class="ui-round" onclick="confirmQuitMatch()" aria-label="Quitter">✕</button>
+      <div class="ui-top-mid mot-score">
+        <span class="av" id="sc-av-me">🙂</span><span class="n" id="sc-me">0</span>
+        <span class="lbl" id="round-label">Manche 1</span>
+        <span class="n" id="sc-opp">0</span><span class="av" id="sc-av-opp">🙂</span>
       </div>
+      <button class="ui-round" data-rules aria-label="Règles">?</button>
     </div>
-    <div class="score-row">
-      <div class="p-score" id="score-p1-box"><div class="lbl" id="score-p1-name">Joueur 1</div><div class="n" id="score-p1">0</div></div>
-      <div class="p-score" id="score-p2-box"><div class="lbl" id="score-p2-name">Joueur 2</div><div class="n" id="score-p2">0</div></div>
-    </div>
-
-    <div id="game-zone"></div>
-
-    <p class="muted" style="text-align:center;margin-top:10px">Code de la partie : <b id="game-code-label"></b></p>
+    <div id="game-zone" style="flex:1;display:flex;flex-direction:column"></div>
   </div>
 
-  <div id="screen-end" class="hidden">
-    <div class="card win-card">
-      <div class="big" id="end-emoji">🏆</div>
-      <h2 id="end-title">…</h2>
-      <p class="muted" id="end-detail"></p>
-      <div class="rank-list" id="rank-list"></div>
-      <button class="btn-main" onclick="location.reload()">Nouvelle partie</button>
+  <div id="screen-end" class="ui-screen has-dock hidden">
+    <div class="mot-end">
+      <div class="tiles" id="end-tiles"></div>
+      <div class="ttl" id="end-title">…</div>
+      <div class="sub" id="end-detail"></div>
+      <div class="mot-big" id="rank-list"></div>
     </div>
+    <div class="ui-dock">
+      <div class="ui-dock-row">
+        <a class="ui-sq" href="index.html" aria-label="Accueil" style="text-decoration:none">🏠</a>
+        <button class="ui-btn" onclick="location.href='123mot.html'">🔁 Nouvelle partie</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ui-sheet" id="rules-sheet" aria-hidden="true">
+  <div class="ui-sheet-scrim" data-rules-close></div>
+  <div class="ui-sheet-body" role="dialog" aria-label="Règles">
+    <div class="ui-grab"></div>
+    <div class="ui-sheet-title">Comment jouer</div>
+    <div class="ui-step"><b>1</b><span>Une catégorie est tirée (animal, pays, prénom…), puis chacun·e tire sa lettre.</span></div>
+    <div class="ui-step"><b>2</b><span>Trouve un mot de la catégorie qui contient <b>les deux lettres</b>.</span></div>
+    <div class="ui-step"><b>3</b><span>Premier à l'avoir ? Appuie sur <b>STOP !</b> et dis ton mot. L'autre valide ou non : bonne réponse, un point pour toi ; mauvaise, un point pour l'autre.</span></div>
+    <button class="ui-btn" data-rules-close>Compris</button>
   </div>
 </div>
 
@@ -270,6 +254,7 @@
 <script src="connection-banner.js"></script>
 <script src="avatar-picker.js"></script>
 <script src="game-link.js"></script>
+<script src="gym-ui.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -298,8 +283,12 @@ let code = null, me = null, state = null, pollTimer = null, busy = false;
 let renderedZoneKey = null;
 
 const $ = id => document.getElementById(id);
-const screens = ['home','create','join','wait','game','end'];
-function show(name){ screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name)); }
+const screens = ['create','join','wait','game','end'];
+function show(name){
+  if(name==='home') name = 'create';
+  screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name));
+  window.GYMUI.screen(name);
+}
 function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
 function pAvatar(p){ return p && p.avatar ? p.avatar : '🙂'; }
 function otherRole(r){ return r==='p1' ? 'p2' : 'p1'; }
@@ -363,8 +352,10 @@ async function saveResult(st){
 /* ---------- create / join ---------- */
 const createAvatarPicker = window.GYMAvatarPicker.render('create-avatar-row');
 const joinAvatarPicker = window.GYMAvatarPicker.render('join-avatar-row');
+window.GYMUI.prefillNames(['create-name','join-name']);
 async function createGame(){
   const name = $('create-name').value.trim() || "Joueur 1";
+  window.GYMUI.rememberName($('create-name').value);
   const avatar = createAvatarPicker.get();
   $('btn-create').disabled = true; busy = true;
 
@@ -377,7 +368,7 @@ async function createGame(){
   me = 'p1';
   saveRole(code, 'p1');
   if(window.GYMRecent) window.GYMRecent.record('mot', code, '1, 2, 3 Mot !');
-  $('wait-code').textContent = code;
+  window.GYMUI.renderCode('wait-code', code, $('wait-hint'));
   renderWait();
   show('wait');
   startPolling();
@@ -398,7 +389,7 @@ async function joinGame(){
     code = c; me = existing; state = st;
     busy = false; $('btn-join').disabled = false;
     if(window.GYMRecent) window.GYMRecent.record('mot', c, '1, 2, 3 Mot !');
-    if(st.status==='finished'){ renderEnd(); } else if(st.status==='waiting'){ $('wait-code').textContent=c; renderWait(); show('wait'); startPolling(); } else { enterGame(); startPolling(); }
+    if(st.status==='finished'){ renderEnd(); } else if(st.status==='waiting'){ window.GYMUI.renderCode('wait-code', c, $('wait-hint')); renderWait(); show('wait'); startPolling(); } else { enterGame(); startPolling(); }
     return;
   }
   if(st.players.p2){
@@ -406,6 +397,7 @@ async function joinGame(){
     $('btn-join').disabled = false; busy = false; return;
   }
   const name = $('join-name').value.trim() || "Joueur 2";
+  window.GYMUI.rememberName($('join-name').value);
   const avatar = joinAvatarPicker.get();
   st.players.p2 = {name, avatar};
   st.status = 'playing';
@@ -438,12 +430,20 @@ async function refresh(){
   applyIncomingState(st);
 }
 function renderWait(){
-  const p1 = state.players.p1, p2 = state.players.p2;
-  $('wait-role-p1').textContent = p1 ? pAvatar(p1)+' '+esc(p1.name) : '— en attente —';
-  $('wait-role-p2').textContent = p2 ? pAvatar(p2)+' '+esc(p2.name) : '— en attente —';
+  $('wait-players').innerHTML = ['p1','p2'].map(r => {
+    const p = state.players[r];
+    if(!p) return '<div class="ui-player empty"><span class="av"></span><span class="nm pulse">En attente…</span></div>';
+    return '<div class="ui-player"><span class="av">'+pAvatar(p)+'</span><span class="nm">'+esc(p.name)+(r===me?' (toi)':'')+'</span><span class="st">Prêt·e ✓</span></div>';
+  }).join('');
+}
+function cancelWait(){
+  if(!confirm("Annuler cette partie ?")) return;
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
+  if(window.GYMRecent) window.GYMRecent.remove('mot', code);
+  location.href = '123mot.html';
 }
 function enterGame(){
-  $('game-code-label').textContent = code;
   show('game');
   renderCurrent();
 }
@@ -541,76 +541,84 @@ async function endMatch(){
 }
 
 /* ---------- rendering ---------- */
+const CAT_EMOJI = {pays:'🌍', ville:'🏙️', animal:'🐾', plat:'🍽️', plante:'🌿', objet:'📦', celebrite:'⭐', prenom_fille:'👧', prenom_garcon:'👦', sport:'⚽', metier:'🧰', couleur:'🎨'};
+function catLabel(c){ return c ? (CAT_EMOJI[c.key]||'🎴')+' '+esc(c.label) : ''; }
+let lastLetters = '';
 function renderGame(){
   if(!state || state.status!=='playing') return;
-  const p1 = state.players.p1, p2 = state.players.p2;
-  $('round-badge').textContent = state.round;
+  const them = otherRole(me), meP = state.players[me], themP = state.players[them];
+  $('sc-av-me').textContent = pAvatar(meP); $('sc-av-opp').textContent = pAvatar(themP);
+  $('sc-me').textContent = state.scores[me]; $('sc-opp').textContent = state.scores[them];
   $('round-label').textContent = 'Manche ' + state.round;
-  $('score-p1-name').textContent = pAvatar(p1)+' '+esc(p1.name);
-  $('score-p2-name').textContent = pAvatar(p2)+' '+esc(p2.name);
-  $('score-p1-box').classList.toggle('me', me==='p1');
-  $('score-p2-box').classList.toggle('me', me==='p2');
-  $('score-p1').textContent = state.scores.p1;
-  $('score-p2').textContent = state.scores.p2;
 
-  const drawerName = state.players[state.cardDrawer].name;
-  const isDrawer = me===state.cardDrawer;
-  if(state.phase==='card_pending'){
-    $('phase-label').textContent = isDrawer ? '🎴 Tire une carte catégorie' : '⏳ ' + esc(drawerName) + ' tire une carte…';
-  } else if(state.phase==='letters_pending'){
-    $('phase-label').textContent = state.letters[me] ? '⏳ En attente de l\'adversaire…' : '🔤 Tire ta lettre';
-  } else if(state.phase==='thinking'){
-    $('phase-label').textContent = '🤔 Trouve le mot… et appuie sur STOP !';
-  } else if(state.phase==='buzzed'){
-    const buzzerName = state.players[state.buzzedBy].name;
-    $('phase-label').textContent = me===state.buzzedBy ? '⏳ ' + esc(state.players[otherRole(me)].name) + ' vérifie ta réponse…' : '🛎 ' + esc(buzzerName) + ' a buzzé !';
-  } else if(state.phase==='round_end'){
-    $('phase-label').textContent = '🏁 Manche terminée';
-  }
+  const ph = state.phase;
+  window.GYMUI.screen(ph==='buzzed' ? 'judge' : (ph==='round_end' ? 'round' : 'game'));
 
-  const zoneKey = state.phase + '|' + (state.category?state.category.key:'') + '|' + state.letters.p1 + '|' + state.letters.p2 + '|' + state.buzzedBy + '|' + state.outcome;
+  const zoneKey = ph + '|' + (state.category?state.category.key:'') + '|' + state.letters.p1 + '|' + state.letters.p2 + '|' + state.buzzedBy + '|' + state.outcome;
   if(renderedZoneKey === zoneKey) return;
   renderedZoneKey = zoneKey;
   const zone = $('game-zone');
+  const drawerName = state.players[state.cardDrawer].name;
+  const isDrawer = me===state.cardDrawer;
 
-  if(state.phase==='card_pending'){
-    zone.innerHTML = isDrawer
-      ? '<button class="btn-main" onclick="drawCard()">🎴 Tirer une carte</button>'
-      : '<div class="card" style="text-align:center"><p class="muted">⏳ ' + esc(drawerName) + ' tire la carte catégorie…</p></div>';
-  } else if(state.phase==='letters_pending'){
-    const catHtml = '<div class="category-badge">' + esc(state.category.label) + '</div>';
-    const myLetter = state.letters[me];
-    const btnHtml = myLetter ? '<div class="card" style="text-align:center"><p class="muted">⏳ En attente de la lettre de l\'adversaire…</p></div>' : '<button class="btn-main" onclick="drawLetter()">🔤 Tirer ma lettre</button>';
-    zone.innerHTML = catHtml + btnHtml;
-  } else if(state.phase==='thinking' || state.phase==='buzzed' || state.phase==='round_end'){
-    const catHtml = '<div class="category-badge">' + esc(state.category.label) + '</div>';
-    const lettersHtml = '<div class="letters-row">' +
-      '<div class="letter-chip'+(me==='p1'?' me':'')+'"><div class="nm">'+esc(p1.name)+'</div><div class="lt">'+esc(state.letters.p1||'?')+'</div></div>' +
-      '<div class="letter-chip'+(me==='p2'?' me':'')+'"><div class="nm">'+esc(p2.name)+'</div><div class="lt">'+esc(state.letters.p2||'?')+'</div></div>' +
-      '</div>';
-    let actionHtml = '';
-    if(state.phase==='thinking'){
-      actionHtml = '<button class="btn-stop" onclick="buzz()">🛑 STOP !</button>' +
-        '<div class="reroll-row">' +
-        '<button class="btn-ghost btn-small" onclick="rerollCategory()">🔄 Changer le thème</button>' +
-        '<button class="btn-ghost btn-small" onclick="rerollLetters()">🔄 Changer les lettres</button>' +
-        '</div>';
-    } else if(state.phase==='buzzed'){
-      const buzzerName = state.players[state.buzzedBy].name;
-      if(me===state.buzzedBy){
-        actionHtml = '<div class="card" style="text-align:center"><p class="muted">⏳ Annonce ton mot à voix haute, ' + esc(state.players[otherRole(me)].name) + ' vérifie…</p></div>';
-      } else {
-        actionHtml = '<div class="card" style="text-align:center"><h2>🛎 ' + esc(buzzerName) + ' a buzzé !</h2><p class="muted" style="margin-bottom:10px">Son mot est-il correct ?</p><div class="judge-btns"><button class="btn-invalid" onclick="judgeResolve(false)">❌ Invalide</button><button class="btn-valid" onclick="judgeResolve(true)">✅ Valide</button></div></div>';
-      }
-    } else if(state.phase==='round_end'){
-      const buzzerName = state.players[state.buzzedBy].name;
-      const resultText = state.outcome==='valid' ? '✅ ' + esc(buzzerName) + ' avait raison !' : '❌ ' + esc(buzzerName) + ' s\'est trompé·e !';
-      actionHtml = '<div class="card" style="text-align:center"><h2>' + resultText + '</h2>' +
-        '<button class="btn-main" onclick="nextRound()">Manche suivante</button>' +
-        '<button class="btn-ghost" onclick="endMatch()">Terminer la partie</button></div>';
+  if(ph==='buzzed'){
+    const buzzerName = state.players[state.buzzedBy].name;
+    const chips = '<div class="mot-chips"><span>'+catLabel(state.category)+'</span><span class="l">'+esc(state.letters.p1)+' + '+esc(state.letters.p2)+'</span></div>';
+    if(me===state.buzzedBy){
+      zone.innerHTML = '<div class="mot-judge"><div class="emo">🛎</div><div class="ttl">Tu as buzzé !</div>'+
+        '<div class="sub">Annonce ton mot à voix haute.<br><span class="pulse">'+esc(themP.name)+' vérifie…</span></div>'+chips+'</div>';
+    } else {
+      if(window.GYMFeedback) window.GYMFeedback.mistake();
+      zone.innerHTML = '<div class="mot-judge"><div class="emo">🛎</div><div class="ttl">'+esc(buzzerName)+' a buzzé !</div>'+
+        '<div class="sub">Son mot est annoncé à voix haute.<br>Contient-il bien '+esc(state.letters.p1)+' et '+esc(state.letters.p2)+' ?</div>'+chips+'</div>'+
+        '<div class="ui-dock"><div class="mot-judge-btns"><button class="no" onclick="judgeResolve(false)">❌ Invalide</button><button class="yes" onclick="judgeResolve(true)">✅ Valide</button></div></div>';
     }
-    zone.innerHTML = catHtml + lettersHtml + actionHtml;
+    return;
   }
+  if(ph==='round_end'){
+    const buzzerName = state.players[state.buzzedBy].name, iBuzzed = me===state.buzzedBy;
+    const ok = state.outcome==='valid';
+    const pointToMe = (ok && iBuzzed) || (!ok && !iBuzzed);
+    zone.innerHTML = '<div class="mot-end ui-screen has-dock" style="padding-top:30px">'+
+      '<div style="font-size:72px;line-height:1">'+(ok?'✅':'❌')+'</div>'+
+      '<div class="ttl">'+(ok ? (iBuzzed ? 'Bien trouvé !' : esc(buzzerName)+' avait raison') : (iBuzzed ? 'Raté…' : esc(buzzerName)+' s’est trompé·e'))+'</div>'+
+      '<div class="sub">'+(pointToMe ? '+1 point pour toi' : '+1 point pour '+esc(themP.name))+'</div>'+
+      '<div class="mot-big">'+bigScore()+'</div>'+
+      '<div class="ui-dock"><div class="ui-dock-row"><button class="ui-btn alt" onclick="endMatch()">🏁 Terminer</button><button class="ui-btn" onclick="nextRound()">Manche suivante</button></div></div></div>';
+    if(pointToMe && window.GYMFeedback) window.GYMFeedback.ok();
+    return;
+  }
+
+  const empty = !state.category;
+  const catHtml = '<div class="mot-cat'+(empty?' empty':'')+'"><small>Catégorie</small><b>'+(empty?'?':catLabel(state.category))+'</b></div>';
+  const lettersKey = state.letters.p1+'|'+state.letters.p2;
+  function letter(r){
+    const l = state.letters[r];
+    const fresh = l && lastLetters.split('|')[r==='p1'?0:1]!==l;
+    return '<div class="mot-letter"><span class="tile'+(l?'':' empty')+(fresh?' pop':'')+'">'+(l?esc(l):'?')+'</span><small>'+(r===me?'ta lettre':'lettre de '+esc(state.players[r].name))+'</small></div>';
+  }
+  const lettersHtml = '<div class="mot-letters">'+letter(me)+'<span class="mot-plus">+</span>'+letter(them)+'</div>';
+  lastLetters = lettersKey;
+  let hint = '', foot = '';
+  if(ph==='card_pending'){
+    hint = isDrawer ? 'C’est toi qui tires la catégorie' : esc(drawerName)+' tire la catégorie…';
+    foot = isDrawer ? '<div class="ui-dock"><button class="ui-btn" onclick="drawCard()">🎴 Tirer une carte</button></div>'
+                    : '';
+  } else if(ph==='letters_pending'){
+    hint = state.letters[me] ? 'En attente de la lettre de '+esc(themP.name)+'…' : 'Tire ta lettre !';
+    foot = state.letters[me] ? '' : '<div class="ui-dock"><button class="ui-btn" onclick="drawLetter()">🔤 Tirer ma lettre</button></div>';
+  } else if(ph==='thinking'){
+    hint = 'Trouve un mot « '+esc(state.category.label)+' » qui contient '+esc(state.letters[me])+' et '+esc(state.letters[them]);
+    foot = '<div class="mot-foot"><button class="mot-stop" onclick="buzz()">STOP !</button><div class="muted">Appuie dès que tu as ton mot</div>'+
+      '<div class="mot-reroll"><button onclick="rerollCategory()">🔄 Changer le thème</button><button onclick="rerollLetters()">🔄 Changer les lettres</button></div></div>';
+  }
+  zone.innerHTML = '<div class="mot-main'+(foot && ph!=='thinking' ? ' ui-screen has-dock' : '')+'">'+catHtml+lettersHtml+'<div class="mot-hint'+((ph!=='thinking' && !foot)?' pulse':'')+'">'+hint+'</div></div>'+foot;
+}
+function bigScore(){
+  const them = otherRole(me);
+  return '<div><div class="n me">'+state.scores[me]+'</div><div class="who">'+pAvatar(state.players[me])+' Toi</div></div>'+
+    '<div class="dash">–</div>'+
+    '<div><div class="n">'+state.scores[them]+'</div><div class="who">'+esc(state.players[them].name)+' '+pAvatar(state.players[them])+'</div></div>';
 }
 async function renderEnd(){
   if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
@@ -623,12 +631,11 @@ async function renderEnd(){
   const iWon = !tie && state.overallWinner===me;
   if(iWon && window.GYMFeedback) window.GYMFeedback.win();
   const winName = tie ? null : state.players[state.overallWinner].name;
-  $('end-emoji').textContent = tie ? '🤝' : '🏆';
-  $('end-title').textContent = tie ? 'Égalité !' : esc(winName) + ' gagne la partie !';
-  $('end-detail').textContent = 'Partie en ' + state.round + ' manche' + (state.round>1?'s':'') + '.';
-  $('rank-list').innerHTML =
-    '<div class="row'+(!tie && state.overallWinner==='p1'?' win':'')+'"><span class="nm">'+pAvatar(state.players.p1)+' '+esc(state.players.p1.name)+(me==='p1'?' (toi)':'')+'</span><span class="sc">'+state.scores.p1+' pts</span></div>' +
-    '<div class="row'+(!tie && state.overallWinner==='p2'?' win':'')+'"><span class="nm">'+pAvatar(state.players.p2)+' '+esc(state.players.p2.name)+(me==='p2'?' (toi)':'')+'</span><span class="sc">'+state.scores.p2+' pts</span></div>';
+  const word = tie ? 'EGAL' : (iWon ? 'BRAVO' : 'OUPS');
+  $('end-tiles').innerHTML = word.split('').map(l => '<span class="tile">'+l+'</span>').join('');
+  $('end-title').textContent = tie ? 'Égalité !' : (iWon ? 'Tu gagnes !' : winName + ' gagne !');
+  $('end-detail').textContent = 'Partie en ' + state.round + ' manche' + (state.round>1?'s':'');
+  $('rank-list').innerHTML = bigScore();
 }
 function confirmQuitMatch(){
   if(!state) return;
@@ -639,22 +646,8 @@ function confirmQuitMatch(){
   if(window.GYMRecent) window.GYMRecent.remove('mot', code);
   location.href = 'index.html';
 }
-function copyCode(){
-  const link = window.GYMGameLink.build(code);
-  navigator.clipboard && navigator.clipboard.writeText(link).then(()=>{
-    $('copy-btn').textContent = "Lien copié ✓";
-    setTimeout(()=>$('copy-btn').textContent="Copier le lien", 1500);
-  });
-}
-function shareCode(){
-  if(!navigator.share) return;
-  navigator.share({
-    title: 'Games Room',
-    text: 'Rejoins ma partie de 1, 2, 3 Mot ! sur Games Room !',
-    url: window.GYMGameLink.build(code)
-  }).catch(()=>{});
-}
-if($('share-btn')) $('share-btn').classList.toggle('hidden', !navigator.share);
+function copyCode(){ window.GYMUI.copyLink(code, $('wait-hint')); }
+function shareCode(){ window.GYMUI.share(code, '1, 2, 3 Mot !', $('wait-hint')); }
 
 (function(){
   const qcode = (new URLSearchParams(location.search).get('code')||'').toUpperCase();

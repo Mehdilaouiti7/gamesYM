@@ -13,6 +13,11 @@ window.GYMAvatarPicker = {
       });
     }
     paint();
+    // Keep the (random) pre-selected avatar visible in the scrolling row.
+    requestAnimationFrame(function(){
+      const sel = el.querySelector('.avatar-opt.sel');
+      if(sel && el.scrollWidth > el.clientWidth) el.scrollLeft = sel.offsetLeft - el.offsetLeft - 5;
+    });
     return { get: function(){ return selected; } };
   }
 };

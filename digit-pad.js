@@ -18,8 +18,7 @@ window.GYMDigitPad = {
         return '<div class="digit-box'+(filled?' filled':'')+(active?' active':'')+'" data-i="'+i+'">'+(filled?d:'')+'</div>';
       }).join('');
       const usedElsewhere = distinct ? slots.filter((d, i) => i !== cursor && d !== '') : [];
-      const row1 = ['1','2','3','4','5'];
-      const row2 = ['6','7','8','9','0'];
+      const keys = ['1','2','3','4','5','6','7','8','9','0'];
       function keyBtn(k){
         const disabled = usedElsewhere.indexOf(k)!==-1;
         return '<button type="button" class="dp-key" data-k="'+k+'"'+(disabled?' disabled':'')+'>'+k+'</button>';
@@ -27,11 +26,12 @@ window.GYMDigitPad = {
       const filledCount = slots.filter(d => d !== '').length;
       const enterDisabled = filledCount<maxLen || (typeof opts.enterDisabled==='function' && opts.enterDisabled());
       el.innerHTML =
-        '<div class="digit-boxes">'+boxes+
+        '<div class="digit-boxes">'+boxes+'</div>'+
+        (opts.hint ? '<div class="dp-hint">'+opts.hint+'</div>' : '')+
+        '<div class="dp-keys">'+keys.map(keyBtn).join('')+'</div>'+
+        '<div class="dp-actions"><button type="button" class="dp-key dp-back" data-back="1" aria-label="Effacer">⌫</button>'+
           (showEnter ? '<button type="button" class="dp-enter" id="'+containerId+'-enter"'+(enterDisabled?' disabled':'')+'>'+enterLabel+'</button>' : '')+
-        '</div>'+
-        '<div class="dp-keys">'+row1.map(keyBtn).join('')+'<button type="button" class="dp-key dp-back" data-back="1">⌫</button></div>'+
-        '<div class="dp-keys">'+row2.map(keyBtn).join('')+'<button type="button" class="dp-key dp-clear" data-clear="1">🗑</button></div>';
+        '</div>';
 
       const boxEls = el.querySelectorAll('.digit-box');
       for(let i=0;i<boxEls.length;i++){
@@ -60,8 +60,6 @@ window.GYMDigitPad = {
         }
         paint();
       };
-      const clearBtn = el.querySelector('.dp-clear');
-      if(clearBtn) clearBtn.onclick = function(){ slots = new Array(maxLen).fill(''); cursor = 0; paint(); };
       if(showEnter){
         const enterBtn = el.querySelector('.dp-enter');
         if(enterBtn) enterBtn.onclick = function(){ if(filledCount===maxLen) onEnter(slots.join('')); };

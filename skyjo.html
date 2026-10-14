@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Games Room · Skyjo</title>
-<meta name="theme-color" content="#233a2f">
+<meta name="theme-color" content="#bfe3ff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Games Room">
@@ -12,331 +12,262 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gym-ui.css">
 <style>
+  /* ---------- Skyjo — « Ciel & couleurs » ---------- */
   :root{
-    --board:#24382e;
-    --board-deep:#1b2c24;
-    --chalk:#f3efe4;
-    --chalk-dim:#c9c4b4;
-    --butter:#e9c46a;
-    --red-chalk:#e76f51;
-    --blue-chalk:#8ecae6;
-    --green-chalk:#7bb274;
-    --deep-blue:#2f6690;
-    --line:rgba(243,239,228,.18);
-    --radius:14px;
+    --c-neg:#3a5bd9; --c-zero:#7cc4f5; --c-low:#41b36b; --c-mid:#f5c62d; --c-high:#e5484d;
+    --bg:linear-gradient(#bfe3ff,#eef8ff 55%) #eef8ff; --bg-solid:#eef8ff;
+    --fg:#123a6b; --dim:#4b6f99; --surface:#fff; --surface-2:#eef5fc; --soft:rgba(255,255,255,.6); --line:#a8cdee;
+    --accent:#3a5bd9; --accent-fg:#fff; --accent-sh:#233c9e;
+    --sel:#123a6b; --sel-fg:#fff; --ok:#3a5bd9; --ok-fg:#fff; --wait-bg:rgba(255,255,255,.7); --wait-fg:#123a6b; --danger:#e5484d;
+    --display:'Baloo 2',sans-serif; --display-weight:800;
+    --seg-on:#3a5bd9; --seg-on-fg:#fff; --opt-font:'Baloo 2',sans-serif; --opt-size:20px;
+    --scrim:rgba(18,58,107,.45); --sheet:#fff; --step-radius:8px;
+    --code-font:'Baloo 2',sans-serif;
+    --end-bg:linear-gradient(#3a5bd9,#2c4a8a) #2c4a8a; --end-solid:#2c4a8a; --end-fg:#fff; --end-soft:rgba(255,255,255,.14);
+    --end-btn-bg:#fff; --end-btn-fg:#3a5bd9; --end-btn-sh:#a8cdee; --rank1-bg:#f5c62d; --rank1-fg:#123a6b;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{min-height:100%}
-  body{
-    font-family:'Fredoka',system-ui,sans-serif;
-    background:
-      radial-gradient(1200px 600px at 50% -10%, rgba(233,196,106,.07), transparent 60%),
-      linear-gradient(var(--board), var(--board-deep));
-    background-repeat: no-repeat;
-    color:var(--chalk);
-    min-height:100dvh;
-    display:flex;flex-direction:column;align-items:center;
-    padding:20px 16px 40px;
-  }
-  .frame{width:100%;max-width:460px}
-  header{text-align:center;margin-bottom:14px;position:relative}
-  h1{font-weight:700;font-size:1.9rem;letter-spacing:.5px}
-  .tagline{color:var(--chalk-dim);font-size:.9rem;margin-top:2px}
-  .back-link{display:inline-block;margin-top:8px;color:var(--chalk-dim);font-size:.82rem;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
-  .quit-match-btn{
-    display:inline-block;width:auto;margin:0 0 10px;padding:6px 12px;
-    background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:999px;
-    color:var(--chalk-dim);font-size:.78rem;font-weight:500;cursor:pointer;
-  }
-  .quit-match-btn:active{opacity:.7}
-  .back-link:active{opacity:.7}
-  .card{
-    background:linear-gradient(160deg, rgba(52,74,62,.9), rgba(30,46,38,.88));
-    border:1px solid rgba(243,239,228,.13);
-    border-radius:var(--radius);
-    padding:18px 16px;
-    margin-bottom:14px;
-    box-shadow:0 10px 26px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.05);
-  }
-  .card h2{font-size:1.05rem;font-weight:600;margin-bottom:10px}
-  label{display:block;font-size:.85rem;color:var(--chalk-dim);margin:10px 0 4px}
-  input[type=text]{
-    width:100%;
-    background:rgba(0,0,0,.25);
-    border:1.5px dashed var(--line);
-    border-radius:10px;
-    color:var(--chalk);
-    font-family:'Space Mono',monospace;
-    font-size:1.15rem;
-    padding:11px 12px;
-    letter-spacing:.25em;
-    outline:none;
-  }
-  input:focus{border-color:var(--butter)}
-  input.name-input{font-family:'Fredoka',sans-serif;letter-spacing:normal;font-size:1rem}
-  button{
-    font-family:'Fredoka',sans-serif;
-    font-weight:600;font-size:1rem;
-    border:none;border-radius:13px;
-    padding:13px 16px;width:100%;
-    cursor:pointer;margin-top:12px;
-    transition:transform .12s cubic-bezier(.22,1,.36,1), filter .15s, opacity .15s;
-  }
-  button:active{transform:scale(.97);filter:brightness(.96)}
-  button:disabled{opacity:.45;cursor:default}
-  .btn-main{background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;box-shadow:0 6px 16px rgba(233,196,106,.18)}
-  .btn-ghost{background:rgba(255,255,255,.04);color:var(--chalk);border:1.5px solid var(--line)}
-  .btn-small{width:auto;padding:8px 14px;font-size:.85rem;margin-top:0}
-  .muted{color:var(--chalk-dim);font-size:.85rem;line-height:1.45}
-  .error{color:var(--red-chalk);font-size:.85rem;margin-top:8px;min-height:1.2em}
-  .hidden{display:none !important}
+  .ui-field input:focus{border-color:var(--accent)}
+  .ui-field input[type=text]{box-shadow:inset 0 0 0 2px transparent}
+  .avatar-opt.sel{background:var(--accent)}
+  .ui-hero-title{font-size:54px;line-height:1}
+  .fan{display:flex}
+  .fan span{width:50px;height:70px;border-radius:10px;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:28px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(18,58,107,.25)}
+  .fan span+span{margin-left:-10px}
+  .fan span:nth-child(1){background:var(--c-neg);transform:rotate(-12deg) translateY(6px)}
+  .fan span:nth-child(2){background:var(--c-low);transform:rotate(-4deg)}
+  .fan span:nth-child(3){background:var(--c-mid);color:#123a6b;transform:rotate(4deg)}
+  .fan span:nth-child(4){background:var(--c-high);transform:rotate(12deg) translateY(6px)}
+  .ui-code span{width:58px;height:76px;border-radius:12px;color:#fff;font-weight:800;font-size:40px;box-shadow:none}
+  .ui-code span:nth-child(1){background:var(--c-neg)}
+  .ui-code span:nth-child(2){background:var(--c-low)}
+  .ui-code span:nth-child(3){background:var(--c-mid);color:#123a6b}
+  .ui-code span:nth-child(4){background:var(--c-high)}
+  .ui-pill.share{background:#fff}
+  .ui-pcard .st{color:var(--c-low)}
+  .ui-pcard .st.host{color:var(--accent)}
 
-  .pcount-row{display:flex;gap:8px;margin-top:6px}
-  .pcount-opt{flex:1}
-  .pcount-opt input{display:none}
-  .pcount-opt span{
-    display:block;text-align:center;padding:11px 0;border-radius:10px;
-    border:1.5px dashed var(--line);color:var(--chalk-dim);cursor:pointer;font-weight:600;
-  }
-  .pcount-opt input:checked + span{border-color:var(--butter);border-style:solid;color:var(--butter);background:rgba(233,196,106,.1)}
+  /* card values */
+  .v-neg{background:var(--c-neg);color:#fff}
+  .v-zero{background:var(--c-zero);color:#123a6b}
+  .v-low{background:var(--c-low);color:#fff}
+  .v-mid{background:var(--c-mid);color:#123a6b}
+  .v-high{background:var(--c-high);color:#fff}
 
-  .code-big{
-    font-family:'Space Mono',monospace;
-    font-size:2.4rem;font-weight:700;
-    letter-spacing:.35em;text-align:center;
-    color:var(--butter);
-    padding:10px 0 4px;
-    text-indent:.35em;
-  }
-  .pulse{animation:pulse 1.6s ease-in-out infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+  #screen-game{min-height:calc(100dvh - env(safe-area-inset-top));display:flex;flex-direction:column;gap:10px}
+  .sk-top-lbl{font-size:13px;color:var(--dim);font-weight:500}
+  .opp-boards{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+  .opp-boards::-webkit-scrollbar{display:none}
+  .opp-board{flex:1 0 calc(50% - 4px);min-width:150px;border-radius:16px;background:rgba(255,255,255,.7);padding:8px;display:flex;align-items:center;gap:8px;transition:box-shadow .2s}
+  .opp-board.turn{box-shadow:inset 0 0 0 2px var(--accent)}
+  .mini{display:grid;grid-template-columns:repeat(4,9px);gap:2px;flex-shrink:0}
+  .mini span{height:12px;border-radius:2px;background:#a8cdee}
+  .mini span.v-neg{background:var(--c-neg)} .mini span.v-zero{background:var(--c-zero)} .mini span.v-low{background:var(--c-low)} .mini span.v-mid{background:var(--c-mid)} .mini span.v-high{background:var(--c-high)}
+  .mini span.gone{background:transparent;box-shadow:inset 0 0 0 1px #c3d9ef}
+  .opp-board .nm{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .opp-board .n{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;line-height:1}
+  .opp-board .n small{font-family:'Fredoka',sans-serif;font-weight:500;font-size:11px;color:var(--dim)}
+  .opp-board > div:last-child{min-width:0}
+  .ui-turn{padding:10px 14px;border-radius:14px}
+  .ui-turn .t{font-size:19px}
+  .pile-row{display:flex;align-items:flex-end;justify-content:center;gap:18px;padding:8px 0 4px}
+  .pile{display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.55;pointer-events:none;transition:opacity .15s;background:none}
+  .pile.active{opacity:1;pointer-events:auto;cursor:pointer}
+  .pile.active:active .pc{transform:translateY(2px)}
+  .pile small{font-size:11px;color:var(--dim)}
+  .pile.active small{color:var(--fg);font-weight:600}
+  .pc{width:66px;height:92px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:34px}
+  .pc.back{background:repeating-linear-gradient(45deg,#2c4a8a 0 8px,#3a5bd9 8px 16px);box-shadow:0 3px 0 #1e3570}
+  .pc.empty{background:rgba(255,255,255,.5);box-shadow:inset 0 0 0 2px #c3d9ef;color:#a8cdee;font-size:20px}
+  .pile.active .pc.back{box-shadow:0 3px 0 #1e3570,0 0 0 3px #fff,0 0 0 5px var(--accent)}
+  .pending{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .pending .pc{width:80px;height:112px;border-radius:14px;font-size:46px;box-shadow:0 0 0 4px #fff,0 10px 24px rgba(18,58,107,.35);transform:translateY(-6px) rotate(-3deg)}
+  @media (prefers-reduced-motion:no-preference){ .pending .pc{animation:skDraw .35s cubic-bezier(.22,1,.36,1)} }
+  @keyframes skDraw{from{transform:translateY(20px) rotate(6deg) scale(.8);opacity:0}}
+  .pending small{font-size:11px;font-weight:600}
 
-  .status-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-  .status-pill{
-    background:rgba(0,0,0,.28);
-    border:1px solid var(--line);
-    border-radius:999px;
-    padding:7px 14px;font-size:.85rem;
-    flex:1;text-align:center;
-  }
-  .status-pill.mine{border-color:var(--butter);color:var(--butter)}
-
-  .scoreboard-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:4px}
-  .sb-chip{flex:0 0 auto;background:rgba(0,0,0,.22);border:1px solid var(--line);border-radius:10px;padding:6px 10px;text-align:center;min-width:56px}
-  .sb-chip.me{border-color:var(--butter)}
-  .sb-chip .nm{font-size:.7rem;color:var(--chalk-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px;margin:0 auto}
-  .sb-chip .n{font-family:'Space Mono',monospace;font-weight:700;font-size:1.05rem}
-  .round-label{text-align:center;color:var(--chalk-dim);font-size:.8rem;margin-bottom:10px}
-
-  .pile-row{display:flex;justify-content:center;gap:20px;margin-bottom:10px}
-  .pile{text-align:center;cursor:pointer;opacity:.4;pointer-events:none;transition:opacity .15s}
-  .pile.active{opacity:1;pointer-events:auto}
-  .pile-back{
-    width:56px;height:76px;border-radius:8px;
-    background:var(--board-deep);border:1.5px dashed var(--line);
-    display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto;
-  }
-  .pile-card{
-    width:56px;height:76px;border-radius:8px;
-    display:flex;align-items:center;justify-content:center;
-    font-family:'Space Mono',monospace;font-weight:700;font-size:1.3rem;
-    margin:0 auto;background:var(--board-deep);border:1.5px solid var(--line);color:var(--chalk-dim);
-  }
-  .pile-card.big{width:72px;height:96px;font-size:1.7rem}
-  .pile-label{font-size:.75rem;color:var(--chalk-dim);margin-top:6px}
-
-  .pending-zone{text-align:center;margin-bottom:12px}
-  .pending-zone .hint{font-size:.85rem;color:var(--chalk-dim);margin:8px 0}
-
-  .board-block{margin-bottom:10px}
-  .board-name{font-size:.85rem;color:var(--chalk-dim);margin-bottom:6px;text-align:center}
-  .board-block.me .board-name{color:var(--butter)}
-  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:320px;margin:0 auto}
+  .sk-panel{margin-top:auto}
+  .sk-head{display:flex;justify-content:space-between;font-size:13px;font-weight:600}
+  .sk-head span:last-child{color:var(--dim)}
+  .sk-head b{color:var(--fg)}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
   .sk-cell{
-    aspect-ratio:3/4;border-radius:8px;
-    display:flex;align-items:center;justify-content:center;
-    font-family:'Space Mono',monospace;font-weight:700;font-size:1.05rem;
-    user-select:none;
+    height:min(86px,21vw);border-radius:12px;display:flex;align-items:center;justify-content:center;
+    font-family:'Baloo 2',sans-serif;font-weight:800;font-size:34px;padding:0;
   }
-  .sk-cell.back{background:var(--board-deep);border:1.5px dashed var(--line);color:var(--chalk-dim);cursor:pointer}
-  .sk-cell.back:active{transform:scale(.96)}
-  .sk-cell.readonly{cursor:default}
-  .sk-cell.readonly.back:active{transform:none}
-  .sk-cell.gone{background:transparent;border:1px dashed var(--line);opacity:.3}
-  .sk-cell.v-neg{background:var(--deep-blue);color:#eaf4fb;cursor:pointer}
-  .sk-cell.v-zero{background:var(--blue-chalk);color:#0b2b3d;cursor:pointer}
-  .sk-cell.v-low{background:var(--green-chalk);color:#0e2a0a;cursor:pointer}
-  .sk-cell.v-mid{background:var(--butter);color:#3a2c10;cursor:pointer}
-  .sk-cell.v-high{background:var(--red-chalk);color:#3a0f05;cursor:pointer}
-  .sk-cell.readonly{cursor:default}
+  .sk-cell:disabled{opacity:1;cursor:default}
+  .sk-cell.back{background:repeating-linear-gradient(45deg,#dbe9f7 0 7px,#eaf3fc 7px 14px);box-shadow:inset 0 0 0 1.5px #c3d9ef;color:transparent}
+  .sk-cell.gone{background:transparent;box-shadow:inset 0 0 0 1.5px #dbe9f7;color:transparent}
+  .sk-cell.can{cursor:pointer}
+  .sk-cell.can.back{box-shadow:inset 0 0 0 2px var(--accent)}
+  .sk-cell.can:not(.back){box-shadow:0 0 0 3px #fff,0 0 0 5px var(--accent)}
+  .sk-cell.can:active{transform:scale(.95)}
+  @media (prefers-reduced-motion:no-preference){ .sk-cell.flip{animation:skFlip .4s ease} }
+  @keyframes skFlip{0%{transform:rotateY(90deg)}100%{transform:none}}
+  .sk-actions{display:flex;gap:8px}
+  .sk-actions .ui-btn{height:50px;font-size:15px;box-shadow:none;background:var(--surface-2);color:var(--accent)}
+  .sk-round{display:flex;flex-direction:column;gap:6px}
+  .sk-round .row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:12px;background:var(--surface-2);font-size:15px}
+  .sk-round .row b{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:18px}
+  .sk-round .row .x2{color:var(--c-high);font-size:12px;font-weight:700;margin-left:4px}
+  .sk-round .ui-btn{flex:none}
+  .sk-round h3{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:22px;text-align:center}
 
-  .opp-boards{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
-  .opp-board .grid.mini{max-width:220px;gap:4px}
-  .opp-board .grid.mini .sk-cell{font-size:.7rem;border-radius:6px}
-
-  .round-end-panel{margin-top:14px;text-align:center}
-  .round-end-panel .row{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:8px 12px;border-radius:10px;background:rgba(0,0,0,.18);
-    margin-bottom:6px;font-size:.95rem;
-  }
-  .row .who{color:var(--chalk-dim)}
-  .row .g{font-family:'Space Mono',monospace;font-weight:700}
-
-  .win-card{text-align:center}
-  .win-card .big{font-size:2.6rem;margin:6px 0}
-  .rank-list{display:flex;flex-direction:column;gap:6px;margin:14px 0 4px}
-  .rank-list .row{
-    display:flex;align-items:center;gap:10px;
-    padding:8px 12px;border-radius:10px;background:rgba(0,0,0,.18);
-    font-size:.9rem;
-  }
-  .rank-list .row.win{border:1px solid var(--butter)}
-  .rank-list .pos{font-family:'Space Mono',monospace;font-weight:700;color:var(--butter);width:22px}
-  .rank-list .nm{flex:1}
-  .rank-list .sc{font-family:'Space Mono',monospace;font-weight:700}
-  .scoreboard{display:flex;align-items:center;justify-content:center;gap:14px;margin:14px 0 4px}
-  .score-side{text-align:center;flex:1}
-  .score-side .n{font-family:'Space Mono',monospace;font-size:2.2rem;font-weight:700;color:var(--butter)}
-  .score-side .nm{font-size:.85rem;color:var(--chalk-dim);max-width:110px;margin:0 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .score-vs{color:var(--chalk-dim);font-size:.9rem}
+  .ui-rank .me-tag{opacity:.75;font-weight:500}
+  .sk-h2h{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+  .sk-h2h b{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:22px}
+  .ui-sheet-title{font-size:30px}
 </style>
-<link rel="stylesheet" href="responsive.css">
-<link rel="stylesheet" href="avatar.css">
 </head>
-<body>
+<body data-screen="create">
 <div class="frame">
-  <header>
-    <h1>🎴 Skyjo</h1>
-    <div class="tagline">Le jeu de cartes, de 2 à 6 joueurs</div>
-    <a class="back-link" href="index.html">← Retour à l'accueil</a>
-  </header>
-
-  <div id="screen-home">
-    <div class="card">
-      <h2>Nouvelle partie</h2>
-      <p class="muted">Crée une partie et envoie le code à tes ami·e·s.</p>
-      <button class="btn-main" onclick="show('create')">Créer une partie</button>
+  <div id="screen-create" class="ui-screen has-dock">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
     </div>
-    <div class="card">
-      <h2>Rejoindre</h2>
-      <p class="muted">Tu as reçu un code ? Entre-le ici.</p>
-      <button class="btn-ghost" onclick="show('join')">Rejoindre avec un code</button>
+    <div class="ui-hero ">
+      <div class="ui-hero-art"><span class="fan"><span>-2</span><span>3</span><span>7</span><span>12</span></span></div>
+      <h1 class="ui-hero-title">Skyjo</h1>
+      <div class="ui-hero-sub">De 2 à 6 · le score le plus bas gagne</div>
     </div>
-    <div class="card">
-      <h2>Règles</h2>
-      <p class="muted">Chacun a une grille de 12 cartes cachées. Retourne 2 cartes pour commencer.<br>
-      À ton tour : pioche ou prends la défausse, puis échange la carte avec une des tiennes (elle part à la défausse), ou défausse-la et retourne une de tes cartes cachées.<br>
-      Une colonne de 3 cartes identiques et révélées est retirée (0 point).<br>
-      Dès qu'un joueur a tout révélé, chacun des autres joue un dernier tour puis on compte les points. Si le finisseur n'a pas le score le plus bas, son score double !<br>
-      On enchaîne les manches jusqu'à 100 points : <b>le score le plus bas gagne</b>.</p>
+    <div class="ui-seg" role="tablist">
+      <button type="button" class="on" aria-selected="true">Créer</button>
+      <button type="button" onclick="show('join')">Rejoindre</button>
     </div>
-  </div>
-
-  <div id="screen-create" class="hidden">
-    <div class="card">
-      <h2>Créer une partie</h2>
-      <label>Nombre de joueurs</label>
-      <div class="pcount-row">
-        <label class="pcount-opt"><input type="radio" name="pcount" value="2" checked><span>2</span></label>
-        <label class="pcount-opt"><input type="radio" name="pcount" value="3"><span>3</span></label>
-        <label class="pcount-opt"><input type="radio" name="pcount" value="4"><span>4</span></label>
-        <label class="pcount-opt"><input type="radio" name="pcount" value="5"><span>5</span></label>
-        <label class="pcount-opt"><input type="radio" name="pcount" value="6"><span>6</span></label>
-      </div>
-      <label>Ton prénom (toujours le même pour garder ton score !)</label>
-      <input type="text" id="create-name" class="name-input" maxlength="12" placeholder="Ex. Léa">
-      <label>Ton avatar</label>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="create-name" maxlength="12" placeholder="Ex. Léa" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
       <div class="avatar-row" id="create-avatar-row"></div>
+    </div>
+    <div class="ui-field">
+      <div class="ui-label">Nombre de joueurs</div>
+      <div class="ui-opts">
+        <label><input type="radio" name="pcount" value="2" checked><span>2</span></label>
+        <label><input type="radio" name="pcount" value="3"><span>3</span></label>
+        <label><input type="radio" name="pcount" value="4"><span>4</span></label>
+        <label><input type="radio" name="pcount" value="5"><span>5</span></label>
+        <label><input type="radio" name="pcount" value="6"><span>6</span></label>
+      </div>
+    </div>
+    <div class="ui-dock">
       <div class="error" id="create-err"></div>
-      <button class="btn-main" id="btn-create" onclick="createGame()">Créer et obtenir le code</button>
-      <button class="btn-ghost" onclick="show('home')">Retour</button>
+      <button class="ui-btn" id="btn-create" onclick="createGame()">Créer la partie</button>
     </div>
   </div>
 
-  <div id="screen-join" class="hidden">
-    <div class="card">
-      <h2>Rejoindre une partie</h2>
-      <label>Code de la partie</label>
-      <input type="text" id="join-code" maxlength="4" placeholder="ABCD" style="text-transform:uppercase">
-      <label>Ton prénom (toujours le même pour garder ton score !)</label>
-      <input type="text" id="join-name" class="name-input" maxlength="12" placeholder="Ex. Emma">
-      <label>Ton avatar</label>
+  <div id="screen-join" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
+    </div>
+    <div class="ui-hero ">
+      <div class="ui-hero-art"><span class="fan"><span>-2</span><span>3</span><span>7</span><span>12</span></span></div>
+      <h1 class="ui-hero-title">Skyjo</h1>
+      <div class="ui-hero-sub">De 2 à 6 · le score le plus bas gagne</div>
+    </div>
+    <div class="ui-seg" role="tablist">
+      <button type="button" onclick="show('create')">Créer</button>
+      <button type="button" class="on" aria-selected="true">Rejoindre</button>
+    </div>
+    <label class="ui-field">
+      <span class="ui-label">Code de la partie</span>
+      <input type="text" id="join-code" class="code-input" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    </label>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="join-name" maxlength="12" placeholder="Ex. Emma" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
       <div class="avatar-row" id="join-avatar-row"></div>
+    </div>
+    <div class="ui-dock">
       <div class="error" id="join-err"></div>
-      <button class="btn-main" id="btn-join" onclick="joinGame()">Rejoindre</button>
-      <button class="btn-ghost" onclick="show('home')">Retour</button>
+      <button class="ui-btn" id="btn-join" onclick="joinGame()">Rejoindre</button>
     </div>
   </div>
 
-  <div id="screen-wait" class="hidden">
-    <div class="card" style="text-align:center">
-      <h2>Partie créée !</h2>
-      <p class="muted">Envoie ce code à tes ami·e·s :</p>
-      <div class="code-big" id="wait-code">····</div>
-      <button class="btn-main btn-small hidden" id="share-btn" onclick="shareCode()">📤 Partager le code</button>
-      <button class="btn-ghost btn-small" onclick="copyCode()" id="copy-btn">Copier le lien</button>
-      <p class="muted pulse" style="margin-top:16px" id="wait-count">0/0 joueurs</p>
-      <p class="muted" id="wait-names"></p>
+  <div id="screen-wait" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <button class="ui-round" onclick="cancelWait()" aria-label="Quitter">✕</button>
+      <div class="ui-top-mid">Salle d'attente</div>
+      <span class="ui-round ghost"></span>
+    </div>
+    <div class="ui-wait" style="gap:16px;padding-top:16px">
+      <button class="ui-code" id="wait-code"></button>
+      <div class="ui-code-hint" id="wait-hint">Touche le code pour copier le lien</div>
+      <div class="ui-row-head"><span>Joueurs</span><span id="wait-count">0 / 0</span></div>
+      <div class="ui-pgrid" id="wait-names"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="ui-dock-row">
+        <button class="ui-sq" onclick="copyCode()" aria-label="Copier le lien">🔗</button>
+        <button class="ui-btn" onclick="shareCode()">📤 Partager le lien</button>
+      </div>
+      <div class="muted pulse" style="text-align:center;font-size:13px">La partie démarre quand tout le monde est là</div>
     </div>
   </div>
 
   <div id="screen-game" class="hidden">
-    <button class="quit-match-btn" onclick="confirmQuitMatch()">✕ Quitter</button>
-    <div class="status-bar">
-      <div class="status-pill" id="turn-pill">…</div>
+    <div class="ui-top">
+      <button class="ui-round" onclick="confirmQuitMatch()" aria-label="Quitter">✕</button>
+      <div class="ui-top-mid"><span class="sk-top-lbl" id="round-label">Manche 1</span></div>
+      <button class="ui-round" data-rules aria-label="Règles">?</button>
     </div>
-    <div class="scoreboard-row" id="scoreboard-row"></div>
-    <div class="round-label" id="round-label">Manche 1</div>
-
-    <div class="pile-row">
-      <div class="pile" id="pile-deck" onclick="drawFromDeck()">
-        <div class="pile-back">🂠</div>
-        <div class="pile-label" id="deck-count">Pioche</div>
-      </div>
-      <div class="pile" id="pile-discard" onclick="takeDiscard()">
-        <div class="pile-card" id="discard-top">—</div>
-        <div class="pile-label">Défausse</div>
-      </div>
-    </div>
-
-    <div class="pending-zone hidden" id="pending-zone">
-      <div class="pile-card big" id="pending-card"></div>
-      <p class="hint" id="pending-hint"></p>
-      <button class="btn-ghost btn-small" id="btn-discard-pending" onclick="discardPending()">Défausser et retourner une carte</button>
-    </div>
-
     <div class="opp-boards" id="opp-boards"></div>
-
-    <div class="board-block me">
-      <div class="board-name">Toi</div>
+    <div class="ui-turn" id="turn-pill"><span class="t">…</span><span class="s"></span></div>
+    <div class="pile-row">
+      <button class="pile" id="pile-deck" onclick="drawFromDeck()" aria-label="Piocher"><div class="pc back"></div><small id="deck-count">Pioche</small></button>
+      <div class="pending hidden" id="pending-zone"><div class="pc" id="pending-card"></div><small>Piochée</small></div>
+      <button class="pile" id="pile-discard" onclick="takeDiscard()" aria-label="Prendre la défausse"><div class="pc" id="discard-top">—</div><small>Défausse</small></button>
+    </div>
+    <div class="ui-panel sk-panel">
+      <div class="sk-round hidden" id="round-end-panel">
+        <h3>Fin de manche</h3>
+        <div id="re-scores"></div>
+        <button class="ui-btn" onclick="nextRound()">Manche suivante</button>
+      </div>
+      <div class="sk-head"><span id="me-label">Ta grille</span><span id="me-visible"></span></div>
       <div class="grid" id="grid-me"></div>
+      <div class="sk-actions hidden" id="sk-actions"><button class="ui-btn" id="btn-discard-pending" onclick="discardPending()">Défausser et retourner une carte</button></div>
     </div>
-
-    <div class="card round-end-panel hidden" id="round-end-panel">
-      <h2>Fin de manche</h2>
-      <div id="re-scores"></div>
-      <button class="btn-main" onclick="nextRound()">Manche suivante</button>
-    </div>
-    <p class="muted" style="text-align:center;margin-top:10px">Code de la partie : <b id="game-code-label"></b></p>
   </div>
 
-  <div id="screen-end" class="hidden">
-    <div class="card win-card">
-      <div class="big" id="end-emoji">🏆</div>
-      <h2 id="end-title">…</h2>
-      <p class="muted" id="end-detail"></p>
-      <div class="rank-list" id="rank-list"></div>
-      <div class="scoreboard hidden" id="scoreboard">
-        <div class="score-side"><div class="n" id="sc-n1">–</div><div class="nm" id="sc-nm1"></div></div>
-        <div class="score-vs">victoires</div>
-        <div class="score-side"><div class="n" id="sc-n2">–</div><div class="nm" id="sc-nm2"></div></div>
-      </div>
-      <p class="muted" id="score-note"></p>
-      <button class="btn-main" onclick="location.reload()">Nouvelle partie</button>
+  <div id="screen-end" class="ui-screen has-dock hidden">
+    <div class="ui-end" style="gap:10px">
+      <div class="ui-end-emo" style="font-size:72px" id="end-emoji">🏆</div>
+      <h2 class="ui-end-title" id="end-title">…</h2>
+      <div class="ui-end-sub" id="end-detail" style="color:#cfe0ff"></div>
+      <div class="ui-rank" id="rank-list" style="margin-top:16px"></div>
+      <div class="ui-end-box sk-h2h hidden" id="scoreboard"><span id="score-note" style="font-size:14px;opacity:.85">Vos duels Skyjo</span><b id="sc-h2h">–</b></div>
     </div>
+    <div class="ui-dock">
+      <div class="ui-dock-row">
+        <a class="ui-sq" href="index.html" aria-label="Accueil" style="text-decoration:none">🏠</a>
+        <button class="ui-btn" onclick="location.href='skyjo.html'">🔁 Nouvelle partie</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ui-sheet" id="rules-sheet" aria-hidden="true">
+  <div class="ui-sheet-scrim" data-rules-close></div>
+  <div class="ui-sheet-body" role="dialog" aria-label="Règles">
+    <div class="ui-grab"></div>
+    <div class="ui-sheet-title">Comment jouer</div>
+    <div class="ui-step"><b>1</b><span>12 cartes cachées chacun. Retourne-en 2 pour commencer.</span></div>
+    <div class="ui-step"><b style="background:#41b36b">2</b><span>Pioche ou prends la défausse, puis échange avec une de tes cartes — ou défausse et retourne une cachée.</span></div>
+    <div class="ui-step"><b style="background:#f5c62d;color:#123a6b">3</b><span>Colonne de 3 cartes identiques révélées = retirée.</span></div>
+    <div class="ui-step"><b style="background:#e5484d">!</b><span>Qui révèle tout déclenche le dernier tour. S'il n'a pas le plus petit score, il est <b>doublé</b>. À 100 points, le plus petit total gagne.</span></div>
+    <button class="ui-btn" data-rules-close>Compris</button>
   </div>
 </div>
 
@@ -347,6 +278,7 @@
 <script src="connection-banner.js"></script>
 <script src="avatar-picker.js"></script>
 <script src="game-link.js"></script>
+<script src="gym-ui.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -359,8 +291,12 @@ const HEADERS = {
 let code = null, me = null, state = null, pollTimer = null, busy = false;
 
 const $ = id => document.getElementById(id);
-const screens = ['home','create','join','wait','game','end'];
-function show(name){ screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name)); }
+const screens = ['create','join','wait','game','end'];
+function show(name){
+  if(name==='home') name = 'create';
+  screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name));
+  window.GYMUI.screen(name);
+}
 function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
 function pAvatar(p){ return p && p.avatar ? p.avatar : '🙂'; }
 function genCode(){
@@ -515,8 +451,10 @@ function valClass(v){
 /* ---------- create / join ---------- */
 const createAvatarPicker = window.GYMAvatarPicker.render('create-avatar-row');
 const joinAvatarPicker = window.GYMAvatarPicker.render('join-avatar-row');
+window.GYMUI.prefillNames(['create-name','join-name']);
 async function createGame(){
   const name = $('create-name').value.trim() || "Joueur 1";
+  window.GYMUI.rememberName($('create-name').value);
   const avatar = createAvatarPicker.get();
   const n = parseInt(document.querySelector('input[name=pcount]:checked').value, 10);
   $('btn-create').disabled = true; busy = true;
@@ -530,7 +468,7 @@ async function createGame(){
   me = 0;
   saveRole(code, 0);
   if(window.GYMRecent) window.GYMRecent.record('sk', code, 'Skyjo');
-  $('wait-code').textContent = code;
+  window.GYMUI.renderCode('wait-code', code, $('wait-hint'));
   renderWait();
   show('wait');
   startPolling();
@@ -538,6 +476,7 @@ async function createGame(){
 async function joinGame(){
   const c = $('join-code').value.trim().toUpperCase();
   const name = $('join-name').value.trim() || "Joueur";
+  window.GYMUI.rememberName($('join-name').value);
   const avatar = joinAvatarPicker.get();
   if(!/^[A-Z]{4}$/.test(c)){ $('join-err').textContent = "Le code fait 4 lettres."; return; }
   $('join-err').textContent = "";
@@ -552,7 +491,7 @@ async function joinGame(){
   if(existing!==null && st.players[existing]){
     code = c; me = existing; state = st;
     busy = false; $('btn-join').disabled = false;
-    if(st.status==='waiting'){ $('wait-code').textContent = c; renderWait(); show('wait'); startPolling(); }
+    if(st.status==='waiting'){ window.GYMUI.renderCode('wait-code', c, $('wait-hint')); renderWait(); show('wait'); startPolling(); }
     else { enterGame(); startPolling(); }
     return;
   }
@@ -570,7 +509,7 @@ async function joinGame(){
   code = c; me = freeIdx; state = st;
   saveRole(c, freeIdx);
   if(window.GYMRecent) window.GYMRecent.record('sk', c, 'Skyjo');
-  if(st.status==='waiting'){ $('wait-code').textContent = c; renderWait(); show('wait'); startPolling(); }
+  if(st.status==='waiting'){ window.GYMUI.renderCode('wait-code', c, $('wait-hint')); renderWait(); show('wait'); startPolling(); }
   else { enterGame(); startPolling(); }
 }
 
@@ -592,12 +531,21 @@ async function refresh(){
   applyIncomingState(st);
 }
 function renderWait(){
-  const joined = state.players.filter(Boolean).map(p=>pAvatar(p)+' '+p.name);
-  $('wait-count').textContent = joined.length + "/" + state.maxPlayers + " joueurs";
-  $('wait-names').textContent = joined.join(', ');
+  const joined = state.players.filter(Boolean).length;
+  $('wait-count').textContent = joined + " / " + state.maxPlayers;
+  $('wait-names').innerHTML = state.players.map((p, idx) => p
+    ? '<div class="ui-pcard"><div class="av">'+pAvatar(p)+'</div><div class="nm">'+esc(p.name)+(idx===me?' (toi)':'')+'</div><div class="st'+(idx===0?' host':'')+'">'+(idx===0?'hôte':'prêt·e')+'</div></div>'
+    : '<div class="ui-pcard empty"><div class="av">＋</div><div class="nm">libre</div></div>'
+  ).join('');
+}
+function cancelWait(){
+  if(!confirm("Quitter la salle d'attente ?")) return;
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
+  if(window.GYMRecent) window.GYMRecent.remove('sk', code);
+  location.href = 'skyjo.html';
 }
 function enterGame(){
-  $('game-code-label').textContent = code;
   show('game');
   renderCurrent();
 }
@@ -721,90 +669,95 @@ async function nextRound(){
 }
 
 /* ---------- rendering ---------- */
-function renderGrid(elId, owner, grid, interactive){
+let prevUp = null;
+function renderGrid(elId, owner, grid, canTap){
   const el = $(elId);
-  el.innerHTML = "";
-  grid.forEach((cell, idx)=>{
-    const d = document.createElement('div');
-    let cls = "sk-cell";
-    if(cell.gone){ cls += " gone"; d.textContent = "—"; }
-    else if(cell.up){ cls += " " + valClass(cell.v); d.textContent = cell.v; }
-    else { cls += " back"; d.textContent = "?"; }
-    if(interactive){ d.onclick = ()=>cellClick(owner, idx); }
-    else { cls += " readonly"; }
-    d.className = cls;
-    el.appendChild(d);
-  });
+  const before = prevUp;
+  el.innerHTML = grid.map((cell, idx) => {
+    let cls = 'sk-cell', txt = '';
+    if(cell.gone) cls += ' gone';
+    else if(cell.up){ cls += ' ' + valClass(cell.v); txt = cell.v; if(before && !before[idx]) cls += ' flip'; }
+    else cls += ' back';
+    const tappable = canTap(cell);
+    if(tappable) cls += ' can';
+    return '<button type="button" class="'+cls+'"'+(tappable?' onclick="cellClick('+owner+','+idx+')"':' disabled')+'>'+txt+'</button>';
+  }).join('');
+  prevUp = grid.map(c => c.up);
 }
 function renderBoard(){
   if(!state || state.status!=='playing') return;
   $('round-label').textContent = "Manche " + (state.round||1);
+  const myTurn = state.phase==='turn' && state.turn===me;
 
-  $('scoreboard-row').innerHTML = state.players.map((p, idx) =>
-    '<div class="sb-chip'+(idx===me?' me':'')+'"><div class="nm">'+esc(p.name)+'</div><div class="n">'+state.totals[idx]+'</div></div>'
-  ).join('');
+  $('opp-boards').innerHTML = others().map(idx => {
+    const g = state.grids[idx], p = state.players[idx];
+    const visible = g.reduce((s,c)=> s + (c.up && !c.gone ? c.v : 0), 0);
+    const cells = g.map(c => c.gone ? '<span class="gone"></span>' : (c.up ? '<span class="'+valClass(c.v)+'"></span>' : '<span></span>')).join('');
+    return '<div class="opp-board'+(state.phase==='turn' && state.turn===idx ? ' turn':'')+'"><div class="mini">'+cells+'</div>'+
+      '<div><div class="nm">'+pAvatar(p)+' '+esc(p.name)+'</div><div class="n">'+visible+' <small>· total '+state.totals[idx]+'</small></div></div></div>';
+  }).join('');
 
   const pill = $('turn-pill');
-  let msg = "…";
-  pill.classList.remove('mine');
+  let t = '…', s = '';
   if(state.phase==='setup'){
     const myR = state.grids[me].filter(c=>c.up).length;
     const waitingOn = state.players.filter((p,idx)=> state.grids[idx].filter(c=>c.up).length<2 ).map(p=>p.name);
-    if(myR<2) msg = "🔍 Retourne " + (2-myR) + " carte" + (2-myR>1?'s':'') + " pour commencer";
-    else msg = "⏳ En attente de " + waitingOn.join(', ');
+    if(myR<2){ t = 'C’est parti !'; s = 'Retourne ' + (2-myR) + ' carte' + (2-myR>1?'s':''); }
+    else { t = 'Patiente…'; s = 'En attente de ' + waitingOn.join(', '); }
+    pill.classList.toggle('mine', myR<2);
   } else if(state.phase==='turn'){
-    const myTurn = state.turn===me;
+    if(!myTurn){ t = 'Au tour de ' + state.players[state.turn].name; s = state.lastRound ? '⚠️ Dernier tour !' : ''; }
+    else {
+      t = 'À toi !';
+      if(state.awaitingFlip) s = 'Retourne une carte cachée';
+      else if(state.pending) s = state.pending.source==='deck' ? 'Échange avec une carte, ou défausse' : 'Échange avec une de tes cartes';
+      else s = state.lastRound ? '⚠️ Dernier tour : pioche ou défausse' : 'Pioche ou prends la défausse';
+      if(!pill.classList.contains('mine') && window.GYMFeedback) window.GYMFeedback.ok();
+    }
     pill.classList.toggle('mine', myTurn);
-    if(!myTurn) msg = "⏳ Au tour de " + state.players[state.turn].name + "…";
-    else if(state.awaitingFlip) msg = "🎯 Retourne une de tes cartes cachées";
-    else if(state.pending) msg = "🎯 Choisis où placer ta carte";
-    else msg = "🎯 À toi : pioche ou prends la défausse";
   } else if(state.phase==='round_end'){
-    msg = "🏁 Fin de manche";
+    t = 'Fin de manche'; pill.classList.remove('mine');
   }
-  pill.textContent = msg;
+  pill.querySelector('.t').textContent = t;
+  pill.querySelector('.s').textContent = s;
 
-  $('deck-count').textContent = "🂠 " + state.deck.length;
+  $('deck-count').textContent = "Pioche · " + state.deck.length;
   const dTop = state.discard.length ? state.discard[state.discard.length-1] : null;
   const dEl = $('discard-top');
-  if(dTop===null){ dEl.textContent = "—"; dEl.className = "pile-card"; }
-  else { dEl.textContent = dTop; dEl.className = "pile-card " + valClass(dTop); }
-
-  const canDraw = state.phase==='turn' && state.turn===me && !state.pending && !state.awaitingFlip;
+  if(dTop===null){ dEl.textContent = "—"; dEl.className = "pc empty"; }
+  else { dEl.textContent = dTop; dEl.className = "pc " + valClass(dTop); }
+  const canDraw = myTurn && !state.pending && !state.awaitingFlip;
   $('pile-deck').classList.toggle('active', canDraw);
   $('pile-discard').classList.toggle('active', canDraw && state.discard.length>0);
 
-  const pendingZone = $('pending-zone');
-  if(state.phase==='turn' && state.turn===me && state.pending){
-    pendingZone.classList.remove('hidden');
+  const hasPending = myTurn && state.pending;
+  $('pending-zone').classList.toggle('hidden', !hasPending);
+  $('sk-actions').classList.toggle('hidden', !(hasPending && state.pending.source==='deck'));
+  if(hasPending){
     $('pending-card').textContent = state.pending.value;
-    $('pending-card').className = "pile-card big " + valClass(state.pending.value);
-    $('btn-discard-pending').classList.toggle('hidden', state.pending.source!=='deck');
-    $('pending-hint').textContent = state.pending.source==='deck'
-      ? "Touche une de tes cartes pour l'échanger, ou défausse-la."
-      : "Touche une de tes cartes pour l'échanger (obligatoire).";
-  } else {
-    pendingZone.classList.add('hidden');
+    $('pending-card').className = "pc " + valClass(state.pending.value);
+    $('btn-discard-pending').textContent = 'Défausser le ' + state.pending.value + ' et retourner une carte';
   }
 
-  const oppBoards = $('opp-boards');
-  oppBoards.innerHTML = "";
-  others().forEach(idx=>{
-    const block = document.createElement('div');
-    block.className = "opp-board";
-    const gridId = "grid-opp-"+idx;
-    block.innerHTML = '<div class="board-name">'+pAvatar(state.players[idx])+' '+esc(state.players[idx].name)+'</div><div class="grid mini" id="'+gridId+'"></div>';
-    oppBoards.appendChild(block);
-    renderGrid(gridId, idx, state.grids[idx], false);
+  const mine = state.grids[me];
+  $('me-label').textContent = pAvatar(state.players[me]) + ' Ta grille';
+  const vis = mine.reduce((s,c)=> s + (c.up && !c.gone ? c.v : 0), 0);
+  $('me-visible').innerHTML = 'visible : <b>'+vis+'</b> · total '+state.totals[me];
+  const myR = mine.filter(c=>c.up).length;
+  renderGrid('grid-me', me, mine, cell => {
+    if(cell.gone) return false;
+    if(state.phase==='setup') return !cell.up && myR<2;
+    if(!myTurn) return false;
+    if(state.awaitingFlip) return !cell.up;
+    if(state.pending) return true;
+    return false;
   });
-
-  renderGrid('grid-me', me, state.grids[me], state.phase==='setup' || (state.phase==='turn' && state.turn===me));
 
   const rp = $('round-end-panel');
   if(state.phase==='round_end' && state.status!=='finished'){
     rp.classList.remove('hidden');
     $('re-scores').innerHTML = state.players.map((p, idx) =>
-      '<div class="row"><span class="who">'+esc(p.name)+'</span><span class="g">'+state.roundScores[idx]+' pts'+(state.doubled===idx?' (x2)':'')+'</span></div>'
+      '<div class="row"><span>'+pAvatar(p)+' '+esc(p.name)+(idx===me?' (toi)':'')+'</span><span><b>+'+state.roundScores[idx]+'</b>'+(state.doubled===idx?'<span class="x2">×2</span>':'')+' · '+state.totals[idx]+'</span></div>'
     ).join('');
   } else {
     rp.classList.add('hidden');
@@ -819,13 +772,13 @@ async function renderEnd(){
   if(iWon && window.GYMFeedback) window.GYMFeedback.win();
   const winName = state.players[state.winner].name;
   $('end-emoji').textContent = iWon ? "🏆" : "🎴";
-  $('end-title').textContent = iWon ? "Bravo " + winName + ", tu as gagné !" : winName + " a gagné !";
-  $('end-detail').textContent = "Le score le plus bas gagne — voici le classement final :";
+  $('end-title').textContent = iWon ? "Tu gagnes !" : winName + " gagne !";
+  $('end-detail').textContent = "Plus petit score après " + (state.round||1) + " manche" + ((state.round||1)>1?'s':'');
 
   const ranking = state.players.map((p, idx) => ({name:p.name, avatar:pAvatar(p), score:state.totals[idx], idx}))
     .sort((a,b) => a.score - b.score);
   $('rank-list').innerHTML = ranking.map((r, pos) =>
-    '<div class="row'+(r.idx===state.winner?' win':'')+'"><span class="pos">'+(pos+1)+'</span><span class="nm">'+r.avatar+' '+esc(r.name)+(r.idx===me?' (toi)':'')+'</span><span class="sc">'+r.score+' pts</span></div>'
+    '<div><span class="pos">'+(pos+1)+'</span><span class="av">'+r.avatar+'</span><span class="nm">'+esc(r.name)+(r.idx===me?' <span class="me-tag">(toi)</span>':'')+'</span><span class="pts">'+r.score+'</span></div>'
   ).join('');
 
   show('end');
@@ -833,19 +786,16 @@ async function renderEnd(){
   if(state.maxPlayers===2){
     $('scoreboard').classList.remove('hidden');
     const n1 = state.players[0].name, n2 = state.players[1].name;
-    $('sc-nm1').textContent = n1; $('sc-nm2').textContent = n2;
-    $('score-note').textContent = "Chargement du score…";
+    $('sc-h2h').textContent = "…";
     const h2h = await headToHead(n1, n2);
     if(h2h){
-      $('sc-n1').textContent = h2h.w1;
-      $('sc-n2').textContent = h2h.w2;
-      $('score-note').textContent = "Total de vos duels Skyjo (avec les mêmes prénoms).";
+      $('sc-h2h').textContent = me===0 ? h2h.w1+' – '+h2h.w2 : h2h.w2+' – '+h2h.w1;
+      $('score-note').textContent = "Tous vos duels Skyjo";
     } else {
-      $('score-note').textContent = "Score indisponible pour le moment.";
+      $('scoreboard').classList.add('hidden');
     }
   } else {
     $('scoreboard').classList.add('hidden');
-    $('score-note').textContent = "";
   }
 }
 function confirmQuitMatch(){
@@ -857,22 +807,8 @@ function confirmQuitMatch(){
   if(window.GYMRecent) window.GYMRecent.remove('sk', code);
   location.href = 'index.html';
 }
-function copyCode(){
-  const link = window.GYMGameLink.build(code);
-  navigator.clipboard && navigator.clipboard.writeText(link).then(()=>{
-    $('copy-btn').textContent = "Lien copié ✓";
-    setTimeout(()=>$('copy-btn').textContent="Copier le lien", 1500);
-  });
-}
-function shareCode(){
-  if(!navigator.share) return;
-  navigator.share({
-    title: 'Games Room',
-    text: 'Rejoins ma partie de Skyjo sur Games Room !',
-    url: window.GYMGameLink.build(code)
-  }).catch(()=>{});
-}
-if($('share-btn')) $('share-btn').classList.toggle('hidden', !navigator.share);
+function copyCode(){ window.GYMUI.copyLink(code, $('wait-hint')); }
+function shareCode(){ window.GYMUI.share(code, 'Skyjo', $('wait-hint')); }
 
 (function(){
   const qcode = (new URLSearchParams(location.search).get('code')||'').toUpperCase();
