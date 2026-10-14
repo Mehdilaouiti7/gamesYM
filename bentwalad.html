@@ -88,9 +88,8 @@
   .bw-ans .t{flex:1;min-width:0;font-size:17px;font-weight:500;overflow-wrap:anywhere}
   .bw-ans .t small{display:block;font-size:12px;color:var(--dim);font-weight:400}
   .bw-ans .mk{width:36px;height:36px;flex-shrink:0;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center}
-  .bw-ans.no{background:rgba(196,83,45,.1);box-shadow:inset 0 0 0 2px var(--terra)}
-  .bw-ans.no .t{text-decoration:line-through;color:var(--terra-sh)}
-  .bw-ans.no .mk{background:var(--terra)}
+  .bw-ans.ok{box-shadow:inset 0 0 0 2px var(--ok)}
+  .bw-ans.no .mk{background:transparent;border:2px dashed var(--rule)}
   .bw-ans.empty{background:none;border:2px dashed var(--rule);color:var(--dim)}
   .bw-ans.empty .t{font-weight:400}
   .bw-ans:disabled{opacity:1;cursor:default}
@@ -325,7 +324,7 @@
     <div class="ui-step"><b>1</b><span>Une lettre arabe est tirée, jamais deux fois la même. Tu tapes avec ton clavier français.</span></div>
     <div class="ui-step"><b>2</b><span>Remplis vite un mot par catégorie : prénom fille, garçon, pays, ville…</span></div>
     <div class="ui-step"><b>3</b><span>Quelqu'un appuie sur <b>STOP !</b> : tout le monde envoie ses réponses.</span></div>
-    <div class="ui-step"><b style="background:#2b2118;color:#f7ecd6">🧐</b><span>Un arbitre tiré au sort refuse les mauvaises réponses, en direct. 1 point par bonne réponse.</span></div>
+    <div class="ui-step"><b style="background:#2b2118;color:#f7ecd6">🧐</b><span>Un arbitre tiré au sort coche les bonnes réponses, en direct. 1 point par bonne réponse.</span></div>
     <button class="ui-btn" data-rules-close>Compris</button>
   </div>
 </div>
@@ -502,8 +501,7 @@ function startRound(st, roundNum){
 function buildEmptyValidity(st){
   const validity = {};
   CATEGORIES.forEach(cat => {
-    // Valid by default when filled in: the arbiter taps an answer to refuse it.
-    validity[cat.key] = st.players.map((p, i) => !!(st.answers[i] && String(st.answers[i][cat.key]||'').trim()));
+    validity[cat.key] = st.players.map(() => false);
   });
   return validity;
 }
@@ -805,8 +803,8 @@ function renderJudging(){
   const cat = CATEGORIES[judgeCat];
   $('judge-title').textContent = isJudge ? "🧐 À toi d'arbitrer" : "🧐 " + judgeName + " arbitre";
   $('judge-subtitle').textContent = isJudge
-    ? "Touche une réponse pour la refuser · tout le monde voit tes choix"
-    : "Les refus apparaissent en direct";
+    ? "Touche chaque bonne réponse pour la valider · tout le monde voit tes choix"
+    : "Les réponses validées apparaissent en direct";
   $('judge-cats').innerHTML = CATEGORIES.map((c, i) => '<button class="'+(i===judgeCat?'on':'')+'" lang="ar" dir="rtl" onclick="setJudgeCat('+i+')">'+esc(c.label)+'</button>').join('');
   const onChip = $('judge-cats').children[judgeCat];
   if(onChip) onChip.scrollIntoView({inline:'center', block:'nearest'});
@@ -814,8 +812,8 @@ function renderJudging(){
     const text = (state.answers[idx] && state.answers[idx][cat.key]) ? String(state.answers[idx][cat.key]).trim() : '';
     if(!text) return '<div class="bw-ans empty"><span class="av">'+pAvatar(p)+'</span><span class="t">— vide —<small>'+esc(p.name)+'</small></span></div>';
     const ok = !!state.judgeValidity[cat.key][idx];
-    return '<button type="button" class="bw-ans'+(ok?'':' no')+'"'+(isJudge ? ' onclick="toggleValidity(\''+cat.key+'\','+idx+','+(!ok)+').then(renderJudging)"' : ' disabled')+'>'+
-      '<span class="av">'+pAvatar(p)+'</span><span class="t">'+esc(text)+'<small>'+esc(p.name)+'</small></span><span class="mk">'+(ok?'✓':'✕')+'</span></button>';
+    return '<button type="button" class="bw-ans'+(ok?' ok':' no')+'"'+(isJudge ? ' onclick="toggleValidity(\''+cat.key+'\','+idx+','+(!ok)+').then(renderJudging)"' : ' disabled')+'>'+
+      '<span class="av">'+pAvatar(p)+'</span><span class="t">'+esc(text)+'<small>'+esc(p.name)+'</small></span><span class="mk">'+(ok?'✓':'')+'</span></button>';
   }).join('');
   const last = judgeCat === CATEGORIES.length-1;
   $('judge-nav').innerHTML = '<button class="ui-sq" onclick="setJudgeCat('+(judgeCat-1)+')" aria-label="Catégorie précédente"'+(judgeCat===0?' disabled':'')+'>‹</button>' +
