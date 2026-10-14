@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Games Room · Dlilek Mlek</title>
-<meta name="theme-color" content="#233a2f">
+<meta name="theme-color" content="#120f1f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Games Room">
@@ -12,310 +12,291 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Anton&family=Reem+Kufi:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gym-ui.css">
 <style>
+  /* ---------- Dlilek Mlek — « Plateau TV » ---------- */
   :root{
-    --board:#24382e;
-    --board-deep:#1b2c24;
-    --chalk:#f3efe4;
-    --chalk-dim:#c9c4b4;
-    --butter:#e9c46a;
-    --red-chalk:#e76f51;
-    --green-chalk:#7bb274;
-    --line:rgba(243,239,228,.18);
-    --radius:14px;
+    --gold:#f2c14e; --gold-grad:linear-gradient(180deg,#ffd873,#e2a92c); --night:#120f1f; --panel:#1d1830; --tile:#2a2340; --magenta:#d63384;
+    --bg:radial-gradient(420px 300px at 50% 0%,#4a1d5e,#120f1f 70%) #120f1f; --bg-solid:#120f1f;
+    --fg:#f8f1dc; --dim:#c9b9d8; --surface:rgba(255,255,255,.07); --surface-2:#2a2340; --soft:rgba(255,255,255,.08); --line:rgba(255,255,255,.2);
+    --accent:#f2c14e; --accent-fg:#120f1f; --accent-sh:#8f6510;
+    --sel:#f2c14e; --sel-fg:#120f1f; --ok:#2fbf71; --ok-fg:#fff; --danger:#ff8a8f;
+    --display:'Anton',sans-serif; --display-weight:400; --hero:#f2c14e;
+    --seg-on:#f2c14e; --seg-on-fg:#120f1f;
+    --code-bg:#1d1830; --code-fg:#f2c14e; --code-sh:transparent; --code-font:'Anton',sans-serif;
+    --scrim:rgba(0,0,0,.6); --sheet:#1d1830;
+    --end-bg:radial-gradient(360px 360px at 50% 35%,#5b3b0b,#120f1f 75%) #120f1f; --end-solid:#120f1f; --end-fg:#f8f1dc; --end-soft:rgba(255,255,255,.1);
+    --end-btn-bg:var(--gold-grad); --end-btn-fg:#120f1f; --end-btn-sh:#8f6510;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{min-height:100%}
-  body{
-    font-family:'Fredoka',system-ui,sans-serif;
-    background:
-      radial-gradient(1200px 600px at 50% -10%, rgba(233,196,106,.07), transparent 60%),
-      linear-gradient(var(--board), var(--board-deep));
-    background-repeat: no-repeat;
-    color:var(--chalk);
-    min-height:100dvh;
-    display:flex;flex-direction:column;align-items:center;
-    padding:20px 16px 40px;
-  }
-  .frame{width:100%;max-width:460px}
-  header{text-align:center;margin-bottom:14px;position:relative}
-  h1{font-weight:700;font-size:1.9rem;letter-spacing:.5px}
-  .tagline{color:var(--chalk-dim);font-size:.9rem;margin-top:2px}
-  .back-link{display:inline-block;margin-top:8px;color:var(--chalk-dim);font-size:.82rem;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
-  .back-link:active{opacity:.7}
-  .quit-match-btn{
-    display:inline-block;width:auto;margin:0 0 10px;padding:6px 12px;
-    background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:999px;
-    color:var(--chalk-dim);font-size:.78rem;font-weight:500;cursor:pointer;
-  }
-  .quit-match-btn:active{opacity:.7}
-  .card{
-    background:linear-gradient(160deg, rgba(52,74,62,.9), rgba(30,46,38,.88));
-    border:1px solid rgba(243,239,228,.13);
-    border-radius:var(--radius);
-    padding:18px 16px;
-    margin-bottom:14px;
-    box-shadow:0 10px 26px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.05);
-  }
-  .card h2{font-size:1.05rem;font-weight:600;margin-bottom:10px}
-  label{display:block;font-size:.85rem;color:var(--chalk-dim);margin:10px 0 4px}
-  input[type=text],input[type=tel]{
-    width:100%;
-    background:rgba(0,0,0,.25);
-    border:1.5px dashed var(--line);
-    border-radius:10px;
-    color:var(--chalk);
-    font-family:'Fredoka',sans-serif;
-    font-size:1rem;
-    padding:11px 12px;
-    outline:none;
-  }
-  input[type=text].code-input{
-    font-family:'Space Mono',monospace;font-size:1.15rem;letter-spacing:.25em;text-transform:uppercase;
-  }
-  input:focus{border-color:var(--butter)}
-  button{
-    font-family:'Fredoka',sans-serif;
-    font-weight:600;font-size:1rem;
-    border:none;border-radius:13px;
-    padding:13px 16px;width:100%;
-    cursor:pointer;margin-top:12px;
-    transition:transform .12s cubic-bezier(.22,1,.36,1), filter .15s, opacity .15s;
-  }
-  button:active{transform:scale(.97);filter:brightness(.96)}
-  button:disabled{opacity:.45;cursor:default}
-  .btn-main{background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;box-shadow:0 6px 16px rgba(233,196,106,.18)}
-  .btn-ghost{background:rgba(255,255,255,.04);color:var(--chalk);border:1.5px solid var(--line)}
-  .btn-small{width:auto;padding:8px 14px;font-size:.85rem;margin-top:0}
-  .muted{color:var(--chalk-dim);font-size:.85rem;line-height:1.45}
-  .error{color:var(--red-chalk);font-size:.85rem;margin-top:8px;min-height:1.2em}
-  .hidden{display:none !important}
+  .ui-btn{background:var(--gold-grad);font-weight:700}
+  .ui-btn.alt{background:rgba(255,255,255,.1);color:var(--fg);box-shadow:none}
+  .ui-sq{background:rgba(255,255,255,.1)}
+  .ui-field input[type=text],.ui-field input[type=tel]{border-color:transparent}
+  .ui-field input:focus{border-color:var(--gold)}
+  .avatar-opt.sel{background:var(--gold);box-shadow:none}
+  .ui-hero{gap:4px}
+  .ui-hero-art{font-family:'Reem Kufi',sans-serif;font-size:22px;color:var(--gold)}
+  .ui-hero-title{font-size:52px;line-height:1;letter-spacing:1px;text-shadow:0 0 30px rgba(242,193,78,.45)}
+  .ui-hero-sub{color:var(--dim)}
+  .ar{font-family:'Reem Kufi',sans-serif}
+  .dm-roles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .dm-roles label{margin:0;cursor:pointer}
+  .dm-roles input{position:absolute;opacity:0;pointer-events:none}
+  .dm-role{border-radius:18px;padding:14px;background:rgba(255,255,255,.06);display:flex;flex-direction:column;gap:4px;transition:background .15s, box-shadow .15s;height:100%}
+  .dm-role .e{font-size:30px;line-height:1.1}
+  .dm-role small{font-size:12px;color:var(--dim)}
+  .dm-roles input:checked + .dm-role{background:rgba(242,193,78,.14);box-shadow:inset 0 0 0 2px var(--gold)}
+  .dm-roles input:focus-visible + .dm-role{outline:2px solid var(--gold);outline-offset:2px}
+  .ui-code span{width:64px;height:80px;border-radius:12px;box-shadow:inset 0 0 0 2px var(--gold),0 0 24px rgba(242,193,78,.3);font-size:44px;font-weight:400}
+  .dm-wait-roles{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  .dm-wait-roles > div{border-radius:18px;padding:16px;background:rgba(242,193,78,.12);text-align:center;display:flex;flex-direction:column;gap:4px;min-width:0}
+  .dm-wait-roles .e{font-size:30px}
+  .dm-wait-roles b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dm-wait-roles small{font-size:12px;color:var(--gold)}
+  .dm-wait-roles > div.empty{background:transparent;border:2px dashed rgba(255,255,255,.2);color:var(--dim)}
+  .dm-wait-roles > div.empty .e{opacity:.5}
+  .dm-wait-roles > div.empty small{color:var(--dim)}
 
-  .code-big{
-    font-family:'Space Mono',monospace;
-    font-size:2.4rem;font-weight:700;
-    letter-spacing:.35em;text-align:center;
-    color:var(--butter);
-    padding:10px 0 4px;
-    text-indent:.35em;
-  }
-  .pulse{animation:pulse 1.6s ease-in-out infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
-
-  .role-choice{display:flex;gap:8px;margin-top:6px}
-  .role-opt{flex:1}
-  .role-opt input{display:none}
-  .role-opt span{
-    display:block;text-align:center;padding:11px 6px;border-radius:10px;
-    border:1.5px dashed var(--line);color:var(--chalk-dim);cursor:pointer;font-weight:600;font-size:.88rem;
-  }
-  .role-opt input:checked + span{border-color:var(--butter);border-style:solid;color:var(--butter);background:rgba(233,196,106,.1)}
-
-  .wait-roles{display:flex;gap:8px;justify-content:center;margin:12px 0}
-  .wait-role-chip{flex:1;background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
-  .wait-role-chip .lbl{font-size:.72rem;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
-  .wait-role-chip .val{font-size:.9rem;font-weight:600}
-
-  .status-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-  #banker-peek{border:1.5px dashed var(--butter);padding:10px 12px}
-  #banker-peek .lbl{color:var(--chalk-dim);font-size:.78rem;margin-bottom:2px}
-  #banker-peek .val{font-weight:700;font-size:1.05rem;color:var(--butter)}
-  .role-badge{
-    width:52px;height:52px;border-radius:16px;flex-shrink:0;
-    background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;
-    display:flex;align-items:center;justify-content:center;
-    font-size:1.5rem;
-    box-shadow:0 6px 16px rgba(233,196,106,.25);
-  }
-  .status-text{flex:1}
-  .status-text .rnd{font-size:.8rem;color:var(--chalk-dim)}
-  .status-text .ph{font-size:.92rem;font-weight:600}
-
-  .dm-layout{display:flex;gap:5px;align-items:flex-start;margin-bottom:14px}
-  .value-col{flex:0 0 78px;display:flex;flex-direction:column;gap:4px;min-width:0}
-  .vl-item{
-    font-family:'Space Mono',monospace;font-size:.62rem;font-weight:600;line-height:1.2;
-    padding:5px 3px;border-radius:7px;background:rgba(255,255,255,.06);
-    border:1px solid var(--line);color:var(--chalk-dim);text-align:center;word-break:break-word;
-  }
-  .vl-item.joke{font-family:'Fredoka',sans-serif;font-weight:500}
-  .vl-item.used{opacity:.3;text-decoration:line-through}
-
-  .box-grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;min-width:0}
+  #screen-game{min-height:calc(100dvh - env(safe-area-inset-top));display:flex;flex-direction:column;gap:12px}
+  .dm-title{font-family:'Anton',sans-serif;font-size:20px;letter-spacing:1px;color:var(--gold);font-weight:400}
+  .dm-strip{padding:12px 14px;border-radius:18px;background:linear-gradient(135deg,#f2c14e,#c98d1c);color:#120f1f;display:flex;align-items:center;gap:12px}
+  .dm-case{width:58px;height:46px;flex-shrink:0;border-radius:9px;background:#120f1f;color:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Anton',sans-serif;font-size:22px;position:relative;margin-top:6px}
+  .dm-case::before{content:"";position:absolute;top:-7px;left:50%;margin-left:-9px;width:18px;height:7px;border:3px solid #120f1f;border-bottom:none;border-radius:6px 6px 0 0}
+  .dm-strip .mid{flex:1;min-width:0}
+  .dm-strip small{display:block;font-size:12px;font-weight:600;opacity:.7}
+  .dm-strip b{font-size:17px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dm-strip .r{text-align:right;flex-shrink:0}
+  .dm-strip .r b{font-family:'Anton',sans-serif;font-weight:400;font-size:26px;line-height:1}
+  .box-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
   .box{
-    aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-    font-family:'Space Mono',monospace;font-weight:700;font-size:.78rem;
-    background:rgba(0,0,0,.25);border:1.5px solid var(--line);border-radius:10px;
-    color:var(--chalk);padding:2px;text-align:center;line-height:1.1;margin:0;width:auto;cursor:default;
+    min-height:52px;border-radius:11px;background:var(--tile);box-shadow:inset 0 0 0 1.5px rgba(242,193,78,.5);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;
+    font-family:'Anton',sans-serif;font-size:20px;color:var(--gold);line-height:1.1;text-align:center;overflow:hidden;
   }
-  .box.tappable{cursor:pointer;border-color:var(--butter);background:rgba(233,196,106,.08)}
-  .box.tappable:active{transform:scale(.92)}
-  .box.opened{background:rgba(0,0,0,.4);color:var(--chalk-dim);font-size:.6rem;border-style:dashed;opacity:.65}
-  .box.own{background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;border-color:var(--butter);font-size:1.15rem}
-  .box.own.revealed{font-size:.62rem}
-  .box.peeked{background:rgba(0,0,0,.18);border-style:dashed;border-color:var(--butter);color:var(--chalk-dim);font-size:.6rem;opacity:.85}
+  .box small{font-family:'Fredoka',sans-serif;font-size:10px;color:var(--dim);font-weight:500;line-height:1.1;word-break:break-word}
+  .box.tappable{cursor:pointer}
+  .box.tappable:active{transform:scale(.92);background:#3a3058}
+  .box.opened{background:rgba(255,255,255,.03);box-shadow:none;color:#7a6c8c;font-family:'Fredoka',sans-serif;font-size:11px;font-weight:600;text-decoration:line-through}
+  .box.opened.big{background:rgba(229,72,77,.18);color:#ff8a8f;box-shadow:inset 0 0 0 1.5px #e5484d;text-decoration:none;font-weight:700}
+  .box.own{background:var(--gold);color:#120f1f;box-shadow:0 0 18px rgba(242,193,78,.45)}
+  .box.own small{color:#120f1f;font-weight:600}
+  .box.peeked small{color:#e7d9a8}
+  .box:disabled{opacity:1}
+  @media (prefers-reduced-motion:no-preference){ .box.just{animation:uiPop .4s cubic-bezier(.22,1,.36,1)} }
+  .ladder{display:flex;flex-wrap:wrap;gap:5px;font-family:'Space Mono',monospace;font-size:11px}
+  .ladder span{padding:4px 7px;border-radius:8px;background:rgba(255,255,255,.1);white-space:nowrap}
+  .ladder span.joke{font-family:'Reem Kufi',sans-serif;font-size:12px;padding:2px 7px}
+  .ladder span.top{background:rgba(242,193,78,.2);color:var(--gold)}
+  .ladder span.used{background:rgba(255,255,255,.04);color:#7a6c8c;text-decoration:line-through}
+  .dm-hint{height:56px;border-radius:18px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:600;text-align:center;padding:0 12px}
+  .dm-foot{padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  .dm-wilayas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .dm-wilayas button{height:52px;border-radius:12px;background:var(--tile);box-shadow:inset 0 0 0 1.5px rgba(242,193,78,.35);font-family:'Reem Kufi',sans-serif;font-size:15px;color:var(--fg)}
+  .dm-wilayas button:active{background:var(--gold);color:#120f1f}
+  .dm-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
 
-  .wilaya-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
-  .wilaya-btn{
-    font-family:'Fredoka',sans-serif;font-weight:600;font-size:.92rem;
-    padding:13px 6px;border-radius:10px;background:rgba(0,0,0,.25);
-    border:1.5px solid var(--line);color:var(--chalk);cursor:pointer;margin:0;width:100%;
-  }
-  .wilaya-btn:active{transform:scale(.96);border-color:var(--butter)}
+  .dm-call{position:fixed;inset:0;z-index:40;background:#0b0914;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:0 24px 200px;text-align:center}
+  .dm-call::before{content:"";position:absolute;inset:0;background:radial-gradient(300px 380px at 50% 30%,rgba(214,51,132,.35),transparent 70%);pointer-events:none}
+  .dm-call > *{position:relative}
+  .dm-phone{width:96px;height:96px;border-radius:50%;background:#1d1830;display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:0 0 0 10px rgba(214,51,132,.15),0 0 0 22px rgba(214,51,132,.07)}
+  @media (prefers-reduced-motion:no-preference){ .dm-phone{animation:dmRing 1.2s ease-in-out infinite} }
+  @keyframes dmRing{0%,100%{transform:rotate(0)}10%{transform:rotate(-12deg)}20%{transform:rotate(12deg)}30%{transform:rotate(-8deg)}40%{transform:rotate(0)}}
+  .dm-call .who{font-size:15px;color:#e7a9cb;margin-top:10px}
+  .dm-call .amt{font-family:'Anton',sans-serif;font-size:clamp(40px,15vw,68px);line-height:1.05;color:var(--gold);text-shadow:0 0 40px rgba(242,193,78,.5);word-break:break-word}
+  .dm-call .info{font-size:14px;color:var(--dim);text-wrap:pretty}
+  .dm-call .ui-dock{background:none}
+  .dm-answer{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .dm-answer button{height:72px;border-radius:22px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .dm-answer button b{font-family:'Reem Kufi',sans-serif;font-size:24px;line-height:1}
+  .dm-answer button small{font-size:12px;opacity:.85}
+  .dm-answer .no{background:#e5484d;box-shadow:0 5px 0 #8e1f23}
+  .dm-answer .yes{background:#2fbf71;box-shadow:0 5px 0 #17703f}
+  .dm-answer button:active{transform:translateY(3px)}
 
-  .offer-btns{display:flex;gap:8px}
-  .offer-btns button{margin-top:0}
-  .offer-type-grid{display:flex;flex-direction:column;gap:8px;margin:10px 0}
-  .offer-type-grid button{margin-top:0}
-
-  .win-card{text-align:center}
-  .win-card .big{font-size:2.6rem;margin:6px 0}
+  .dm-sheet-opts{display:flex;flex-direction:column;gap:10px}
+  .dm-sheet-opts button{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:rgba(255,255,255,.07);text-align:left;font-size:16px;font-weight:600}
+  .dm-sheet-opts button small{display:block;font-weight:400;font-size:13px;color:var(--dim)}
+  .dm-sheet-opts button .e{font-size:28px}
+  .dm-sheet-opts button:active{background:rgba(242,193,78,.2)}
+  .dm-offer-input{width:100%;height:64px;border-radius:16px;background:rgba(255,255,255,.07);border:2px solid var(--gold);color:var(--gold);font-family:'Anton',sans-serif;font-size:30px;text-align:center;outline:none}
+  .dm-offer-input.text{font-family:'Fredoka',sans-serif;font-size:18px;color:var(--fg)}
+  .dm-sheet-row{display:flex;gap:10px}
+  .dm-sheet-row .ui-btn{margin-top:0;flex:1;width:auto}
+  .dm-sheet-row .ui-btn.alt{flex:0 0 58px;padding:0}
 
   .reveal-badge{
-    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.7);
-    background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;
-    border-radius:16px;padding:22px 30px;box-shadow:0 14px 40px rgba(0,0,0,.4);
-    font-family:'Space Mono',monospace;font-weight:700;font-size:1.3rem;text-align:center;
-    z-index:50;opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;
-    max-width:80vw;
+    position:fixed;top:45%;left:50%;transform:translate(-50%,-50%) scale(.7);z-index:50;
+    min-width:200px;max-width:84vw;padding:26px 30px;border-radius:20px;
+    background:var(--gold-grad);color:#120f1f;box-shadow:0 0 60px rgba(242,193,78,.5);
+    font-family:'Anton',sans-serif;font-size:34px;text-align:center;
+    opacity:0;pointer-events:none;transition:opacity .25s ease, transform .3s cubic-bezier(.22,1,.36,1);
   }
+  .reveal-badge small{display:block;font-family:'Fredoka',sans-serif;font-size:13px;font-weight:600;opacity:.7}
+  .reveal-badge .ar{font-family:'Reem Kufi',sans-serif;font-weight:700}
   .reveal-badge.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 
-  /* Desktop / TV: widen the board so all 24 boxes + both value ladders
-     fit on one screen at once, no scrolling needed to compare boxes. */
-  @media (min-width: 700px){
-    .frame.wide-board{ max-width: 760px; }
-    .frame.wide-board .dm-layout{ gap: 10px; }
-    .frame.wide-board .box-grid{ grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .frame.wide-board .value-col{ flex: 0 0 104px; }
-    .frame.wide-board .vl-item{ font-size: .68rem; padding: 6px 4px; }
-  }
-  @media (min-width: 1000px){
-    .frame.wide-board{ max-width: 1000px; }
-    .frame.wide-board .box-grid{ grid-template-columns: repeat(6, 1fr); gap: 9px; }
-    .frame.wide-board .value-col{ flex: 0 0 126px; }
-    .frame.wide-board .vl-item{ font-size: .75rem; padding: 7px 5px; }
-    .frame.wide-board .box{ font-size: .95rem; }
-    .frame.wide-board .box.opened, .frame.wide-board .box.peeked{ font-size: .66rem; }
-  }
-  @media (min-width: 1400px){
-    .frame.wide-board{ max-width: 1260px; }
-    .frame.wide-board .box-grid{ grid-template-columns: repeat(8, 1fr); gap: 10px; }
-    .frame.wide-board .value-col{ flex: 0 0 146px; }
-    .frame.wide-board .vl-item{ font-size: .82rem; padding: 8px 6px; }
-    .frame.wide-board .box{ font-size: 1.05rem; }
-    .frame.wide-board .box.opened, .frame.wide-board .box.peeked{ font-size: .72rem; }
-  }
+  .dm-end{display:flex;flex-direction:column;align-items:center;gap:14px;padding:50px 0 0;text-align:center}
+  .dm-end .s1{font-size:14px;color:var(--dim)}
+  .dm-end .s2{font-size:15px}
+  .dm-end .prize{min-width:180px;max-width:100%;min-height:130px;padding:16px 22px;border-radius:20px;background:var(--gold-grad);display:flex;align-items:center;justify-content:center;font-family:'Anton',sans-serif;font-size:40px;color:#120f1f;box-shadow:0 0 60px rgba(242,193,78,.5);margin:10px 0;word-break:break-word}
+  .dm-end .prize .ar{font-family:'Reem Kufi',sans-serif;font-weight:700}
+  .dm-end .verdict{font-family:'Anton',sans-serif;font-size:42px;letter-spacing:.5px;color:#2fbf71;line-height:1.05}
+  .dm-end .verdict.bad{color:#ff8a8f}
+  .dm-end .s3{font-size:15px;color:var(--dim);text-wrap:balance}
+
+  .ui-sheet-title{letter-spacing:.5px;color:var(--gold);font-size:28px}
+  .ui-sheet .ui-btn{background:var(--gold);color:#120f1f;font-weight:700}
+  .ui-sheet .ui-btn.alt{background:rgba(255,255,255,.08);color:var(--fg)}
+
+  @media (min-width:700px){ .box-grid{grid-template-columns:repeat(6,1fr)} .dm-wilayas{grid-template-columns:repeat(4,1fr)} }
 </style>
-<link rel="stylesheet" href="responsive.css">
-<link rel="stylesheet" href="avatar.css">
 </head>
-<body>
+<body data-screen="create">
 <div class="frame">
-  <header>
-    <h1>💼 Dlilek Mlek</h1>
-    <div class="tagline">دليلك ملك — le jeu des mallettes, à deux</div>
-    <a class="back-link" href="index.html">← Retour à l'accueil</a>
-  </header>
-
-  <div id="screen-home">
-    <div class="card">
-      <h2>Nouvelle partie</h2>
-      <p class="muted">Crée une partie et envoie le code à ton ami·e. Un·e candidat·e, un·e banquier·ère.</p>
-      <button class="btn-main" onclick="show('create')">Créer une partie</button>
+  <div id="screen-create" class="ui-screen has-dock">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
     </div>
-    <div class="card">
-      <h2>Rejoindre</h2>
-      <p class="muted">Tu as reçu un code ? Entre-le ici.</p>
-      <button class="btn-ghost" onclick="show('join')">Rejoindre avec un code</button>
+    <div class="ui-hero ">
+      <div class="ui-hero-art"><span lang="ar" dir="rtl">دليلك ملك</span></div>
+      <h1 class="ui-hero-title">DLILEK MLEK</h1>
+      <div class="ui-hero-sub">24 mallettes · une offre quand le banquier veut</div>
     </div>
-    <div class="card">
-      <h2>Règles</h2>
-      <p class="muted">24 mallettes (autant que de gouvernorats) contiennent chacune un lot, tiré au hasard à chaque partie parmi une grande liste de montants et de lots rigolos : des petits montants, quelques lots rigolos (<span lang="ar" dir="rtl">شيشة</span>, <span lang="ar" dir="rtl">سروال عربي</span>…) et de grosses sommes, jusqu'au mystérieux milliard. Le·la <b>candidat·e</b> choisit une mallette qui restera fermée jusqu'à la fin, puis ouvre les autres, une par une.<br>
-      À tout moment, le·la <b>banquier·ère</b> peut faire une offre : de l'argent, un objet surprise (pour tester le·la candidat·e !), ou un échange de mallette. Le·la candidat·e répond <span lang="ar" dir="rtl"><b>نرفض</b></span> (je continue) ou <span lang="ar" dir="rtl"><b>نقبل</b></span> (j'accepte) — sauf pour un échange, qui ne met pas fin à la partie, juste à l'incertitude sur sa mallette ! S'il·elle refuse toutes les offres jusqu'au bout, il·elle repart avec le contenu de sa propre mallette !</p>
+    <div class="ui-seg" role="tablist">
+      <button type="button" class="on" aria-selected="true">Créer</button>
+      <button type="button" onclick="show('join')">Rejoindre</button>
     </div>
-  </div>
-
-  <div id="screen-create" class="hidden">
-    <div class="card">
-      <h2>Créer une partie</h2>
-      <label>Ton prénom</label>
-      <input type="text" id="create-name" class="name-input" maxlength="12" placeholder="Ex. Léa">
-      <label>Ton avatar</label>
+    <div class="ui-field">
+      <div class="ui-label">Ton rôle</div>
+      <div class="dm-roles">
+        <label><input type="radio" name="myrole" value="candidate" checked><span class="dm-role"><span class="e">🙋</span><b>Candidat·e</b><small>Garde ou vend sa mallette</small></span></label>
+        <label><input type="radio" name="myrole" value="banker"><span class="dm-role"><span class="e">📞</span><b>Banquier·ère</b><small>Fait les offres</small></span></label>
+      </div>
+    </div>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="create-name" maxlength="12" placeholder="Ex. Léa" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
       <div class="avatar-row" id="create-avatar-row"></div>
-      <label>Ton rôle</label>
-      <div class="role-choice">
-        <label class="role-opt"><input type="radio" name="myrole" value="candidate" checked><span>🎯 Candidat·e</span></label>
-        <label class="role-opt"><input type="radio" name="myrole" value="banker"><span>💼 Banquier·ère</span></label>
-      </div>
+    </div>
+    <div class="ui-dock">
       <div class="error" id="create-err"></div>
-      <button class="btn-main" id="btn-create" onclick="createGame()">Créer et obtenir le code</button>
-      <button class="btn-ghost" onclick="show('home')">Retour</button>
+      <button class="ui-btn" id="btn-create" onclick="createGame()">Créer la partie</button>
     </div>
   </div>
 
-  <div id="screen-join" class="hidden">
-    <div class="card">
-      <h2>Rejoindre une partie</h2>
-      <label>Code de la partie</label>
-      <input type="text" class="code-input" id="join-code" maxlength="4" placeholder="ABCD">
-      <label>Ton prénom</label>
-      <input type="text" id="join-name" class="name-input" maxlength="12" placeholder="Ex. Emma">
-      <label>Ton avatar</label>
+  <div id="screen-join" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
+    </div>
+    <div class="ui-hero ">
+      <div class="ui-hero-art"><span lang="ar" dir="rtl">دليلك ملك</span></div>
+      <h1 class="ui-hero-title">DLILEK MLEK</h1>
+      <div class="ui-hero-sub">24 mallettes · une offre quand le banquier veut</div>
+    </div>
+    <div class="ui-seg" role="tablist">
+      <button type="button" onclick="show('create')">Créer</button>
+      <button type="button" class="on" aria-selected="true">Rejoindre</button>
+    </div>
+    <label class="ui-field">
+      <span class="ui-label">Code de la partie</span>
+      <input type="text" id="join-code" class="code-input" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    </label>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="join-name" maxlength="12" placeholder="Ex. Emma" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
       <div class="avatar-row" id="join-avatar-row"></div>
+    </div>
+    <div class="ui-dock">
       <div class="error" id="join-err"></div>
-      <button class="btn-main" id="btn-join" onclick="joinGame()">Rejoindre</button>
-      <button class="btn-ghost" onclick="show('home')">Retour</button>
+      <button class="ui-btn" id="btn-join" onclick="joinGame()">Rejoindre</button>
     </div>
   </div>
 
-  <div id="screen-wait" class="hidden">
-    <div class="card" style="text-align:center">
-      <h2>Partie créée !</h2>
-      <p class="muted">Envoie ce code à ton ami·e :</p>
-      <div class="code-big" id="wait-code">····</div>
-      <button class="btn-main btn-small hidden" id="share-btn" onclick="shareCode()">📤 Partager le code</button>
-      <button class="btn-ghost btn-small" onclick="copyCode()" id="copy-btn">Copier le lien</button>
-      <div class="wait-roles">
-        <div class="wait-role-chip"><div class="lbl">🎯 Candidat·e</div><div class="val" id="wait-role-candidate">—</div></div>
-        <div class="wait-role-chip"><div class="lbl">💼 Banquier·ère</div><div class="val" id="wait-role-banker">—</div></div>
+  <div id="screen-wait" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <button class="ui-round" onclick="cancelWait()" aria-label="Annuler">✕</button>
+      <div class="ui-top-mid">En direct dans un instant…</div>
+      <span class="ui-round ghost"></span>
+    </div>
+    <div class="ui-wait">
+      <div class="muted" style="font-size:15px">Code de l'émission</div>
+      <button class="ui-code" id="wait-code"></button>
+      <div class="ui-code-hint" id="wait-hint">Touche le code pour copier le lien</div>
+      <div class="dm-wait-roles">
+        <div id="wait-role-candidate"></div>
+        <div id="wait-role-banker"></div>
       </div>
-      <p class="muted pulse" style="margin-top:6px">En attente de ton ami·e…</p>
+    </div>
+    <div class="ui-dock">
+      <div class="ui-dock-row">
+        <button class="ui-sq" onclick="copyCode()" aria-label="Copier le lien">🔗</button>
+        <button class="ui-btn" onclick="shareCode()" id="invite-btn">📤 Inviter</button>
+      </div>
     </div>
   </div>
 
   <div id="screen-game" class="hidden">
-    <button class="quit-match-btn" onclick="confirmQuitMatch()">✕ Quitter</button>
-    <div class="status-bar">
-      <div class="role-badge" id="role-badge">🎯</div>
-      <div class="status-text">
-        <div class="rnd" id="round-label">Manche 1/8</div>
-        <div class="ph" id="phase-label">…</div>
-      </div>
+    <div class="ui-top">
+      <button class="ui-round" onclick="confirmQuitMatch()" aria-label="Quitter">✕</button>
+      <div class="ui-top-mid"><span class="dm-title" id="round-label">…</span></div>
+      <button class="ui-round" data-rules aria-label="Règles">?</button>
     </div>
-
-    <div class="card hidden" id="banker-peek" style="text-align:center"></div>
-    <div class="card hidden" id="wilaya-panel"></div>
-    <div class="dm-layout hidden" id="dm-layout">
-      <div class="value-col" id="value-col-left"></div>
+    <div class="dm-strip" id="dm-strip"></div>
+    <div id="wilaya-panel" class="hidden" style="display:flex;flex-direction:column;gap:12px"></div>
+    <div id="dm-layout" class="hidden" style="display:flex;flex-direction:column;gap:12px">
       <div class="box-grid" id="box-grid"></div>
-      <div class="value-col" id="value-col-right"></div>
+      <div class="ladder" id="ladder"></div>
     </div>
-    <div class="card hidden" id="offer-panel"></div>
-
-    <p class="muted" style="text-align:center;margin-top:10px">Code de la partie : <b id="game-code-label"></b></p>
+    <div style="flex:1"></div>
+    <div class="dm-foot" id="dm-foot"></div>
+    <div class="dm-call hidden" id="offer-panel"></div>
   </div>
 
-  <div class="reveal-badge hidden" id="reveal-badge"><div id="reveal-label"></div></div>
+  <div class="reveal-badge hidden" id="reveal-badge"><small>La mallette contenait</small><div id="reveal-label"></div></div>
 
-  <div id="screen-end" class="hidden">
-    <div class="card win-card">
-      <div class="big" id="end-emoji">🏆</div>
-      <h2 id="end-title">…</h2>
-      <p class="muted" id="end-detail"></p>
-      <button class="btn-main" onclick="location.reload()">Nouvelle partie</button>
+  <div id="screen-end" class="ui-screen has-dock hidden">
+    <div class="dm-end">
+      <div class="s1" id="end-s1"></div>
+      <div class="s2" id="end-s2"></div>
+      <div class="prize" id="end-prize"></div>
+      <div class="verdict" id="end-title">…</div>
+      <div class="s3" id="end-detail"></div>
     </div>
+    <div class="ui-dock">
+      <div class="ui-dock-row">
+        <a class="ui-sq" href="index.html" aria-label="Accueil" style="text-decoration:none">🏠</a>
+        <button class="ui-btn" onclick="location.href='dlilekmlek.html'">🔁 Nouvelle partie</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ui-sheet" id="offer-sheet" aria-hidden="true">
+  <div class="ui-sheet-scrim" onclick="cancelOfferDraft()"></div>
+  <div class="ui-sheet-body" role="dialog" aria-label="Faire une offre" id="offer-sheet-body"></div>
+</div>
+
+<div class="ui-sheet" id="rules-sheet" aria-hidden="true">
+  <div class="ui-sheet-scrim" data-rules-close></div>
+  <div class="ui-sheet-body" role="dialog" aria-label="Règles">
+    <div class="ui-grab"></div>
+    <div class="ui-sheet-title">COMMENT JOUER</div>
+    <div class="ui-step"><b>1</b><span>24 mallettes avec des montants et des lots rigolos, tirés au hasard — jusqu'au <span class="ar">مليار</span>.</span></div>
+    <div class="ui-step"><b>2</b><span>Le·la <b>candidat·e</b> choisit sa wilaya et sa mallette, fermée jusqu'à la fin, puis ouvre les autres une à une.</span></div>
+    <div class="ui-step"><b>3</b><span>Quand il·elle veut, le·la <b>banquier·ère</b> propose : 💰 argent, 🎁 objet ou 🔄 échange de mallette.</span></div>
+    <div class="ui-step"><b style="background:#d63384;color:#fff">!</b><span><span class="ar">نقبل</span> = tu repars avec l'offre. <span class="ar">نرفض</span> = on continue. Tout refusé ? Tu repars avec ta mallette.</span></div>
+    <button class="ui-btn" data-rules-close>Compris</button>
   </div>
 </div>
 
@@ -326,6 +307,7 @@
 <script src="connection-banner.js"></script>
 <script src="avatar-picker.js"></script>
 <script src="game-link.js"></script>
+<script src="gym-ui.js"></script>
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
@@ -381,10 +363,11 @@ let renderedLadderCount = -1, renderedBoxKey = null, renderedOfferKey = null;
 let offerDraftType = null, lastOpenedCount = -1, revealTimer = null;
 
 const $ = id => document.getElementById(id);
-const screens = ['home','create','join','wait','game','end'];
+const screens = ['create','join','wait','game','end'];
 function show(name){
+  if(name==='home') name = 'create';
   screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name));
-  document.querySelector('.frame').classList.toggle('wide-board', name==='game');
+  window.GYMUI.screen(name);
 }
 function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
 function pAvatar(p){ return p && p.avatar ? p.avatar : '🙂'; }
@@ -467,8 +450,10 @@ async function saveResult(st){
 /* ---------- create / join ---------- */
 const createAvatarPicker = window.GYMAvatarPicker.render('create-avatar-row');
 const joinAvatarPicker = window.GYMAvatarPicker.render('join-avatar-row');
+window.GYMUI.prefillNames(['create-name','join-name']);
 async function createGame(){
   const name = $('create-name').value.trim() || "Joueur 1";
+  window.GYMUI.rememberName($('create-name').value);
   const avatar = createAvatarPicker.get();
   const role = document.querySelector('input[name=myrole]:checked').value;
   $('btn-create').disabled = true; busy = true;
@@ -483,7 +468,7 @@ async function createGame(){
   me = role;
   saveRole(code, role);
   if(window.GYMRecent) window.GYMRecent.record('dm', code, 'Dlilek Mlek');
-  $('wait-code').textContent = code;
+  window.GYMUI.renderCode('wait-code', code, $('wait-hint'));
   renderWait();
   show('wait');
   startPolling();
@@ -513,6 +498,7 @@ async function joinGame(){
     $('btn-join').disabled = false; busy = false; return;
   }
   const name = $('join-name').value.trim() || "Joueur 2";
+  window.GYMUI.rememberName($('join-name').value);
   const avatar = joinAvatarPicker.get();
   st.players[openRole] = {name, avatar};
   st.status = 'playing';
@@ -559,12 +545,22 @@ function renderCurrent(){
   else if(state.status==='playing'){ window.GYMLeaveGuard.enable(); renderGame(); }
 }
 function renderWait(){
-  const c = state.players.candidate, b = state.players.banker;
-  $('wait-role-candidate').textContent = c ? pAvatar(c)+' '+esc(c.name) : '— en attente —';
-  $('wait-role-banker').textContent = b ? pAvatar(b)+' '+esc(b.name) : '— en attente —';
+  [['candidate','🙋','Candidat·e'],['banker','📞','Banquier·ère']].forEach(([r, e, lbl]) => {
+    const p = state.players[r], el = $('wait-role-'+r);
+    el.className = p ? '' : 'empty';
+    el.innerHTML = p ? '<span class="e">'+pAvatar(p)+'</span><b>'+esc(p.name)+'</b><small>'+lbl+'</small>'
+                     : '<span class="e">'+e+'</span><b>'+lbl+'</b><small class="pulse">en attente…</small>';
+  });
+  $('invite-btn').textContent = me==='candidate' ? '📤 Inviter le banquier' : '📤 Inviter le·la candidat·e';
+}
+function cancelWait(){
+  if(!confirm("Annuler cette partie ?")) return;
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
+  if(window.GYMRecent) window.GYMRecent.remove('dm', code);
+  location.href = 'dlilekmlek.html';
 }
 function enterGame(){
-  $('game-code-label').textContent = code;
   show('game');
   renderCurrent();
 }
@@ -714,66 +710,61 @@ async function respondOffer(accept){
 }
 
 /* ---------- rendering ---------- */
-function phaseLabelText(st, isCandidate, candName, bankName){
-  if(st.phase==='pick_wilaya') return isCandidate ? '📍 Choisis ta wilaya' : '⏳ '+candName+' choisit sa wilaya…';
-  if(st.phase==='pick_box') return isCandidate ? '🎯 Choisis ta mallette' : '⏳ '+candName+' choisit sa mallette…';
-  if(st.phase==='opening') return isCandidate ? '📦 Ouvre une mallette' : '👀 Observe, et fais une offre quand tu veux';
-  if(st.phase==='swap_pick') return isCandidate ? '🔄 Choisis ta nouvelle mallette' : '⏳ '+candName+' choisit sa nouvelle mallette…';
-  if(st.phase==='offer_made'){
-    if(st.offerType==='swap') return isCandidate ? '🔄 Le/la banquier·ère te propose un échange' : '⏳ En attente de la décision…';
-    return isCandidate ? '🤔 نقبل ولا نرفض ؟' : '⏳ En attente de la décision…';
-  }
-  return '';
-}
 let renderedWilaya = false;
+function boxLabel(i){ return 'n°'+(i+1); }
+function renderStrip(isCandidate){
+  const candP = state.players.candidate, opened = state.openedBoxIds.length, total = state.assignment.length - 1;
+  const own = state.ownBoxId;
+  const hasOwn = own!==null && own!==undefined;
+  const wil = state.candidateWilaya ? '<span class="ar" lang="ar" dir="rtl">'+esc(state.candidateWilaya)+'</span>' : '';
+  let caseTxt = hasOwn ? String(own+1) : '?', small, big;
+  if(isCandidate){
+    small = hasOwn ? 'Ta mallette · fermée' : (state.phase==='pick_wilaya' ? 'Bienvenue sur le plateau' : 'Choisis ta mallette');
+    big = hasOwn ? (wil || boxLabel(own)) : (wil || 'Candidat·e');
+  } else {
+    small = hasOwn ? 'Mallette de '+esc(candP.name)+' · tu la connais' : esc(candP.name)+' choisit…';
+    big = hasOwn ? labelHtml(BOX_VALUES[state.assignment[own]]) : (wil || '…');
+  }
+  $('dm-strip').innerHTML = '<div class="dm-case">'+caseTxt+'</div><div class="mid"><small>'+small+'</small><b>'+big+'</b></div>'+
+    '<div class="r"><small>Restantes</small><b>'+(total-opened)+'</b></div>';
+}
 function renderWilayaPanel(isCandidate){
   const panel = $('wilaya-panel');
   if(isCandidate){
-    panel.innerHTML = '<h2>Choisis ta wilaya</h2><div class="wilaya-grid">' +
-      WILAYAS.map(w => '<button type="button" class="wilaya-btn" lang="ar" dir="rtl" onclick="pickWilaya(\''+w+'\')">'+w+'</button>').join('') +
+    panel.innerHTML = '<div class="dm-wilayas">' +
+      WILAYAS.map(w => '<button type="button" lang="ar" dir="rtl" onclick="pickWilaya(\''+w+'\')">'+w+'</button>').join('') +
       '</div>';
   } else {
-    panel.innerHTML = '<p class="muted" style="text-align:center">⏳ Le/la candidat·e choisit sa wilaya…</p>';
+    panel.innerHTML = '<div class="dm-center" style="padding-top:60px"><div style="font-size:56px">📍</div><div class="muted pulse" style="font-size:16px">'+esc(state.players.candidate.name)+' choisit sa wilaya…</div></div>';
   }
 }
 function renderGame(){
   if(!state || state.status!=='playing') return;
   const isCandidate = me==='candidate';
   const candP = state.players.candidate, bankP = state.players.banker;
-  $('role-badge').textContent = isCandidate ? '🎯' : '💼';
-  if(state.phase==='pick_wilaya'){
-    $('round-label').textContent = 'Choix de la wilaya';
-  } else {
-    const totalToOpen = state.assignment.length - 1;
-    $('round-label').innerHTML = state.openedBoxIds.length + '/' + totalToOpen + ' mallettes ouvertes' +
-      (state.candidateWilaya ? ' · <span lang="ar" dir="rtl">'+esc(state.candidateWilaya)+'</span>' : '');
-  }
-  $('phase-label').textContent = phaseLabelText(state, isCandidate, candP.name, bankP.name);
+  const totalToOpen = state.assignment.length - 1;
+  $('round-label').textContent = state.phase==='pick_wilaya' ? 'CHOIX DE LA WILAYA'
+    : (state.phase==='pick_box' ? 'CHOIX DE LA MALLETTE' : state.openedBoxIds.length+' / '+totalToOpen+' OUVERTES');
+  renderStrip(isCandidate);
 
   const inWilayaPhase = state.phase==='pick_wilaya';
   $('wilaya-panel').classList.toggle('hidden', !inWilayaPhase);
   $('dm-layout').classList.toggle('hidden', inWilayaPhase);
   if(inWilayaPhase){
     if(!renderedWilaya){ renderWilayaPanel(isCandidate); renderedWilaya = true; }
+    $('dm-foot').innerHTML = isCandidate ? '<div class="dm-hint">📍 Choisis ta wilaya</div>' : '';
     $('offer-panel').classList.add('hidden');
-    $('banker-peek').classList.add('hidden');
     lastOpenedCount = state.openedBoxIds.length;
     return;
   }
   renderedWilaya = false;
 
-  const showPeek = !isCandidate && state.ownBoxId !== null && state.ownBoxId !== undefined;
-  $('banker-peek').classList.toggle('hidden', !showPeek);
-  if(showPeek){
-    const ownVal = BOX_VALUES[state.assignment[state.ownBoxId]];
-    $('banker-peek').innerHTML = '<div class="lbl">💼 Mallette du/de la candidat·e</div><div class="val">'+labelHtml(ownVal)+'</div>';
-  }
-
+  let justOpened = null;
   if(lastOpenedCount===-1 || state.phase==='pick_box'){
     lastOpenedCount = state.openedBoxIds.length;
   } else if(state.openedBoxIds.length > lastOpenedCount){
-    const lastBoxId = state.openedBoxIds[state.openedBoxIds.length-1];
-    showReveal(BOX_VALUES[state.assignment[lastBoxId]]);
+    justOpened = state.openedBoxIds[state.openedBoxIds.length-1];
+    showReveal(BOX_VALUES[state.assignment[justOpened]]);
     lastOpenedCount = state.openedBoxIds.length;
   } else if(state.openedBoxIds.length < lastOpenedCount){
     lastOpenedCount = state.openedBoxIds.length;
@@ -781,89 +772,122 @@ function renderGame(){
 
   if(renderedLadderCount !== state.openedBoxIds.length){
     const openedPoolIdx = new Set(state.openedBoxIds.map(b=>state.assignment[b]));
-    const sortedEntries = state.assignment.map(poolIdx => ({poolIdx, v: BOX_VALUES[poolIdx]})).sort((a,b) => a.v.n - b.v.n);
-    const vlItem = e => '<div class="vl-item'+(e.v.joke?' joke':'')+(openedPoolIdx.has(e.poolIdx)?' used':'')+'">'+labelHtml(e.v)+'</div>';
-    $('value-col-left').innerHTML = sortedEntries.slice(0, VALUE_SPLIT).map(vlItem).join('');
-    $('value-col-right').innerHTML = sortedEntries.slice(VALUE_SPLIT).map(vlItem).join('');
+    const sorted = state.assignment.map(poolIdx => ({poolIdx, v: BOX_VALUES[poolIdx]})).sort((a,b) => a.v.n - b.v.n);
+    $('ladder').innerHTML = sorted.map(e => '<span class="'+(e.v.joke?'joke ':'')+(e.v.n>=100000?'top ':'')+(openedPoolIdx.has(e.poolIdx)?'used':'')+'"'+(e.v.joke?' lang="ar" dir="rtl"':'')+'>'+esc(e.v.label)+'</span>').join('');
     renderedLadderCount = state.openedBoxIds.length;
   }
 
   const boxKey = state.phase + '|' + state.openedBoxIds.length + '|' + state.ownBoxId;
   if(renderedBoxKey !== boxKey){
-    let boxesHtml = '';
+    let html = '';
     for(let i=0;i<state.assignment.length;i++){
-      const opened = state.openedBoxIds.includes(i);
-      const isOwn = state.ownBoxId===i;
-      let cls='box', content=String(i+1), handler='';
-      if(opened){ cls+=' opened'; content = labelHtml(BOX_VALUES[state.assignment[i]]); }
-      else if(isOwn){
-        cls+=' own';
-        if(!isCandidate){ cls+=' revealed'; content = labelHtml(BOX_VALUES[state.assignment[i]]); }
-        else content='💼';
-      }
-      else if(!isCandidate){ cls+=' peeked'; content = labelHtml(BOX_VALUES[state.assignment[i]]); }
-      else if(isCandidate && state.phase==='pick_box'){ cls+=' tappable'; handler='pickBox('+i+')'; }
-      else if(isCandidate && state.phase==='opening'){ cls+=' tappable'; handler='openBox('+i+')'; }
-      else if(isCandidate && state.phase==='swap_pick'){ cls+=' tappable'; handler='pickSwapBox('+i+')'; }
-      boxesHtml += '<button type="button" class="'+cls+'"'+(handler?' onclick="'+handler+'"':' disabled')+'>'+content+'</button>';
+      const opened = state.openedBoxIds.includes(i), isOwn = state.ownBoxId===i;
+      const v = BOX_VALUES[state.assignment[i]];
+      let cls = 'box', content = String(i+1), handler = '';
+      if(opened){ cls += ' opened'+(v.n>=100000?' big':''); content = labelHtml(v); }
+      else if(isOwn){ cls += ' own'; content = isCandidate ? '💼<small>'+(i+1)+'</small>' : '💼<small>'+labelHtml(v)+'</small>'; }
+      else if(!isCandidate){ cls += ' peeked'; content = (i+1)+'<small>'+labelHtml(v)+'</small>'; }
+      else if(state.phase==='pick_box'){ cls += ' tappable'; handler = 'pickBox('+i+')'; }
+      else if(state.phase==='opening'){ cls += ' tappable'; handler = 'openBox('+i+')'; }
+      else if(state.phase==='swap_pick'){ cls += ' tappable'; handler = 'pickSwapBox('+i+')'; }
+      if(i===justOpened) cls += ' just';
+      html += '<button type="button" class="'+cls+'"'+(handler?' onclick="'+handler+'" aria-label="Mallette '+(i+1)+'"':' disabled')+'>'+content+'</button>';
     }
-    $('box-grid').innerHTML = boxesHtml;
+    $('box-grid').innerHTML = html;
     renderedBoxKey = boxKey;
   }
+
+  // Thumb zone: hint for the candidate, offer button for the banker.
+  let foot = '';
+  if(isCandidate){
+    if(state.phase==='pick_box') foot = '<div class="dm-hint">💼 Touche ta mallette — elle restera fermée</div>';
+    else if(state.phase==='opening') foot = '<div class="dm-hint">👆 Touche une mallette pour l’ouvrir</div>';
+    else if(state.phase==='swap_pick') foot = '<div class="dm-hint">🔄 Choisis ta nouvelle mallette</div>';
+  } else {
+    if(state.phase==='opening' && state.openedBoxIds.length>=1) foot = '<button class="ui-btn" onclick="openOfferChooser()">📞 Appeler · faire une offre</button>';
+    else if(state.phase==='opening') foot = '<div class="dm-hint">👀 Attends la première mallette ouverte</div>';
+    else if(state.phase==='pick_box') foot = '<div class="dm-hint pulse">⏳ '+esc(candP.name)+' choisit sa mallette…</div>';
+    else if(state.phase==='swap_pick') foot = '<div class="dm-hint pulse">⏳ '+esc(candP.name)+' choisit sa nouvelle mallette…</div>';
+  }
+  if($('dm-foot').innerHTML !== foot) $('dm-foot').innerHTML = foot;
 
   renderOfferPanel(isCandidate);
 }
 function showReveal(v){
   const el = $('reveal-badge');
-  $('reveal-label').innerHTML = labelHtml(v);
+  $('reveal-label').innerHTML = v.joke ? '<span class="ar" lang="ar" dir="rtl">'+esc(v.label)+'</span>' : esc(v.label);
   el.classList.remove('hidden');
   requestAnimationFrame(()=> el.classList.add('show'));
+  if(window.GYMFeedback) (v.n>=100000 ? window.GYMFeedback.mistake() : window.GYMFeedback.ok());
   if(revealTimer) clearTimeout(revealTimer);
   revealTimer = setTimeout(()=>{
     el.classList.remove('show');
     setTimeout(()=> el.classList.add('hidden'), 260);
   }, 1600);
 }
+function openSheet(on){
+  const s = $('offer-sheet');
+  s.classList.toggle('open', on); s.setAttribute('aria-hidden', on ? 'false' : 'true');
+}
+function remainingInfo(){
+  const left = state.assignment.length - 1 - state.openedBoxIds.length;
+  const openedPool = new Set(state.openedBoxIds.map(b=>state.assignment[b]));
+  const bigLeft = state.assignment.some((p,i) => BOX_VALUES[p].guaranteed && !openedPool.has(p));
+  return 'Il reste '+left+' mallette'+(left>1?'s':'')+(bigLeft ? ', dont le <span class="ar">مليار</span>' : '')+'.';
+}
 function renderOfferPanel(isCandidate){
   const composing = offerDraftType==='cash' || offerDraftType==='gift';
   const key = state.phase + '|' + state.offerType + '|' + state.currentOffer + '|' + state.currentOfferLabel + '|' + offerDraftType + (composing ? '' : '|'+state.openedBoxIds.length);
   if(key === renderedOfferKey) return;
   renderedOfferKey = key;
-  const panel = $('offer-panel');
-  if(state.phase==='opening' && !isCandidate){
-    if(state.openedBoxIds.length < 1){ panel.classList.add('hidden'); panel.innerHTML=''; return; }
-    panel.classList.remove('hidden');
-    if(!offerDraftType){
-      panel.innerHTML = '<button class="btn-main" onclick="openOfferChooser()">💼 Faire une offre</button>';
-    } else if(offerDraftType==='choose'){
-      panel.innerHTML = '<h2>Quel type d\'offre ?</h2><div class="offer-type-grid">' +
-        '<button class="btn-ghost" onclick="chooseOfferType(\'cash\')">💰 Offre en argent</button>' +
-        '<button class="btn-ghost" onclick="chooseOfferType(\'gift\')">🎁 Offre d\'objet</button>' +
-        '<button class="btn-ghost" onclick="chooseOfferType(\'swap\')">🔄 Offre d\'échange</button>' +
-        '</div><button class="btn-ghost btn-small" onclick="cancelOfferDraft()">Annuler</button>';
+  const panel = $('offer-panel'), sheet = $('offer-sheet-body');
+  const bankName = esc(state.players.banker.name);
+
+  // Banker: composing an offer happens in a bottom sheet.
+  if(state.phase==='opening' && !isCandidate && offerDraftType){
+    const head = '<div class="ui-grab"></div><div class="ui-sheet-title">';
+    if(offerDraftType==='choose'){
+      sheet.innerHTML = head+'TON OFFRE</div><div class="dm-sheet-opts">'+
+        '<button onclick="chooseOfferType(\'cash\')"><span class="e">💰</span><span>Argent<small>Un montant en dinars</small></span></button>'+
+        '<button onclick="chooseOfferType(\'gift\')"><span class="e">🎁</span><span>Objet<small>Un lot surprise, pour tester</small></span></button>'+
+        '<button onclick="chooseOfferType(\'swap\')"><span class="e">🔄</span><span>Échange<small>Contre une autre mallette fermée</small></span></button>'+
+        '</div><button class="ui-btn alt" style="background:rgba(255,255,255,.08);color:var(--fg)" onclick="cancelOfferDraft()">Annuler</button>';
     } else if(offerDraftType==='cash'){
-      panel.innerHTML = '<h2>💰 Ton offre en argent</h2><input type="tel" inputmode="decimal" id="offer-input" placeholder="Montant en DT"><div class="error" id="offer-err"></div><button class="btn-main" onclick="submitOffer()">Envoyer l\'offre</button><button class="btn-ghost btn-small" onclick="cancelOfferDraft()">Annuler</button>';
+      sheet.innerHTML = head+'💰 OFFRE EN ARGENT</div><input type="tel" inputmode="decimal" id="offer-input" class="dm-offer-input" placeholder="0 DT"><div class="error" id="offer-err"></div>'+
+        '<div class="dm-sheet-row"><button class="ui-btn alt" onclick="chooseOfferType(\'choose\')" aria-label="Retour">←</button><button class="ui-btn" onclick="submitOffer()">📞 Appeler</button></div>';
     } else if(offerDraftType==='gift'){
-      panel.innerHTML = '<h2>🎁 Ton offre d\'objet</h2><input type="text" id="offer-gift-input" placeholder="Ex. une voiture, un voyage…"><div class="error" id="offer-err"></div><button class="btn-main" onclick="submitOffer()">Envoyer l\'offre</button><button class="btn-ghost btn-small" onclick="cancelOfferDraft()">Annuler</button>';
+      sheet.innerHTML = head+'🎁 OFFRE D’OBJET</div><input type="text" id="offer-gift-input" class="dm-offer-input text" placeholder="Ex. une voiture, un voyage…"><div class="error" id="offer-err"></div>'+
+        '<div class="dm-sheet-row"><button class="ui-btn alt" onclick="chooseOfferType(\'choose\')" aria-label="Retour">←</button><button class="ui-btn" onclick="submitOffer()">📞 Appeler</button></div>';
     } else if(offerDraftType==='swap'){
-      panel.innerHTML = '<h2>🔄 Offre d\'échange</h2><p class="muted">Le/la candidat·e pourra échanger sa mallette contre une autre mallette fermée, sans connaître son contenu.</p><button class="btn-main" onclick="submitOffer()">Proposer l\'échange</button><button class="btn-ghost btn-small" onclick="cancelOfferDraft()">Annuler</button>';
+      sheet.innerHTML = head+'🔄 OFFRE D’ÉCHANGE</div><p class="muted" style="font-size:15px">Le·la candidat·e pourra échanger sa mallette contre une autre mallette fermée, sans connaître son contenu.</p>'+
+        '<div class="dm-sheet-row"><button class="ui-btn alt" onclick="chooseOfferType(\'choose\')" aria-label="Retour">←</button><button class="ui-btn" onclick="submitOffer()">📞 Proposer</button></div>';
     }
-  } else if(state.phase==='opening' && isCandidate){
-    panel.classList.add('hidden');
-    panel.innerHTML = '';
-  } else if(state.phase==='offer_made' && isCandidate){
+    openSheet(true);
+    const inp = $('offer-input') || $('offer-gift-input');
+    if(inp) setTimeout(()=>inp.focus(), 250);
+  } else {
+    openSheet(false);
+  }
+
+  if(state.phase==='offer_made'){
     panel.classList.remove('hidden');
-    if(state.offerType==='swap'){
-      panel.innerHTML = '<h2>🔄 Le/la banquier·ère te propose d\'échanger ta mallette</h2><p class="muted">Contre une autre mallette fermée, sans connaître son contenu.</p><div class="offer-btns"><button class="btn-ghost" onclick="respondOffer(false)">Non merci</button><button class="btn-main" onclick="respondOffer(true)">Oui, échanger</button></div>';
-    } else if(state.offerType==='gift'){
-      panel.innerHTML = '<h2>🎁 Offre du banquier·ère : '+esc(state.currentOfferLabel)+'</h2><div class="offer-btns"><button class="btn-ghost" onclick="respondOffer(false)"><span lang="ar" dir="rtl">✊ نرفض</span></button><button class="btn-main" onclick="respondOffer(true)"><span lang="ar" dir="rtl">🤝 نقبل</span></button></div>';
+    const amt = state.offerType==='swap' ? '🔄 ÉCHANGE' : (state.offerType==='gift' ? '🎁 '+esc(state.currentOfferLabel) : fmtAmount(state.currentOffer));
+    if(isCandidate){
+      const own = state.ownBoxId;
+      const info = state.offerType==='swap'
+        ? 'Échanger ta mallette n°'+(own+1)+' contre une autre mallette fermée ?'
+        : remainingInfo()+' Ta mallette n°'+(own+1)+' vaut peut-être plus… ou rien.';
+      const btns = state.offerType==='swap'
+        ? '<button class="no" onclick="respondOffer(false)"><b>✊ لا</b><small>Je garde ma mallette</small></button><button class="yes" onclick="respondOffer(true)"><b>🔄 نبدّل</b><small>J’échange</small></button>'
+        : '<button class="no" onclick="respondOffer(false)"><b>✊ نرفض</b><small>Je refuse</small></button><button class="yes" onclick="respondOffer(true)"><b>🤝 نقبل</b><small>J’accepte</small></button>';
+      panel.innerHTML = '<div class="dm-phone">📞</div><div class="who">'+(state.players.banker ? 'Le banquier '+bankName+' appelle…' : 'Le banquier appelle…')+'</div>'+
+        '<div class="amt">'+amt+'</div><div class="info">'+info+'</div>'+
+        '<div class="ui-dock"><div class="dm-answer">'+btns+'</div></div>';
+      if(window.GYMFeedback) window.GYMFeedback.vibrate([200,100,200]);
     } else {
-      panel.innerHTML = '<h2>💰 Offre du banquier·ère : '+fmtAmount(state.currentOffer)+'</h2><div class="offer-btns"><button class="btn-ghost" onclick="respondOffer(false)"><span lang="ar" dir="rtl">✊ نرفض</span></button><button class="btn-main" onclick="respondOffer(true)"><span lang="ar" dir="rtl">🤝 نقبل</span></button></div>';
+      panel.innerHTML = '<div class="dm-phone">📞</div><div class="who">Tu appelles '+esc(state.players.candidate.name)+'…</div>'+
+        '<div class="amt">'+amt+'</div><div class="info pulse">En attente de la décision…</div>';
     }
-  } else if(state.phase==='offer_made' && !isCandidate){
-    panel.classList.remove('hidden');
-    const lbl = state.offerType==='swap' ? 'Proposition d\'échange envoyée' : state.offerType==='gift' ? 'Ton offre : '+esc(state.currentOfferLabel) : 'Ton offre : '+fmtAmount(state.currentOffer);
-    panel.innerHTML = '<h2>'+lbl+'</h2><p class="muted" style="text-align:center">⏳ En attente de la décision…</p>';
   } else {
     panel.classList.add('hidden');
     panel.innerHTML = '';
@@ -879,15 +903,34 @@ async function renderEnd(){
   const isCandidate = me==='candidate';
   const candName = state.players.candidate.name;
   const ownBox = BOX_VALUES[state.assignment[state.ownBoxId]];
-  const finalIsJoke = state.outcome==='final_box' && ownBox.joke;
-  const finalHtml = finalIsJoke ? '<span lang="ar" dir="rtl">'+esc(state.finalLabel)+'</span>' : esc(state.finalLabel);
-  const big = state.finalAmount >= 1000;
-  $('end-emoji').textContent = big ? '🏆' : '💼';
-  $('end-title').textContent = state.outcome==='accepted' ? 'Offre acceptée !' : 'Mallette ouverte !';
-  const wilayaHtml = state.candidateWilaya ? ' (<span lang="ar" dir="rtl">'+esc(state.candidateWilaya)+'</span>)' : '';
-  $('end-detail').innerHTML = (isCandidate ? 'Tu repars' : esc(candName)+wilayaHtml+' repart') + ' avec <b>'+finalHtml+'</b>.' +
-    (state.outcome==='accepted' ? '<br>Sa mallette contenait '+labelHtml(ownBox)+'.' : '');
-  if(big && window.GYMFeedback) window.GYMFeedback.win();
+  const lbl = v => v.joke ? '<span class="ar" lang="ar" dir="rtl">'+esc(v.label)+'</span>' : esc(v.label);
+  const wil = state.candidateWilaya ? ' · <span class="ar" lang="ar" dir="rtl">'+esc(state.candidateWilaya)+'</span>' : '';
+  const accepted = state.outcome==='accepted';
+  const who = isCandidate ? 'Ta mallette' : 'La mallette de '+esc(candName);
+  $('end-s1').innerHTML = accepted
+    ? (isCandidate ? 'Tu as accepté ' : esc(candName)+' a accepté ')+(state.offerType==='gift' ? '🎁 '+esc(state.finalLabel) : esc(state.finalLabel))
+    : (isCandidate ? 'Tu as tout refusé jusqu’au bout !' : esc(candName)+' a tout refusé jusqu’au bout !');
+  $('end-s2').innerHTML = who+' n°'+(state.ownBoxId+1)+wil+' contenait…';
+  $('end-prize').innerHTML = lbl(ownBox);
+  // Did the candidate beat the bank? Compare what they left with against their own box.
+  let verdict = 'MALLETTE OUVERTE', bad = false, detail = '';
+  if(accepted && state.offerType!=='gift'){
+    const diff = state.finalAmount - ownBox.n;
+    const candWon = diff >= 0;
+    verdict = (candWon === isCandidate) ? 'BIEN JOUÉ !' : 'DOMMAGE…';
+    bad = verdict!=='BIEN JOUÉ !';
+    detail = candWon ? esc(candName)+' a battu le banquier de '+fmtAmount(diff)+'.' : 'Le banquier a gagné '+fmtAmount(-diff)+'.';
+  } else if(accepted){
+    verdict = 'OFFRE ACCEPTÉE'; detail = esc(candName)+' repart avec 🎁 '+esc(state.finalLabel)+'.';
+  } else {
+    const big = ownBox.n >= 1000;
+    verdict = big ? 'JACKPOT !' : 'C’EST LE JEU…'; bad = !big;
+    detail = (isCandidate ? 'Tu repars' : esc(candName)+' repart')+' avec le contenu de sa mallette.';
+  }
+  $('end-title').textContent = verdict;
+  $('end-title').classList.toggle('bad', bad);
+  $('end-detail').innerHTML = detail;
+  if(!bad && window.GYMFeedback) window.GYMFeedback.win();
 }
 
 function confirmQuitMatch(){
@@ -899,22 +942,8 @@ function confirmQuitMatch(){
   if(window.GYMRecent) window.GYMRecent.remove('dm', code);
   location.href = 'index.html';
 }
-function copyCode(){
-  const link = window.GYMGameLink.build(code);
-  navigator.clipboard && navigator.clipboard.writeText(link).then(()=>{
-    $('copy-btn').textContent = "Lien copié ✓";
-    setTimeout(()=>$('copy-btn').textContent="Copier le lien", 1500);
-  });
-}
-function shareCode(){
-  if(!navigator.share) return;
-  navigator.share({
-    title: 'Games Room',
-    text: 'Rejoins ma partie de Dlilek Mlek sur Games Room !',
-    url: window.GYMGameLink.build(code)
-  }).catch(()=>{});
-}
-if($('share-btn')) $('share-btn').classList.toggle('hidden', !navigator.share);
+function copyCode(){ window.GYMUI.copyLink(code, $('wait-hint')); }
+function shareCode(){ window.GYMUI.share(code, 'Dlilek Mlek', $('wait-hint')); }
 
 document.addEventListener('keydown', e=>{
   if(e.key!=='Enter') return;
