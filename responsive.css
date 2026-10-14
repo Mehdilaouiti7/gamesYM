@@ -28,7 +28,7 @@
   button:not(:disabled):hover{ filter: brightness(1.08); cursor: pointer; }
   .btn-ghost:hover{ background: rgba(255,255,255,.08); border-color: rgba(243,239,228,.32); }
   .card:hover{ border-color: rgba(243,239,228,.22); }
-  .recent-row:hover{ background: rgba(255,255,255,.09); border-color: rgba(243,239,228,.32); }
+  .h-recent a:hover, .tile:hover{ filter: brightness(1.08); }
   .avatar-opt:hover{ border-color: var(--butter, #e9c46a); }
   .chip:hover{ filter: brightness(1.1); }
   .joined-chip:hover, .opp-chip:hover, .sb-chip:hover{ border-color: rgba(243,239,228,.32); }
@@ -40,7 +40,8 @@ button:focus-visible,
 input:focus-visible,
 a:focus-visible,
 .avatar-opt:focus-visible,
-.recent-row:focus-visible,
+.tile:focus-visible,
+.h-recent a:focus-visible,
 .chip:focus-visible{
   outline: 2px solid var(--butter, #e9c46a);
   outline-offset: 2px;

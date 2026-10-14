@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Bowlby+One+SC&family=Anton&family=Patrick+Hand&family=Lilita+One&family=Baloo+2:wght@800&family=Unbounded:wght@400;700&family=Reem+Kufi:wght@500;700&family=Archivo+Black&display=swap" rel="stylesheet">
 <style>
   :root{
     --board:#24382e;
@@ -55,24 +55,14 @@
   h1 .emo{font-size:1.5rem;vertical-align:-2px}
   .tagline{color:var(--chalk-dim);font-size:.9rem;margin-top:2px}
 
-  .menu-btn{
-    position:absolute;top:0;right:0;
-    width:38px;height:38px;border-radius:12px;margin:0;padding:0;
-    background:rgba(255,255,255,.07);
-    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-    border:1px solid var(--line);
-    display:flex;align-items:center;justify-content:center;
-    font-size:1.05rem;cursor:pointer;
-  }
-  .menu-btn:active{transform:scale(.94)}
   .menu-overlay{
     position:fixed;inset:0;z-index:40;background:transparent;
     opacity:0;pointer-events:none;transition:opacity .2s ease;
   }
   .menu-overlay.open{opacity:1;pointer-events:auto}
   .menu-panel{
-    position:absolute;top:44px;right:0;z-index:41;width:230px;
-    background:rgba(36,56,46,.75);
+    position:absolute;top:52px;right:0;z-index:41;width:230px;
+    background:rgba(34,38,42,.85);
     backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
     border:1px solid rgba(243,239,228,.16);
     border-radius:16px;
@@ -98,12 +88,6 @@
     margin-bottom:14px;
     box-shadow:0 10px 26px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.05);
   }
-  @media (prefers-reduced-motion: no-preference){
-    #screen-home .card{animation:cardIn .5s cubic-bezier(.22,1,.36,1) both}
-    #screen-home .card:nth-of-type(1){animation-delay:.02s}
-    #screen-home .card:nth-of-type(2){animation-delay:.08s}
-    #screen-home .card:nth-of-type(3){animation-delay:.14s}
-  }
   @keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
   .card-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
   .card-icon{
@@ -114,21 +98,6 @@
   .card-head h2{margin-bottom:0}
   .card h2{font-size:1.05rem;font-weight:600;margin-bottom:10px}
 
-  .recent-row{
-    display:flex;align-items:center;gap:10px;
-    padding:10px 12px;border-radius:12px;
-    background:rgba(255,255,255,.05);
-    border:1px solid var(--line);
-    margin-bottom:8px;
-    text-decoration:none;color:inherit;
-    cursor:pointer;
-  }
-  .recent-row:active{transform:scale(.98)}
-  .recent-row .emo{font-size:1.3rem;flex-shrink:0}
-  .recent-row .info{flex:1;min-width:0}
-  .recent-row .info .g{font-weight:600;font-size:.9rem}
-  .recent-row .info .c{font-size:.72rem;color:var(--chalk-dim);font-family:'Space Mono',monospace;letter-spacing:.12em}
-  .recent-row .go{color:var(--butter);font-size:.78rem;flex-shrink:0;white-space:nowrap}
   label{display:block;font-size:.85rem;color:var(--chalk-dim);margin:10px 0 4px}
   input[type=text],input[type=tel]{
     width:100%;
@@ -273,6 +242,163 @@
   .score-side .n{font-family:'Space Mono',monospace;font-size:2.2rem;font-weight:700;color:var(--butter)}
   .score-side .nm{font-size:.85rem;color:var(--chalk-dim);max-width:110px;margin:0 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .score-vs{color:var(--chalk-dim);font-size:.9rem}
+
+  /* ---------- Accueil ---------- */
+  body.home{
+    background:#14171a;
+    padding-bottom:calc(110px + env(safe-area-inset-bottom));
+  }
+  body.home #vt-header{display:none}
+  #screen-home{display:flex;flex-direction:column;gap:12px}
+  .h-top{display:flex;align-items:center;justify-content:space-between}
+  .h-hello{font-size:13px;color:#8e918f}
+  .h-title{font-size:26px;font-weight:700;letter-spacing:-.3px;line-height:1.25}
+  .h-actions{display:flex;gap:8px;position:relative}
+  .h-icon-btn{
+    width:44px;height:44px;border-radius:14px;margin:0;padding:0;border:none;
+    background:#22262a;display:flex;align-items:center;justify-content:center;
+    font-size:18px;text-decoration:none;cursor:pointer;
+  }
+  .h-icon-btn:active{transform:scale(.94)}
+  .h-label{font-size:12px;color:#8e918f;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+  .h-recent{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none}
+  .h-recent::-webkit-scrollbar{display:none}
+  .h-recent a{
+    flex:1 0 calc(50% - 5px);min-width:0;display:flex;align-items:center;gap:10px;
+    padding:7px 12px;border-radius:16px;color:#f3efe4;text-decoration:none;
+  }
+  .h-recent a:active{transform:scale(.97)}
+  .h-recent .emo{font-size:22px}
+  .h-recent .info{flex:1;min-width:0}
+  .h-recent .g{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .h-recent .c{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.05em;opacity:.8;white-space:nowrap}
+
+  .h-filter{display:flex;gap:6px;background:#1d2024;border-radius:14px;padding:4px}
+  .h-filter button{
+    flex:1;margin:0;padding:9px 0;border-radius:11px;background:transparent;
+    color:#a9aca9;font-weight:500;font-size:14px;box-shadow:none;
+  }
+  .h-filter button.on{background:#f3efe4;color:#14171a;font-weight:600}
+
+  .h-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+  .tile{
+    height:80px;border-radius:18px;padding:12px;margin:0;width:auto;
+    display:flex;flex-direction:column;justify-content:space-between;
+    text-align:left;text-decoration:none;font-family:'Fredoka',sans-serif;font-weight:400;
+    transition:transform .12s cubic-bezier(.22,1,.36,1), opacity .2s;
+  }
+  .tile:active{transform:scale(.96)}
+  .tile.hidden{display:none !important}
+  .tile-top{display:flex;justify-content:space-between;align-items:flex-start}
+  .tile-emo{font-size:22px;line-height:1}
+  .tile-n{font-size:11px;font-weight:600;border-radius:999px;padding:3px 8px;line-height:1.2;white-space:nowrap}
+  .tile-split{display:flex;align-items:baseline;justify-content:space-between;gap:6px;white-space:nowrap}
+  .tile .ar{font-family:'Reem Kufi',sans-serif}
+
+  .t-vt{background:#f4ecd8;color:#5a2a1c}
+  .t-vt .tile-n{background:rgba(181,67,47,.14)}
+  .t-vt .tile-name{font-family:'Bowlby One SC',sans-serif;font-size:17px;line-height:1.05}
+
+  .t-dm{background:#120f1f;color:#f2c14e;box-shadow:inset 0 0 0 1px rgba(242,193,78,.35)}
+  .t-dm .tile-n{background:rgba(242,193,78,.16)}
+  .t-dm .tile-name{font-family:'Anton',sans-serif;font-size:22px;letter-spacing:.5px;line-height:1}
+
+  .t-ttt{background:#fbfaf4 linear-gradient(#dfe7f2 1px,transparent 1px);background-size:100% 18px;color:#1f3c88}
+  .t-ttt .tile-n{background:rgba(31,60,136,.1)}
+  .t-ttt .ttt-glyph{font-family:'Patrick Hand',cursive;font-size:30px;line-height:1}
+  .t-ttt .ttt-glyph span{color:#d6453d}
+  .t-ttt .tile-name{font-family:'Patrick Hand',cursive;font-size:24px;line-height:1}
+
+  .t-mot{background:#ff6b2c;color:#fff}
+  .t-mot .tile-n{background:rgba(255,255,255,.2)}
+  .t-mot .mot-letters{display:flex;gap:4px}
+  .t-mot .mot-letters span{
+    width:26px;height:28px;border-radius:6px;background:#fff3df;color:#ff6b2c;
+    font-family:'Lilita One',sans-serif;font-size:18px;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 #d84f14;
+  }
+  .t-mot .tile-name{font-family:'Lilita One',sans-serif;font-size:21px;line-height:1}
+
+  .t-sk{background:#dff1ff;color:#123a6b}
+  .t-sk .tile-n{background:rgba(18,58,107,.1)}
+  .t-sk .sk-cards{display:flex;gap:3px}
+  .t-sk .sk-cards span{width:18px;height:26px;border-radius:5px}
+  .t-sk .sk-cards span:nth-child(1){background:#3a5bd9}
+  .t-sk .sk-cards span:nth-child(2){background:#41b36b}
+  .t-sk .sk-cards span:nth-child(3){background:#f5c62d}
+  .t-sk .sk-cards span:nth-child(4){background:#e5484d}
+  .t-sk .tile-name{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;line-height:1}
+
+  .t-tm{background:radial-gradient(120px 90px at 70% 20%,#3b2d8f,#0e0b24);color:#d9d0ff}
+  .t-tm .tile-n{background:rgba(185,167,255,.16)}
+  .t-tm .tm-num{font-family:'Unbounded',sans-serif;font-size:24px;font-weight:700;line-height:1;color:#fff;text-shadow:0 0 16px #8b74ff}
+  .t-tm .tile-name{font-family:'Unbounded',sans-serif;font-size:17px;line-height:1}
+
+  .t-cb{background:#1f5b43;color:#fdf6e3;box-shadow:inset 0 0 0 4px #1d5fa8}
+  .t-cb .tile-n{background:rgba(253,246,227,.16)}
+  .t-cb .cb-cards{display:flex}
+  .t-cb .cb-cards span{
+    width:24px;height:32px;border-radius:5px;background:#fdf6e3;color:#c0392b;
+    font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;transform:rotate(-8deg);
+  }
+  .t-cb .cb-cards span+span{color:#1d1d1d;transform:rotate(6deg);margin-left:-6px}
+  .t-cb .tile-name span:first-child{font-weight:700;font-size:20px}
+  .t-cb .tile-name .ar{font-size:16px}
+
+  .t-bw{background:#e8d5b0;color:#2b2118}
+  .t-bw .tile-n{background:rgba(43,33,24,.1)}
+  .t-bw .bw-glyph{font-family:'Reem Kufi',sans-serif;font-size:30px;line-height:1;color:#c4532d}
+  .t-bw .tile-name span:first-child{font-weight:700;font-size:19px}
+  .t-bw .tile-name .ar{font-size:15px}
+
+  .t-tb{
+    grid-column:1 / -1;flex-direction:row;align-items:center;justify-content:flex-start;gap:14px;padding:12px 14px;
+    background:#1a0f14;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,59,92,.4);
+  }
+  .t-tb .tb-buzzer{
+    width:52px;height:52px;border-radius:50%;flex-shrink:0;
+    background:radial-gradient(circle at 40% 35%,#ff6b81,#e0193a);
+    box-shadow:0 5px 0 #8f0d24,0 0 24px rgba(255,59,92,.5);
+  }
+  .t-tb .tb-info{flex:1;display:flex;flex-direction:column}
+  .t-tb .tile-name{font-family:'Archivo Black',sans-serif;font-size:24px;letter-spacing:.5px;line-height:1.2}
+  .t-tb .tb-sub{font-size:13px;color:#ffb3c0}
+  .t-tb .tile-n{background:rgba(255,59,92,.18)}
+
+  .h-dock{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    padding:14px 16px calc(14px + env(safe-area-inset-bottom));
+    background:linear-gradient(transparent,#14171a 30%);
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .h-dock-bar{
+    width:100%;max-width:430px;display:flex;gap:8px;background:#22262a;
+    border-radius:20px;padding:6px;box-shadow:0 10px 30px rgba(0,0,0,.5);
+  }
+  .h-dock-field{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:0 0 0 12px;margin:0;cursor:text}
+  .h-dock-field span{font-size:13px;color:#8e918f;white-space:nowrap}
+  .h-dock-field input[type=text]{
+    flex:1;min-width:0;width:auto;padding:0;background:transparent;border:none;border-radius:0;
+    font-size:18px;letter-spacing:.3em;text-transform:uppercase;color:#f3efe4;
+  }
+  .h-dock-field input::placeholder{color:#5d6260;opacity:1}
+  .h-dock-btn{
+    width:auto;height:48px;margin:0;padding:0 20px;border-radius:15px;
+    background:#f3efe4;color:#14171a;font-weight:600;font-size:15px;flex-shrink:0;
+  }
+  .h-dock-err{color:#ff8a7a;font-size:13px;min-height:0;margin-top:6px;text-align:center}
+  .h-dock-err:empty{display:none}
+  @media (prefers-reduced-motion: no-preference){
+    #screen-home .tile{animation:cardIn .45s cubic-bezier(.22,1,.36,1) both}
+    #screen-home .tile:nth-child(2){animation-delay:.03s}
+    #screen-home .tile:nth-child(3){animation-delay:.06s}
+    #screen-home .tile:nth-child(4){animation-delay:.09s}
+    #screen-home .tile:nth-child(5){animation-delay:.12s}
+    #screen-home .tile:nth-child(6){animation-delay:.15s}
+    #screen-home .tile:nth-child(7){animation-delay:.18s}
+    #screen-home .tile:nth-child(8){animation-delay:.21s}
+    #screen-home .tile:nth-child(9){animation-delay:.24s}
+  }
   ::-webkit-scrollbar{width:6px}
   ::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
 </style>
@@ -281,75 +407,89 @@
 </head>
 <body>
 <div class="frame">
-  <header>
-    <button class="menu-btn" id="menu-btn" aria-label="Menu" onclick="toggleMenu()">⚙️</button>
-    <div class="menu-overlay" id="menu-overlay" onclick="closeMenu()"></div>
-    <div class="menu-panel" id="menu-panel">
-      <button class="menu-item" onclick="location.href='historique.html'">📊 Historique</button>
-      <button class="menu-item" onclick="closeMenu(); window.showInstallTutorial && window.showInstallTutorial();">📲 Installer l'app</button>
-    </div>
+  <header id="vt-header">
     <h1><span class="emo">🎲</span> Games Room</h1>
     <div class="tagline">Des jeux à partager, à deux ou en groupe</div>
   </header>
 
   <div id="screen-home">
-    <p class="muted" style="text-align:center;margin-bottom:6px">Choisis un jeu, seul·e ou avec tes ami·e·s.</p>
+    <div class="h-top">
+      <div>
+        <div class="h-hello" id="h-hello">Salut 👋</div>
+        <h1 class="h-title">Games Room</h1>
+      </div>
+      <div class="h-actions">
+        <a class="h-icon-btn" href="historique.html" aria-label="Historique">📊</a>
+        <button class="h-icon-btn" id="menu-btn" aria-label="Réglages" onclick="toggleMenu()">⚙️</button>
+        <div class="menu-overlay" id="menu-overlay" onclick="closeMenu()"></div>
+        <div class="menu-panel" id="menu-panel">
+          <button class="menu-item" onclick="location.href='historique.html'">📊 Historique</button>
+          <button class="menu-item" onclick="closeMenu(); window.showInstallTutorial && window.showInstallTutorial();">📲 Installer l'app</button>
+        </div>
+      </div>
+    </div>
 
     <div id="recent-section" class="hidden">
-      <div class="section-label">🕒 Reprendre une partie</div>
-      <div id="recent-list"></div>
+      <div class="h-label">Reprendre</div>
+      <div class="h-recent" id="recent-list"></div>
     </div>
 
-    <div class="section-label">🎯 En tête-à-tête</div>
-    <div class="card">
-      <div class="card-head"><span class="card-icon">🐄</span><h2>Vache &amp; Taureau</h2></div>
-      <p class="muted">Devine le nombre secret à 4 chiffres de ton adversaire. À deux uniquement.</p>
-      <button class="btn-main" onclick="show('vt-home')">Jouer à Vache &amp; Taureau</button>
-    </div>
-    <div class="card">
-      <div class="card-head"><span class="card-icon">💼</span><h2>Dlilek Mlek</h2></div>
-      <p class="muted">دليلك ملك — un·e candidat·e, un·e banquier·ère, 24 mallettes. Dlilek ou Mlek ? À deux uniquement.</p>
-      <button class="btn-main" onclick="location.href='dlilekmlek.html'">Jouer à Dlilek Mlek</button>
-    </div>
-    <div class="card">
-      <div class="card-head"><span class="card-icon">⭕</span><h2>Morpion</h2></div>
-      <p class="muted">Le classique X contre O, en manches enchaînées. À deux uniquement.</p>
-      <button class="btn-main" onclick="location.href='tictactoe.html'">Jouer au Morpion</button>
-    </div>
-    <div class="card">
-      <div class="card-head"><span class="card-icon">🔤</span><h2>1, 2, 3 Mot !</h2></div>
-      <p class="muted">Une catégorie, deux lettres tirées au sort, et le premier qui trouve le mot buzze ! À deux uniquement.</p>
-      <button class="btn-main" onclick="location.href='123mot.html'">Jouer à 1, 2, 3 Mot !</button>
+    <div class="h-filter" role="tablist">
+      <button type="button" class="on" data-f="all" onclick="setFilter('all')">Tous</button>
+      <button type="button" data-f="duo" onclick="setFilter('duo')">À deux</button>
+      <button type="button" data-f="group" onclick="setFilter('group')">En groupe</button>
     </div>
 
-    <div class="section-label">👥 En groupe</div>
-    <div class="group-grid">
-      <div class="card">
-        <div class="card-head"><span class="card-icon">🎴</span><h2>Skyjo</h2></div>
-        <p class="muted">Le jeu de cartes, de 2 à 6 joueurs. Retourne, échange, fais le score le plus bas !</p>
-        <button class="btn-main" onclick="location.href='skyjo.html'">Jouer à Skyjo</button>
-      </div>
-      <div class="card">
-        <div class="card-head"><span class="card-icon">🧠</span><h2>The Mind</h2></div>
-        <p class="muted">De 2 à 4 joueurs, en équipe. Jouez vos cartes dans l'ordre, sans parler ni se signaler !</p>
-        <button class="btn-main" onclick="location.href='the-mind.html'">Jouer à The Mind</button>
-      </div>
-      <div class="card">
-        <div class="card-head"><span class="card-icon">🃏</span><h2>Chkobba</h2></div>
-        <p class="muted">Le jeu de cartes tunisien, à 2 ou en équipes de 2 (à 4). Capture les cartes de la table !</p>
-        <button class="btn-main" onclick="location.href='chkobba.html'">Jouer à Chkobba</button>
-      </div>
-      <div class="card">
-        <div class="card-head"><span class="card-icon">📖</span><h2>Bent Walad</h2></div>
-        <p class="muted">بنت ولد — autant de joueurs que tu veux. Une lettre, une course pour remplir les catégories !</p>
-        <button class="btn-main" onclick="location.href='bentwalad.html'">Jouer à Bent Walad</button>
-      </div>
-      <div class="card">
-        <div class="card-head"><span class="card-icon">🚫</span><h2>Taboo</h2></div>
-        <p class="muted">الكلمة الممنوعة — deux équipes, un chrono. Fais deviner le mot sans dire les mots interdits !</p>
-        <button class="btn-main" onclick="location.href='taboo.html'">Jouer à Taboo</button>
-      </div>
+    <div class="h-grid" id="h-grid">
+      <button type="button" class="tile t-vt" data-cat="duo" onclick="show('vt-home')">
+        <div class="tile-top"><span class="tile-emo">🐄</span><span class="tile-n">2</span></div>
+        <div class="tile-name">Vache &amp; Taureau</div>
+      </button>
+      <a class="tile t-dm" data-cat="duo" href="dlilekmlek.html">
+        <div class="tile-top"><span class="tile-emo">💼</span><span class="tile-n">2</span></div>
+        <div class="tile-name">DLILEK MLEK</div>
+      </a>
+      <a class="tile t-ttt" data-cat="duo" href="tictactoe.html">
+        <div class="tile-top"><span class="ttt-glyph"><span>✕</span>○</span><span class="tile-n">2</span></div>
+        <div class="tile-name">Morpion</div>
+      </a>
+      <a class="tile t-mot" data-cat="duo" href="123mot.html">
+        <div class="tile-top"><span class="mot-letters"><span>B</span><span>R</span></span><span class="tile-n">2</span></div>
+        <div class="tile-name">1, 2, 3 Mot !</div>
+      </a>
+      <a class="tile t-sk" data-cat="group" href="skyjo.html">
+        <div class="tile-top"><span class="sk-cards"><span></span><span></span><span></span><span></span></span><span class="tile-n">2–6</span></div>
+        <div class="tile-name">Skyjo</div>
+      </a>
+      <a class="tile t-tm" data-cat="group" href="the-mind.html">
+        <div class="tile-top"><span class="tm-num">47</span><span class="tile-n">2–4</span></div>
+        <div class="tile-name">The Mind</div>
+      </a>
+      <a class="tile t-cb" data-cat="group" href="chkobba.html">
+        <div class="tile-top"><span class="cb-cards"><span>7</span><span>♠</span></span><span class="tile-n">2 · 4</span></div>
+        <div class="tile-name tile-split"><span>Chkobba</span><span class="ar" lang="ar">شكبّة</span></div>
+      </a>
+      <a class="tile t-bw" data-cat="group" href="bentwalad.html">
+        <div class="tile-top"><span class="bw-glyph" lang="ar">ب</span><span class="tile-n">3+</span></div>
+        <div class="tile-name tile-split"><span>Bent Walad</span><span class="ar" lang="ar">بنت ولد</span></div>
+      </a>
+      <a class="tile t-tb" data-cat="group" href="taboo.html">
+        <span class="tb-buzzer"></span>
+        <span class="tb-info"><span class="tile-name">TABOO</span><span class="tb-sub">Deux équipes · 60 s</span></span>
+        <span class="tile-n">4+</span>
+      </a>
     </div>
+
+    <form class="h-dock" onsubmit="homeJoin();return false;">
+      <div class="h-dock-bar">
+        <label class="h-dock-field">
+          <span>Code reçu ?</span>
+          <input type="text" id="home-code" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Code de la partie">
+        </label>
+        <button type="submit" class="h-dock-btn" id="home-join-btn">Rejoindre</button>
+      </div>
+      <div class="h-dock-err" id="home-join-err" role="status"></div>
+    </form>
   </div>
 
   <div id="screen-vt-home" class="hidden">
@@ -511,7 +651,10 @@ let renderedMeCount = -1, renderedOppCount = -1;
 
 const $ = id => document.getElementById(id);
 const screens = ['home','vt-home','create','join','wait','game','end'];
-function show(name){ screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name)); }
+function show(name){
+  screens.forEach(s => $('screen-'+s).classList.toggle('hidden', s!==name));
+  document.body.classList.toggle('home', name==='home');
+}
 
 function toggleMenu(){
   $('menu-panel').classList.toggle('open');
@@ -607,6 +750,7 @@ const createAvatarPicker = window.GYMAvatarPicker.render('create-avatar-row');
 const joinAvatarPicker = window.GYMAvatarPicker.render('join-avatar-row');
 async function createGame(){
   const name = $('create-name').value.trim() || "Joueuse 1";
+  rememberName($('create-name').value);
   const avatar = createAvatarPicker.get();
   const secret = genSecret();
   const mrEl = document.querySelector('input[name=mrounds]:checked');
@@ -655,6 +799,7 @@ async function joinGame(){
     return;
   }
   const name = $('join-name').value.trim() || "Joueuse 2";
+  rememberName($('join-name').value);
   const avatar = joinAvatarPicker.get();
   const secret = genSecret();
   if(st.players.p2){
@@ -931,30 +1076,81 @@ document.addEventListener('keydown', e=>{
   else if(!$('screen-join').classList.contains('hidden')) joinGame();
 });
 
+// key → table prefix used in Supabase (<key>_games), tile colour for "Reprendre".
 const RECENT_META = {
-  vt: {emoji:'🐄', label:'Vache & Taureau', url:'index.html'},
-  sk: {emoji:'🎴', label:'Skyjo', url:'skyjo.html'},
-  tm: {emoji:'🧠', label:'The Mind', url:'the-mind.html'},
-  cb: {emoji:'🃏', label:'Chkobba', url:'chkobba.html'},
-  bw: {emoji:'📖', label:'Bent Walad', url:'bentwalad.html'},
-  dm: {emoji:'💼', label:'Dlilek Mlek', url:'dlilekmlek.html'},
-  tb: {emoji:'🚫', label:'Taboo', url:'taboo.html'},
-  ttt: {emoji:'⭕', label:'Morpion', url:'tictactoe.html'},
-  mot: {emoji:'🔤', label:'1, 2, 3 Mot !', url:'123mot.html'}
+  vt: {emoji:'🐄', label:'Vache & Taureau', url:'index.html', bg:'#f4ecd8', fg:'#5a2a1c'},
+  dm: {emoji:'💼', label:'Dlilek Mlek', url:'dlilekmlek.html', bg:'#120f1f', fg:'#f2c14e'},
+  ttt: {emoji:'⭕', label:'Morpion', url:'tictactoe.html', bg:'#fbfaf4', fg:'#1f3c88'},
+  mot: {emoji:'🔤', label:'1, 2, 3 Mot !', url:'123mot.html', bg:'#ff6b2c', fg:'#fff'},
+  sk: {emoji:'🎴', label:'Skyjo', url:'skyjo.html', bg:'#2c4a8a', fg:'#f3efe4'},
+  tm: {emoji:'🧠', label:'The Mind', url:'the-mind.html', bg:'#2a2170', fg:'#d9d0ff'},
+  cb: {emoji:'🃏', label:'Chkobba', url:'chkobba.html', bg:'#1f5b43', fg:'#fdf6e3'},
+  bw: {emoji:'📖', label:'Bent Walad', url:'bentwalad.html', bg:'#e8d5b0', fg:'#2b2118'},
+  tb: {emoji:'🚫', label:'Taboo', url:'taboo.html', bg:'#1a0f14', fg:'#fff'}
 };
 function renderRecent(){
   const list = window.GYMRecent ? window.GYMRecent.getAll() : [];
   if(!list.length){ $('recent-section').classList.add('hidden'); return; }
   $('recent-section').classList.remove('hidden');
   $('recent-list').innerHTML = list.map(e => {
-    const meta = RECENT_META[e.game] || {emoji:'🎲', label:e.game, url:'index.html'};
+    const meta = RECENT_META[e.game] || {emoji:'🎲', label:e.game, url:'index.html', bg:'#22262a', fg:'#f3efe4'};
     const href = meta.url + '?code=' + encodeURIComponent(e.code);
-    return '<a class="recent-row" href="'+href+'"><span class="emo">'+meta.emoji+'</span>'+
-      '<span class="info"><div class="g">'+esc(meta.label)+'</div><div class="c">'+esc(e.code)+'</div></span>'+
-      '<span class="go">Reprendre →</span></a>';
+    return '<a href="'+href+'" style="background:'+meta.bg+';color:'+meta.fg+'"><span class="emo">'+meta.emoji+'</span>'+
+      '<span class="info"><div class="g">'+esc(meta.label)+'</div><div class="c">'+esc(e.code)+' · reprendre</div></span></a>';
   }).join('');
 }
 renderRecent();
+
+function setFilter(f){
+  document.querySelectorAll('.h-filter button').forEach(b => b.classList.toggle('on', b.dataset.f===f));
+  document.querySelectorAll('#h-grid .tile').forEach(t => t.classList.toggle('hidden', f!=='all' && t.dataset.cat!==f));
+}
+
+function rememberName(n){ n = (n||'').trim(); if(n) try{ localStorage.setItem('gym-player-name', n); }catch(e){} }
+(function(){
+  let n = null;
+  try{ n = localStorage.getItem('gym-player-name'); }catch(e){}
+  if(n) $('h-hello').textContent = 'Salut '+n+' 👋';
+  if(n){ $('create-name').value = n; $('join-name').value = n; }
+})();
+
+// One "Rejoindre" field for every game: look the code up in each game's table.
+async function findGameByCode(c){
+  const recent = (window.GYMRecent ? window.GYMRecent.getAll() : []).find(e => e.code===c && RECENT_META[e.game]);
+  if(recent) return recent.game;
+  const keys = Object.keys(RECENT_META);
+  const hits = await Promise.all(keys.map(async k => {
+    try{
+      const r = await fetch(SB_URL+"/rest/v1/"+k+"_games?code=eq."+encodeURIComponent(c)+"&select=code", {headers:HEADERS});
+      if(!r.ok) return false;
+      return (await r.json()).length > 0;
+    }catch(e){ return false; }
+  }));
+  const i = hits.indexOf(true);
+  return i>=0 ? keys[i] : null;
+}
+async function homeJoin(){
+  const input = $('home-code'), err = $('home-join-err'), btn = $('home-join-btn');
+  const c = input.value.trim().toUpperCase();
+  if(!/^[A-Z]{4}$/.test(c)){ err.textContent = "Le code fait 4 lettres."; input.focus(); return; }
+  err.textContent = "";
+  btn.disabled = true; btn.textContent = "…";
+  const game = await findGameByCode(c);
+  btn.disabled = false; btn.textContent = "Rejoindre";
+  if(!game){ err.textContent = "Partie introuvable. Vérifie le code."; return; }
+  if(game==='vt'){
+    $('join-code').value = c;
+    show('join');
+    if(loadRole(c)) joinGame();
+    return;
+  }
+  location.href = RECENT_META[game].url + '?code=' + encodeURIComponent(c);
+}
+$('home-code').addEventListener('input', e => {
+  e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g,'');
+  $('home-join-err').textContent = "";
+});
+document.body.classList.toggle('home', !$('screen-home').classList.contains('hidden'));
 
 (function(){
   const qcode = (new URLSearchParams(location.search).get('code')||'').toUpperCase();
