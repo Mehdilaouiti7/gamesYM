@@ -18,7 +18,11 @@ window.GYMUI = (function(){
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeRules(); });
 
   // Remember which screen is visible so CSS can theme the page (e.g. end screen background).
-  function screen(name){ document.body.setAttribute('data-screen', name); window.scrollTo(0,0); }
+  function screen(name){
+    if(document.body.getAttribute('data-screen')===name) return;
+    document.body.setAttribute('data-screen', name);
+    window.scrollTo(0,0);
+  }
 
   function link(code){
     return window.GYMGameLink ? window.GYMGameLink.build(code) : location.href;
