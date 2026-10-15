@@ -134,42 +134,32 @@
   .ui-sheet-title .ar{font-size:20px;color:var(--terra);font-weight:500}
   .ui-step > b:first-child{background:var(--terra);color:#fff}
 
+  /* Letter draw: a slot-machine reel that rolls by itself at the start of each round. */
   .wheel-overlay{
-    position:fixed;inset:0;background:rgba(43,33,24,.82);backdrop-filter:blur(3px);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
-    opacity:0;pointer-events:none;transition:opacity .35s ease;z-index:20;
+    position:fixed;inset:0;z-index:20;background:linear-gradient(var(--terra),var(--terra-sh));
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px;
+    opacity:0;pointer-events:none;transition:opacity .35s ease;color:#fff;
   }
   .wheel-overlay.show{opacity:1;pointer-events:auto}
-  .wheel-caption{font-size:1.05rem;font-weight:600;color:#f7ecd6;text-align:center}
-  .wheel-caption .sub{display:block;font-size:.82rem;font-weight:400;color:var(--chalk-dim);margin-top:3px}
-  .wheel-wrap{position:relative;width:min(78vw,300px);height:min(78vw,300px)}
-  .pointer{
-    position:absolute;top:-6px;left:50%;transform:translateX(-50%);
-    width:0;height:0;z-index:2;
-    border-left:12px solid transparent;border-right:12px solid transparent;
-    border-top:20px solid var(--butter);
-    filter:drop-shadow(0 3px 6px rgba(0,0,0,.4));
-  }
-  .wheel-hub{
-    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-    width:44px;height:44px;border-radius:50%;z-index:2;
-    background:linear-gradient(160deg,#eecd7c,var(--butter));
-    box-shadow:0 4px 12px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.5);
-    display:flex;align-items:center;justify-content:center;font-size:1.2rem;
-  }
-  .wheel{
-    position:absolute;inset:0;border-radius:50%;
-    box-shadow:0 12px 30px rgba(0,0,0,.4), 0 0 0 6px rgba(0,0,0,.25), inset 0 0 24px rgba(0,0,0,.35);
-    transform:rotate(0deg);
-  }
-  .wheel-letters{position:absolute;inset:0}
-  .wheel-letter{
-    position:absolute;top:50%;left:50%;
-    font-family:'Space Mono',monospace;font-weight:700;font-size:1.05rem;color:var(--chalk);
-  }
-  .wheel-letter span{display:block;transition:opacity .2s}
-  .wheel-letter.used span{opacity:.28}
-  .wheel.landed{filter:drop-shadow(0 0 14px rgba(233,196,106,.55))}
+  .wheel-caption{font-size:1.1rem;font-weight:600;text-align:center}
+  .wheel-caption .sub{display:block;font-size:.82rem;font-weight:400;color:#fde7da;margin-top:3px}
+  .wheel-caption b{font-family:'Reem Kufi',sans-serif;font-size:1.5rem}
+  .reel-wrap{position:relative}
+  .reel-frame{position:relative;width:min(62vw,230px);height:186px;border-radius:24px;background:var(--paper);box-shadow:inset 0 0 0 7px var(--ink),0 12px 0 rgba(0,0,0,.25);overflow:hidden}
+  .reel-frame::before,.reel-frame::after{content:"";position:absolute;left:0;right:0;height:58px;z-index:2;pointer-events:none}
+  .reel-frame::before{top:0;background:linear-gradient(var(--paper),rgba(247,236,214,0))}
+  .reel-frame::after{bottom:0;background:linear-gradient(rgba(247,236,214,0),var(--paper))}
+  .reel-window{position:absolute;left:12px;right:12px;top:50%;height:82px;margin-top:-41px;border-top:3px solid var(--terra);border-bottom:3px solid var(--terra);z-index:3;pointer-events:none;transition:background .3s}
+  .reel-frame.landed .reel-window{background:rgba(196,83,45,.1)}
+  .reel{position:absolute;left:0;right:0;top:0;will-change:transform}
+  .reel div{height:82px;display:flex;align-items:center;justify-content:center;font-family:'Reem Kufi',sans-serif;font-weight:700;font-size:56px;color:var(--ink)}
+  .reel div.used{color:#c9b28a}
+  .reel-lever{position:absolute;right:-32px;top:50%;width:11px;height:84px;margin-top:-72px;background:var(--rule);border-radius:6px;transform-origin:50% 100%;transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+  .reel-lever::before{content:"";position:absolute;top:-16px;left:-8px;width:27px;height:27px;border-radius:50%;background:#e3a83b;box-shadow:0 3px 0 #9a6b1c}
+  .reel-lever.pull{transform:rotate(30deg) scaleY(.82)}
+  .reel-used{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:300px;font-family:'Reem Kufi',sans-serif;font-size:16px;color:#fde7da;min-height:1.4em}
+  .reel-used small{font-family:'Fredoka',sans-serif;font-size:12px;width:100%;text-align:center;opacity:.8}
+  @media (prefers-reduced-motion:reduce){ .reel-lever{transition:none} }
 </style>
 </head>
 <body data-screen="create">
@@ -325,15 +315,13 @@
   </div>
 </div>
 
-<div class="wheel-overlay" id="wheel-overlay">
-  <div class="wheel-caption" id="wheel-caption">La roue tourne…</div>
-  <div class="wheel-wrap">
-    <div class="pointer"></div>
-    <div class="wheel-hub">🎲</div>
-    <div class="wheel" id="wheel">
-      <div class="wheel-letters" id="wheel-letters"></div>
-    </div>
+<div class="wheel-overlay" id="wheel-overlay" aria-live="polite">
+  <div class="wheel-caption" id="wheel-caption">Tirage de la lettre…</div>
+  <div class="reel-wrap">
+    <div class="reel-frame" id="reel-frame"><div class="reel" id="reel"></div><div class="reel-window"></div></div>
+    <div class="reel-lever" id="reel-lever"></div>
   </div>
+  <div class="reel-used" id="reel-used"></div>
 </div>
 
 <div class="ui-sheet" id="rules-sheet" aria-hidden="true">
@@ -385,7 +373,7 @@ function cats(st){ st = st || state; return (st && st.categories && st.categorie
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
 let renderedRound = -1;
-let wheelPlayedForRound = -1, spinning = false, wheelRotation = 0;
+let wheelPlayedForRound = -1, spinning = false;
 
 const $ = id => document.getElementById(id);
 const screens = ['create','join','wait','game','end'];
@@ -397,58 +385,55 @@ function show(name){
 function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
 function pAvatar(p){ return p && p.avatar ? p.avatar : '🙂'; }
 
-/* ---------- letter wheel ---------- */
-const WHEEL_SLICE = 360 / LETTERS.length;
-const wheelLetterEls = [];
-(function buildWheel(){
-  const wheel = $('wheel');
-  const wheelLetters = $('wheel-letters');
-  const wrap = document.querySelector('.wheel-wrap');
-  const radius = Math.max(80, wrap.getBoundingClientRect().width / 2) * 0.78;
-  wheel.style.background = 'repeating-conic-gradient(from 0deg, var(--board-mid) 0deg ' + WHEEL_SLICE + 'deg, var(--board-deep) ' + WHEEL_SLICE + 'deg ' + (WHEEL_SLICE * 2) + 'deg)';
-  LETTERS.forEach((l, i) => {
-    const el = document.createElement('div');
-    el.className = 'wheel-letter';
-    el.style.transform = 'translate(-50%,-50%) rotate(' + (i * WHEEL_SLICE + WHEEL_SLICE / 2) + 'deg) translateY(-' + radius + 'px)';
-    el.innerHTML = '<span lang="ar" dir="rtl">' + l + '</span>';
-    wheelLetters.appendChild(el);
-    wheelLetterEls.push(el);
-  });
+/* ---------- letter reel ---------- */
+const REEL_H = 82, REEL_COPIES = 7, REEL_OFFSET = (186 - REEL_H) / 2;
+(function buildReel(){
+  let html = '';
+  for(let k=0;k<REEL_COPIES;k++) LETTERS.forEach(l => { html += '<div lang="ar" data-l="'+l+'">'+l+'</div>'; });
+  $('reel').innerHTML = html;
+  $('reel').style.transform = 'translateY(' + REEL_OFFSET + 'px)';
 })();
 function spinWheel(letter, round){
   const targetIndex = LETTERS.indexOf(letter);
   if(targetIndex === -1) return;
   spinning = true;
-  const wheel = $('wheel');
-  const overlay = $('wheel-overlay');
+  const reel = $('reel'), overlay = $('wheel-overlay'), frame = $('reel-frame');
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const contextLabel = round === 1 ? "Début de partie" : "Manche " + round;
-  $('wheel-caption').innerHTML = 'La roue tourne…<span class="sub">' + esc(contextLabel) + '</span>';
+  $('wheel-caption').innerHTML = 'Tirage de la lettre…<span class="sub">' + esc(contextLabel) + '</span>';
   $('letter-badge').textContent = '?';
   $('letter-badge').classList.remove('pop');
-  const used = new Set((state.usedLetters || []).filter(l => l !== letter));
-  wheelLetterEls.forEach((el, i) => el.classList.toggle('used', used.has(LETTERS[i])));
-  wheel.classList.remove('landed');
+  const used = (state.usedLetters || []).filter(l => l !== letter);
+  reel.querySelectorAll('div').forEach(d => d.classList.toggle('used', used.includes(d.getAttribute('data-l'))));
+  $('reel-used').innerHTML = used.length ? '<small>Déjà sorties</small>' + used.map(l => '<span>'+esc(l)+'</span>').join('') : '';
+  frame.classList.remove('landed');
   overlay.classList.add('show');
 
-  const spins = 6;
-  const SPIN_MS = 3300;
-  wheelRotation = wheelRotation - (wheelRotation % 360) + spins * 360 - (targetIndex * WHEEL_SLICE + WHEEL_SLICE / 2);
-  wheel.style.transition = 'none';
-  void wheel.offsetHeight;
-  wheel.style.transition = 'transform ' + SPIN_MS + 'ms cubic-bezier(.13,.79,.18,1)';
-  wheel.style.transform = 'rotate(' + wheelRotation + 'deg)';
+  // The lever pulls itself, then the reel rolls and stops on a late copy of the letter.
+  const lever = $('reel-lever');
+  lever.classList.add('pull'); setTimeout(() => lever.classList.remove('pull'), 350);
+  const stopAt = (reduce ? 1 : REEL_COPIES - 2) * LETTERS.length + targetIndex;
+  const SPIN_MS = reduce ? 500 : 3200;
+  reel.style.transition = 'none';
+  reel.style.transform = 'translateY(' + REEL_OFFSET + 'px)';
+  void reel.offsetHeight;
+  setTimeout(() => {
+    reel.style.transition = 'transform ' + SPIN_MS + 'ms cubic-bezier(.15,.85,.25,1.04)';
+    reel.style.transform = 'translateY(' + (REEL_OFFSET - REEL_H * stopAt) + 'px)';
+  }, reduce ? 0 : 250);
 
   setTimeout(() => {
-    wheel.classList.add('landed');
-    $('wheel-caption').innerHTML = 'Lettre tirée : <b style="color:var(--butter)">' + esc(letter) + '</b><span class="sub">' + esc(contextLabel) + '</span>';
+    frame.classList.add('landed');
+    if(window.GYMFeedback) window.GYMFeedback.ok();
+    $('wheel-caption').innerHTML = 'Lettre tirée : <b lang="ar">' + esc(letter) + '</b><span class="sub">' + esc(letterName(letter)) + ' · ' + esc(contextLabel) + '</span>';
     setTimeout(() => {
       overlay.classList.remove('show');
       $('letter-badge').textContent = letter;
       $('letter-badge').classList.add('pop');
       spinning = false;
       if(state) renderBoard();
-    }, 900);
-  }, SPIN_MS);
+    }, 1100);
+  }, SPIN_MS + (reduce ? 0 : 250));
 }
 function genCode(){
   const letters="ABCDEFGHJKMNPQRSTUVWXYZ";
