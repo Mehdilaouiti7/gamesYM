@@ -60,16 +60,27 @@
   .sk-top-lbl{font-size:13px;color:var(--dim);font-weight:500}
   .opp-boards{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
   .opp-boards::-webkit-scrollbar{display:none}
-  .opp-board{flex:1 0 calc(50% - 4px);min-width:150px;border-radius:16px;background:rgba(255,255,255,.7);padding:8px;display:flex;align-items:center;gap:8px;transition:box-shadow .2s}
+  .opp-board{flex:1 0 calc(50% - 4px);min-width:172px;border-radius:16px;background:rgba(255,255,255,.7);padding:8px;display:flex;align-items:center;gap:8px;transition:box-shadow .2s, transform .1s;text-align:left;color:inherit;cursor:pointer}
+  .opp-board:active{transform:scale(.97)}
   .opp-board.turn{box-shadow:inset 0 0 0 2px var(--accent)}
-  .mini{display:grid;grid-template-columns:repeat(4,9px);gap:2px;flex-shrink:0}
-  .mini span{height:12px;border-radius:2px;background:#a8cdee}
+  .mini{display:grid;grid-template-columns:repeat(4,17px);gap:2px;flex-shrink:0}
+  .mini span{height:21px;border-radius:4px;background:repeating-linear-gradient(45deg,#cfe2f5 0 3px,#e3eefa 3px 6px);box-shadow:inset 0 0 0 1px #b8d3ee;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:12px;line-height:1;color:#fff}
+  .mini span.v-zero,.mini span.v-mid{color:#123a6b}
   .mini span.v-neg{background:var(--c-neg)} .mini span.v-zero{background:var(--c-zero)} .mini span.v-low{background:var(--c-low)} .mini span.v-mid{background:var(--c-mid)} .mini span.v-high{background:var(--c-high)}
   .mini span.gone{background:transparent;box-shadow:inset 0 0 0 1px #c3d9ef}
   .opp-board .nm{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .opp-board .n{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;line-height:1}
   .opp-board .n small{font-family:'Fredoka',sans-serif;font-weight:500;font-size:11px;color:var(--dim)}
   .opp-board > div:last-child{min-width:0}
+  .opp-board .see{font-size:11px;color:var(--accent);font-weight:600}
+  .bs-head{display:flex;align-items:center;gap:12px}
+  .bs-head .av{font-size:34px;line-height:1}
+  .bs-head .nm{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;line-height:1.1}
+  .bs-head .st{font-size:13px;color:var(--dim)}
+  .bs-head .st b{color:var(--fg)}
+  .bs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .bs-grid .sk-cell{height:min(76px,19vw);font-size:30px}
+  .bs-turn{font-size:13px;font-weight:600;color:var(--accent);text-align:center;min-height:1.2em}
   .ui-turn{padding:10px 14px;border-radius:14px}
   .ui-turn .t{font-size:19px}
   .pile-row{display:flex;align-items:flex-end;justify-content:center;gap:18px;padding:8px 0 4px}
@@ -255,6 +266,17 @@
         <button class="ui-btn" onclick="location.href='skyjo.html'">🔁 Nouvelle partie</button>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="ui-sheet" id="board-sheet" aria-hidden="true">
+  <div class="ui-sheet-scrim" onclick="closeBoard()"></div>
+  <div class="ui-sheet-body" role="dialog" aria-label="Grille de l'adversaire">
+    <div class="ui-grab"></div>
+    <div class="bs-head" id="bs-head"></div>
+    <div class="bs-grid" id="bs-grid"></div>
+    <div class="bs-turn" id="bs-turn"></div>
+    <button class="ui-btn" onclick="closeBoard()">Fermer</button>
   </div>
 </div>
 
@@ -684,6 +706,32 @@ function renderGrid(elId, owner, grid, canTap){
   }).join('');
   prevUp = grid.map(c => c.up);
 }
+// Tap an opponent's mini grid to see their full board (updates live while open).
+let boardSheetIdx = null;
+function openBoard(idx){
+  boardSheetIdx = idx;
+  renderBoardSheet();
+  const s = $('board-sheet'); s.classList.add('open'); s.setAttribute('aria-hidden','false');
+}
+function closeBoard(){
+  boardSheetIdx = null;
+  const s = $('board-sheet'); s.classList.remove('open'); s.setAttribute('aria-hidden','true');
+}
+function renderBoardSheet(){
+  if(boardSheetIdx===null || !state || !state.grids || !state.grids[boardSheetIdx]){ closeBoard(); return; }
+  const idx = boardSheetIdx, g = state.grids[idx], p = state.players[idx];
+  const visible = g.reduce((s,c)=> s + (c.up && !c.gone ? c.v : 0), 0);
+  const hidden = g.filter(c => !c.up && !c.gone).length;
+  $('bs-head').innerHTML = '<span class="av">'+pAvatar(p)+'</span><div><div class="nm">'+esc(p.name)+'</div>'+
+    '<div class="st">visible : <b>'+visible+'</b> · total <b>'+state.totals[idx]+'</b> · '+hidden+' cachée'+(hidden>1?'s':'')+'</div></div>';
+  $('bs-grid').innerHTML = g.map(c => {
+    if(c.gone) return '<div class="sk-cell gone"></div>';
+    if(c.up) return '<div class="sk-cell '+valClass(c.v)+'">'+c.v+'</div>';
+    return '<div class="sk-cell back"></div>';
+  }).join('');
+  $('bs-turn').textContent = state.phase==='turn' && state.turn===idx ? 'C\u2019est son tour' : (state.lastRound && state.lastRound.triggeredBy===idx ? 'A tout révélé · dernier tour' : '');
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeBoard(); });
 function renderBoard(){
   if(!state || state.status!=='playing') return;
   $('round-label').textContent = "Manche " + (state.round||1);
@@ -692,10 +740,11 @@ function renderBoard(){
   $('opp-boards').innerHTML = others().map(idx => {
     const g = state.grids[idx], p = state.players[idx];
     const visible = g.reduce((s,c)=> s + (c.up && !c.gone ? c.v : 0), 0);
-    const cells = g.map(c => c.gone ? '<span class="gone"></span>' : (c.up ? '<span class="'+valClass(c.v)+'"></span>' : '<span></span>')).join('');
-    return '<div class="opp-board'+(state.phase==='turn' && state.turn===idx ? ' turn':'')+'"><div class="mini">'+cells+'</div>'+
-      '<div><div class="nm">'+pAvatar(p)+' '+esc(p.name)+'</div><div class="n">'+visible+' <small>· total '+state.totals[idx]+'</small></div></div></div>';
+    const cells = g.map(c => c.gone ? '<span class="gone"></span>' : (c.up ? '<span class="'+valClass(c.v)+'">'+c.v+'</span>' : '<span></span>')).join('');
+    return '<button type="button" class="opp-board'+(state.phase==='turn' && state.turn===idx ? ' turn':'')+'" onclick="openBoard('+idx+')" aria-label="Voir la grille de '+esc(p.name)+'"><div class="mini">'+cells+'</div>'+
+      '<div><div class="nm">'+pAvatar(p)+' '+esc(p.name)+'</div><div class="n">'+visible+' <small>· total '+state.totals[idx]+'</small></div><div class="see">Voir sa grille ›</div></div></button>';
   }).join('');
+  if(boardSheetIdx!==null) renderBoardSheet();
 
   const pill = $('turn-pill');
   let t = '…', s = '';
@@ -764,6 +813,7 @@ function renderBoard(){
   }
 }
 async function renderEnd(){
+  closeBoard();
   if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
   window.GYMRealtime.unsubscribe(SB_URL, SB_KEY);
   if(!$('screen-end').classList.contains('hidden')) return;
