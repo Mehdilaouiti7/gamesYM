@@ -73,6 +73,13 @@
   .opp-board .n small{font-family:'Fredoka',sans-serif;font-weight:500;font-size:11px;color:var(--dim)}
   .opp-board > div:last-child{min-width:0}
   .opp-board .see{font-size:11px;color:var(--accent);font-weight:600}
+  /* 3+ opponents: compact tiles side by side (name, grid, link) so nobody needs scrolling. */
+  .opp-boards.compact{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:6px;overflow:visible;margin:0;padding:0}
+  .opp-boards.compact .opp-board{min-width:0;flex-direction:column;align-items:stretch;gap:4px;padding:6px;border-radius:14px}
+  .opp-boards.compact .nm{font-size:11px;text-align:center}
+  .opp-boards.compact .mini{grid-template-columns:repeat(4,minmax(0,1fr));width:100%;gap:2px}
+  .opp-boards.compact .mini span{height:auto;aspect-ratio:4/5;font-size:11px;border-radius:3px}
+  .opp-boards.compact .see{font-size:10px;text-align:center}
   .bs-head{display:flex;align-items:center;gap:12px}
   .bs-head .av{font-size:34px;line-height:1}
   .bs-head .nm{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;line-height:1.1}
@@ -737,10 +744,16 @@ function renderBoard(){
   $('round-label').textContent = "Manche " + (state.round||1);
   const myTurn = state.phase==='turn' && state.turn===me;
 
-  $('opp-boards').innerHTML = others().map(idx => {
+  const opps = others();
+  const compact = opps.length >= 3;
+  $('opp-boards').classList.toggle('compact', compact);
+  $('opp-boards').style.setProperty('--cols', opps.length===4 ? 4 : 3);
+  $('opp-boards').innerHTML = opps.map(idx => {
     const g = state.grids[idx], p = state.players[idx];
     const visible = g.reduce((s,c)=> s + (c.up && !c.gone ? c.v : 0), 0);
     const cells = g.map(c => c.gone ? '<span class="gone"></span>' : (c.up ? '<span class="'+valClass(c.v)+'">'+c.v+'</span>' : '<span></span>')).join('');
+    if(compact) return '<button type="button" class="opp-board'+(state.phase==='turn' && state.turn===idx ? ' turn':'')+'" onclick="openBoard('+idx+')" aria-label="Voir la grille de '+esc(p.name)+'">'+
+      '<div class="nm">'+pAvatar(p)+' '+esc(p.name)+'</div><div class="mini">'+cells+'</div><div class="see">Voir sa grille ›</div></button>';
     return '<button type="button" class="opp-board'+(state.phase==='turn' && state.turn===idx ? ' turn':'')+'" onclick="openBoard('+idx+')" aria-label="Voir la grille de '+esc(p.name)+'"><div class="mini">'+cells+'</div>'+
       '<div><div class="nm">'+pAvatar(p)+' '+esc(p.name)+'</div><div class="n">'+visible+' <small>· total '+state.totals[idx]+'</small></div><div class="see">Voir sa grille ›</div></div></button>';
   }).join('');
