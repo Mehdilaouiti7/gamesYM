@@ -43,6 +43,19 @@
   .bw-chips{width:100%;display:flex;flex-wrap:wrap;gap:8px}
   .bw-chips span{padding:10px 14px;border-radius:999px;background:var(--paper);font-size:15px}
   .bw-chips span.host{background:var(--ink);color:var(--paper)}
+  .bw-cat-pick{width:100%;display:flex;flex-wrap:wrap;gap:8px}
+  .bw-cat-pick button{display:flex;align-items:center;gap:8px;padding:9px 12px 9px 10px;border-radius:999px;background:var(--paper);font-family:'Reem Kufi','Fredoka',sans-serif;font-size:16px;color:var(--fg);transition:background .15s,color .15s,opacity .15s}
+  .bw-cat-pick button i{width:20px;height:20px;border-radius:6px;border:2px solid var(--rule);display:flex;align-items:center;justify-content:center;font-style:normal;font-family:'Fredoka',sans-serif;font-size:13px;flex-shrink:0}
+  .bw-cat-pick button.on{background:var(--ink);color:var(--paper)}
+  .bw-cat-pick button.on i{background:var(--terra);border-color:var(--terra);color:#fff}
+  .bw-cat-pick button:not(.on) span{opacity:.6;text-decoration:line-through}
+  .bw-cat-pick button:disabled{opacity:1;cursor:default}
+  .bw-cat-pick button:not(.on):disabled{display:none}
+  .bw-cat-pick button .x{font-family:'Fredoka',sans-serif;font-size:13px;opacity:.6;margin-left:2px}
+  .bw-cat-add{width:100%;display:flex;gap:8px}
+  .bw-cat-add input{flex:1;min-width:0;height:48px;border-radius:14px;border:2px dashed var(--rule);background:transparent;padding:0 14px;font-family:'Fredoka',sans-serif;font-size:16px;color:var(--fg);outline:none}
+  .bw-cat-add input:focus{border-style:solid;border-color:var(--terra)}
+  .bw-cat-add button{width:48px;height:48px;border-radius:14px;background:var(--terra);color:#fff;font-size:22px;flex-shrink:0}
   .bw-chips span.more{background:none;border:2px dashed var(--rule);color:var(--dim)}
 
   #screen-game{min-height:calc(100dvh - env(safe-area-inset-top));display:flex;flex-direction:column;gap:8px}
@@ -236,6 +249,13 @@
       <div class="ui-code-hint" id="wait-hint"></div>
       <div class="ui-row-head"><span>Joueurs</span><span id="joined-count">1</span></div>
       <div class="bw-chips" id="joined-list"></div>
+      <div class="ui-row-head" style="margin-top:6px"><span>Catégories</span><span id="cat-count"></span></div>
+      <div class="bw-cat-pick" id="cat-pick"></div>
+      <form class="bw-cat-add hidden" id="cat-add" onsubmit="addCategory();return false;">
+        <input type="text" id="cat-new" maxlength="20" placeholder="Ajouter une catégorie (ex. Marque)" dir="auto" autocomplete="off">
+        <button type="submit" aria-label="Ajouter">＋</button>
+      </form>
+      <div class="error" id="cat-err" style="text-align:center"></div>
     </div>
     <div class="ui-dock">
       <button class="ui-btn hidden" id="btn-start" onclick="startGame()">Tirer la première lettre</button>
@@ -346,7 +366,7 @@ const HEADERS = {
   "Content-Type": "application/json"
 };
 const LETTERS = ['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','هـ','و','ي'];
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   {key:'bent', label:'بنت'},
   {key:'walad', label:'ولد'},
   {key:'balad', label:'بلاد'},
@@ -358,6 +378,10 @@ const CATEGORIES = [
   {key:'akla', label:'أكلة'}
 ];
 const MAX_PLAYERS = 10;
+const MAX_CATEGORIES = 16;
+// Categories played in this game: chosen by the host in the waiting room (all defaults ticked at first).
+function catPool(st){ st = st || state; return (st && st.catPool) || DEFAULT_CATEGORIES.map(c => ({key:c.key, label:c.label, on:true})); }
+function cats(st){ st = st || state; return (st && st.categories && st.categories.length) ? st.categories : DEFAULT_CATEGORIES; }
 
 let code = null, me = null, state = null, pollTimer = null, busy = false;
 let renderedRound = -1;
@@ -500,7 +524,7 @@ function startRound(st, roundNum){
 }
 function buildEmptyValidity(st){
   const validity = {};
-  CATEGORIES.forEach(cat => {
+  cats(st).forEach(cat => {
     validity[cat.key] = st.players.map(() => false);
   });
   return validity;
@@ -509,7 +533,7 @@ function computeRoundScores(st, validityMap){
   const n = st.players.length;
   const scores = new Array(n).fill(0);
   const detail = [];
-  CATEGORIES.forEach(cat => {
+  cats(st).forEach(cat => {
     const catDetail = [];
     for(let p=0;p<n;p++){
       const text = (st.answers[p] && st.answers[p][cat.key]) ? String(st.answers[p][cat.key]).trim() : '';
@@ -524,7 +548,7 @@ function computeRoundScores(st, validityMap){
 }
 function collectMyAnswers(){
   const obj = {};
-  CATEGORIES.forEach(cat => {
+  cats().forEach(cat => {
     const el = $('inp-'+state.round+'-'+cat.key);
     obj[cat.key] = el ? el.value : '';
   });
@@ -541,7 +565,7 @@ async function createGame(){
   const avatar = createAvatarPicker.get();
   $('btn-create').disabled = true; busy = true;
   code = genCode();
-  state = { v:1, code, status:'waiting', players:[{name, avatar}], totals:[0], round:0, usedLetters:[] };
+  state = { v:1, code, status:'waiting', players:[{name, avatar}], totals:[0], round:0, usedLetters:[], catPool: catPool(null) };
   const ok = await saveState(state);
   busy = false; $('btn-create').disabled = false;
   if(!ok){ $('create-err').textContent = "Connexion impossible. Vérifie ton réseau et réessaie."; return; }
@@ -603,6 +627,9 @@ async function startGame(){
   busy = true;
   let st = await loadState(code) || state;
   if(st.status!=='waiting'){ state=st; busy=false; renderWait(); return; }
+  const chosen = catPool(st).filter(c => c.on);
+  if(!chosen.length){ state=st; busy=false; renderWait(); return; }
+  st.categories = chosen.map(c => ({key:c.key, label:c.label}));
   st.status = 'playing';
   startRound(st, 1);
   const ok = await saveState(st);
@@ -643,7 +670,53 @@ function renderWait(){
   $('btn-start').disabled = state.players.length < 2;
   $('btn-start').textContent = state.players.length < 2 ? 'Il faut au moins 2 joueurs' : 'Tirer la première lettre';
   $('wait-note').classList.toggle('hidden', isHost);
+  renderCategories();
   if(!isHost) $('wait-note').textContent = "En attente que " + esc(state.players[0].name) + " démarre…";
+}
+function renderCategories(){
+  const isHost = me===0;
+  const pool = catPool();
+  const on = pool.filter(c => c.on).length;
+  $('cat-count').textContent = on + ' / ' + pool.length;
+  $('cat-pick').innerHTML = pool.map((c, i) =>
+    '<button type="button" class="'+(c.on?'on':'')+'"'+(isHost ? ' onclick="toggleCategory('+i+')" aria-pressed="'+c.on+'"' : ' disabled')+'>'+
+    '<i>'+(c.on?'✓':'')+'</i><span dir="auto">'+esc(c.label)+'</span>'+
+    (isHost && c.custom ? '<b class="x" onclick="event.stopPropagation();removeCategory('+i+')" aria-label="Supprimer">✕</b>' : '')+'</button>'
+  ).join('');
+  $('cat-add').classList.toggle('hidden', !isHost || pool.length >= MAX_CATEGORIES);
+  if(isHost){
+    $('btn-start').disabled = state.players.length < 2 || on===0;
+    $('btn-start').textContent = state.players.length < 2 ? 'Il faut au moins 2 joueurs' : (on===0 ? 'Choisis au moins une catégorie' : 'Tirer la première lettre · ' + on + ' catégorie' + (on>1?'s':''));
+  }
+}
+// Host-only edits: reload first so players who joined meanwhile are not overwritten.
+async function editCategories(fn){
+  if(busy || !state || me!==0 || state.status!=='waiting') return;
+  busy = true;
+  let st = await loadState(code) || state;
+  if(st.status!=='waiting'){ state=st; busy=false; renderWait(); return; }
+  st.catPool = catPool(st).map(c => Object.assign({}, c));
+  const err = fn(st.catPool);
+  if(err){ $('cat-err').textContent = err; busy=false; return; }
+  $('cat-err').textContent = '';
+  const ok = await saveState(st);
+  busy = false;
+  if(!ok){ $('cat-err').textContent = "Erreur réseau, réessaie."; return; }
+  state = st;
+  renderWait();
+}
+function toggleCategory(i){ editCategories(pool => { if(pool[i]) pool[i].on = !pool[i].on; }); }
+function removeCategory(i){ editCategories(pool => { if(pool[i] && pool[i].custom) pool.splice(i, 1); }); }
+function addCategory(){
+  const input = $('cat-new');
+  const label = input.value.trim().replace(/\s+/g, ' ');
+  if(!label) return;
+  editCategories(pool => {
+    if(pool.length >= MAX_CATEGORIES) return "Maximum " + MAX_CATEGORIES + " catégories.";
+    if(pool.some(c => c.label.toLowerCase() === label.toLowerCase())) return "Cette catégorie existe déjà.";
+    pool.push({key:'c' + Date.now().toString(36), label, on:true, custom:true});
+    input.value = '';
+  });
 }
 function cancelWait(){
   if(!confirm("Quitter la salle d'attente ?")) return;
@@ -750,8 +823,8 @@ const LETTER_NAMES = {'ا':['Alif','A'],'ب':['Ba','B'],'ت':['Ta','T'],'ث':['T
 let judgeCat = 0;
 function letterName(l){ const n = LETTER_NAMES[l]; return n ? n[0]+' · « '+n[1]+' »' : '…'; }
 function updateFilled(){
-  const filled = CATEGORIES.filter(cat => { const el = $('inp-'+state.round+'-'+cat.key); return el && el.value.trim(); }).length;
-  $('filled-count').textContent = filled + '/' + CATEGORIES.length;
+  const filled = cats().filter(cat => { const el = $('inp-'+state.round+'-'+cat.key); return el && el.value.trim(); }).length;
+  $('filled-count').textContent = filled + '/' + cats().length;
 }
 function renderBoard(){
   if(!state || state.status!=='playing') return;
@@ -777,9 +850,9 @@ function renderBoard(){
   window.GYMUI.screen(ph==='reveal' ? 'reveal' : 'game');
   if(ph==='writing'){
     if(renderedRound !== state.round){
-      $('cat-form').innerHTML = CATEGORIES.map(cat =>
+      $('cat-form').innerHTML = cats().map(cat =>
         '<div class="cat-row"><input type="text" id="inp-'+state.round+'-'+cat.key+'" lang="fr" placeholder="…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="" oninput="updateFilled()" aria-label="'+esc(cat.label)+'">'+
-        '<label for="inp-'+state.round+'-'+cat.key+'" lang="ar" dir="rtl">'+esc(cat.label)+'</label></div>'
+        '<label for="inp-'+state.round+'-'+cat.key+'" dir="auto">'+esc(cat.label)+'</label></div>'
       ).join('');
       renderedRound = state.round;
       judgeCat = 0;
@@ -796,16 +869,16 @@ function renderBoard(){
 
   if(needsSpin) spinWheel(state.letter, state.round);
 }
-function setJudgeCat(i){ judgeCat = Math.max(0, Math.min(CATEGORIES.length-1, i)); renderJudging(); }
+function setJudgeCat(i){ judgeCat = Math.max(0, Math.min(cats().length-1, i)); renderJudging(); }
 function renderJudging(){
   const isJudge = me===state.judgeIdx;
   const judgeName = state.players[state.judgeIdx].name;
-  const cat = CATEGORIES[judgeCat];
+  const cat = cats()[judgeCat];
   $('judge-title').textContent = isJudge ? "🧐 À toi d'arbitrer" : "🧐 " + judgeName + " arbitre";
   $('judge-subtitle').textContent = isJudge
     ? "Touche chaque bonne réponse pour la valider · tout le monde voit tes choix"
     : "Les réponses validées apparaissent en direct";
-  $('judge-cats').innerHTML = CATEGORIES.map((c, i) => '<button class="'+(i===judgeCat?'on':'')+'" lang="ar" dir="rtl" onclick="setJudgeCat('+i+')">'+esc(c.label)+'</button>').join('');
+  $('judge-cats').innerHTML = cats().map((c, i) => '<button class="'+(i===judgeCat?'on':'')+'" dir="auto" onclick="setJudgeCat('+i+')">'+esc(c.label)+'</button>').join('');
   const onChip = $('judge-cats').children[judgeCat];
   if(onChip) onChip.scrollIntoView({inline:'center', block:'nearest'});
   $('judge-form').innerHTML = state.players.map((p, idx) => {
@@ -815,7 +888,7 @@ function renderJudging(){
     return '<button type="button" class="bw-ans'+(ok?' ok':' no')+'"'+(isJudge ? ' onclick="toggleValidity(\''+cat.key+'\','+idx+','+(!ok)+').then(renderJudging)"' : ' disabled')+'>'+
       '<span class="av">'+pAvatar(p)+'</span><span class="t">'+esc(text)+'<small>'+esc(p.name)+'</small></span><span class="mk">'+(ok?'✓':'')+'</span></button>';
   }).join('');
-  const last = judgeCat === CATEGORIES.length-1;
+  const last = judgeCat === cats().length-1;
   $('judge-nav').innerHTML = '<button class="ui-sq" onclick="setJudgeCat('+(judgeCat-1)+')" aria-label="Catégorie précédente"'+(judgeCat===0?' disabled':'')+'>‹</button>' +
     (last && isJudge ? '<button class="ui-btn go" onclick="confirmScores()">Valider les scores ✓</button>'
                      : (last ? '<button class="ui-btn" disabled>⏳ '+esc(judgeName)+' valide…</button>' : '<button class="ui-btn" onclick="setJudgeCat('+(judgeCat+1)+')">Catégorie suivante ›</button>'));
@@ -830,7 +903,7 @@ function renderReveal(){
       const acls = e.valid ? '' : 'invalid';
       return '<div class="reveal-entry"><span class="nm">'+pAvatar(state.players[e.p])+' '+esc(state.players[e.p].name)+'</span><span class="ans '+acls+'">'+ans+'</span><span class="pts '+pcls+'">+'+e.points+'</span></div>';
     }).join('');
-    return '<div class="reveal-cat"><h3 lang="ar" dir="rtl">'+esc(d.label)+'</h3>'+rows+'</div>';
+    return '<div class="reveal-cat"><h3 dir="auto">'+esc(d.label)+'</h3>'+rows+'</div>';
   }).join('');
 }
 async function renderEnd(){
