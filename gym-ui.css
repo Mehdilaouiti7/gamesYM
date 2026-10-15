@@ -251,3 +251,9 @@ body[data-screen=end] .ui-dock .ui-btn{background:var(--end-btn-bg);color:var(--
 }
 button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .ui-panel .ui-sq{background:var(--surface-2)}
+
+/* ---------- Waiting room player chips (group games) ---------- */
+.ui-chips{width:100%;display:flex;flex-wrap:wrap;gap:8px}
+.ui-chips span{padding:10px 14px;border-radius:999px;background:var(--surface);font-size:15px}
+.ui-chips span.host{background:var(--accent);color:var(--accent-fg)}
+.ui-chips span.more{background:none;border:2px dashed var(--line);color:var(--dim)}

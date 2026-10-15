@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Games Room · Bluff</title>
+<meta name="theme-color" content="#3d0f1f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Games Room">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gym-ui.css">
+<style>
+  /* ---------- Bluff — « Cour royale » ---------- */
+  :root{
+    --wine:#3d0f1f; --wine-2:#55172c; --ivory:#f4ead5; --brass:#c9a227; --brass-dk:#7d6311;
+    --r-duc:#6b3fa0; --r-assassin:#1b1b1b; --r-capitaine:#1f5fa0; --r-ambassadeur:#2e8b57; --r-comtesse:#c0392b;
+    --bg:radial-gradient(500px 380px at 50% 0%,#6b1f38,transparent 70%), #3d0f1f; --bg-solid:#3d0f1f;
+    --fg:#f4ead5; --dim:#d1b9a6; --surface:rgba(244,234,213,.08); --surface-2:#55172c; --soft:rgba(244,234,213,.1); --line:rgba(201,162,39,.4);
+    --accent:#c9a227; --accent-fg:#2a0a14; --accent-sh:#7d6311;
+    --sel:#c9a227; --sel-fg:#2a0a14; --ok:#c9a227; --ok-fg:#2a0a14; --wait-bg:rgba(244,234,213,.08); --danger:#ffb3a7;
+    --display:'Cinzel',Georgia,serif; --display-weight:700;
+    --seg-on:#f4ead5; --seg-on-fg:#3d0f1f;
+    --code-bg:#f4ead5; --code-fg:#3d0f1f; --code-sh:#c9a227; --code-font:'Cinzel',serif;
+    --scrim:rgba(20,4,10,.65); --sheet:#f4ead5;
+    --end-bg:radial-gradient(500px 420px at 50% 25%,rgba(201,162,39,.35),transparent 70%), #3d0f1f; --end-solid:#3d0f1f; --end-fg:#f4ead5; --end-soft:rgba(244,234,213,.1);
+    --end-btn-bg:#c9a227; --end-btn-fg:#2a0a14; --end-btn-sh:#7d6311; --rank1-bg:#c9a227; --rank1-fg:#2a0a14;
+  }
+  .ui-field input:focus{border-color:var(--brass)}
+  .avatar-opt.sel{background:var(--brass);box-shadow:none}
+  .ui-hero{gap:6px}
+  .ui-hero-title{font-size:48px;letter-spacing:4px;color:var(--brass);text-shadow:0 2px 0 #2a0a14}
+  .ui-hero-sub{color:var(--dim)}
+  .fan{display:flex;justify-content:center}
+  .fan .rc{width:54px;height:78px;font-size:26px}
+  .fan .rc+.rc{margin-left:-16px}
+  .fan .rc:nth-child(1){transform:rotate(-14deg) translateY(6px)} .fan .rc:nth-child(2){transform:rotate(-5deg)} .fan .rc:nth-child(3){transform:rotate(5deg)} .fan .rc:nth-child(4){transform:rotate(14deg) translateY(6px)}
+  .ui-code span{font-weight:700}
+  .ui-chips span.host{background:var(--brass)}
+
+  /* role card */
+  .rc{flex-shrink:0;border-radius:10px;background:var(--rc,#555);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:inset 0 0 0 3px rgba(244,234,213,.85),0 6px 14px rgba(0,0,0,.35);position:relative;padding:4px}
+  .rc .n{font-family:'Cinzel',serif;font-weight:700;font-size:9px;letter-spacing:0;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .me-cards .rc .n{font-size:10px}
+  .rc.back{background:repeating-linear-gradient(45deg,#6b1f38 0 6px,#55172c 6px 12px);box-shadow:inset 0 0 0 2px var(--brass),0 4px 10px rgba(0,0,0,.3)}
+  .rc.dead{filter:grayscale(.85) brightness(.75)}
+  .rc.dead::after{content:"";position:absolute;left:10%;right:10%;top:50%;height:3px;background:#ff6b6b;transform:rotate(-30deg)}
+  .r-duc{--rc:var(--r-duc)} .r-assassin{--rc:var(--r-assassin)} .r-capitaine{--rc:var(--r-capitaine)} .r-ambassadeur{--rc:var(--r-ambassadeur)} .r-comtesse{--rc:var(--r-comtesse)}
+
+  #screen-game{min-height:calc(100dvh - env(safe-area-inset-top));display:flex;flex-direction:column;gap:10px;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  .bl-top{font-family:'Cinzel',serif;font-weight:700;font-size:14px;letter-spacing:.06em}
+  .opps{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:6px}
+  .opp{border-radius:14px;padding:8px;background:var(--surface);display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;transition:box-shadow .2s;min-width:0}
+  .opp.turn{box-shadow:inset 0 0 0 2px var(--brass)}
+  .opp.out{opacity:.45}
+  .opp .nm{font-size:12px;font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .opp .cs{display:flex;gap:4px}
+  .opp .rc{width:26px;height:36px;border-radius:5px;font-size:13px;box-shadow:inset 0 0 0 1.5px rgba(244,234,213,.8)}
+  .opp .rc .n{display:none}
+  .coins{font-family:'Cinzel',serif;font-weight:700;font-size:13px;color:var(--brass)}
+  .stage{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;min-height:120px}
+  .decl{border-radius:16px;padding:14px;background:var(--ivory);color:#2a0a14;text-align:center;box-shadow:0 10px 24px rgba(0,0,0,.3)}
+  .decl small{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#7a5560}
+  .decl b{display:block;font-family:'Cinzel',serif;font-size:20px;line-height:1.2;margin-top:4px}
+  .decl .claim{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:4px 10px;border-radius:999px;color:#fff;font-size:13px;font-weight:600;background:var(--rc)}
+  .log{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--dim)}
+  .log div:last-child{color:var(--fg)}
+  .me-panel{background:rgba(20,4,10,.35);border-radius:22px;padding:12px;display:flex;flex-direction:column;gap:10px}
+  .me-row{display:flex;align-items:center;gap:12px}
+  .me-cards{display:flex;gap:8px}
+  .me-cards .rc{width:74px;height:102px;font-size:32px}
+  .me-cards .rc.pickable{cursor:pointer;animation:uiPulse 1.2s ease-in-out infinite}
+  .me-cards .rc.sel{outline:3px solid var(--brass);outline-offset:3px}
+  .me-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .me-info .coins{font-size:26px}
+  .me-info small{font-size:12px;color:var(--dim)}
+  .acts{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+  .act{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:12px;background:var(--surface);text-align:left;font-size:13px;font-weight:600;min-width:0}
+  .act i{font-style:normal;font-size:18px;width:26px;height:26px;border-radius:7px;background:var(--rc,rgba(244,234,213,.18));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .act span{min-width:0}
+  .act small{display:block;font-weight:400;font-size:11px;color:var(--dim)}
+  .act.on{box-shadow:inset 0 0 0 2px var(--brass);background:rgba(201,162,39,.15)}
+  .act:disabled{opacity:.35}
+  .act.wide{grid-column:1/-1}
+  .targets{display:flex;gap:6px;flex-wrap:wrap}
+  .targets button{padding:8px 12px;border-radius:999px;background:var(--surface);font-weight:600;font-size:14px}
+  .targets button.on{background:var(--brass);color:#2a0a14}
+  .resp{display:flex;flex-direction:column;gap:6px}
+  .resp-row{display:flex;gap:6px}
+  .resp-row button{flex:1;height:50px;border-radius:14px;font-weight:700;font-size:15px}
+  .b-pass{background:var(--surface)}
+  .b-chal{background:#ff5b5b;color:#2a0a14}
+  .b-block{background:var(--rc);color:#fff}
+  .bl-wait{text-align:center;color:var(--dim);font-size:14px;padding:6px 0}
+  .ex-pool{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .ex-pool .rc{width:62px;height:86px;font-size:28px;cursor:pointer}
+  .ex-pool .rc.sel{outline:3px solid var(--brass);outline-offset:3px}
+  .me-panel .ui-btn{flex:none;height:50px;font-size:16px}
+
+  .bl-end{display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px 0 0;text-align:center}
+  .bl-end h2{font-family:'Cinzel',serif;font-size:34px;color:var(--brass);line-height:1.1;text-wrap:balance}
+  .bl-end p{color:var(--dim)}
+
+  .ui-sheet-body{color:#2a0a14}
+  .ui-sheet-title{font-family:'Cinzel',serif;color:#3d0f1f}
+  .roles-table{display:flex;flex-direction:column;gap:6px}
+  .roles-table div{display:flex;align-items:center;gap:10px;font-size:14px;line-height:1.3}
+  .roles-table .rc{width:34px;height:46px;font-size:18px}
+  .roles-table .rc .n{display:none}
+  .ui-step > b:first-child{background:#3d0f1f;color:var(--brass)}
+  .ui-sheet .ui-btn{background:#3d0f1f;color:var(--brass)}
+</style>
+</head>
+<body data-screen="create">
+<div class="frame">
+  <div id="screen-create" class="ui-screen has-dock">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
+    </div>
+    <div class="ui-hero">
+      <div class="ui-hero-art"><span class="fan"><span class="rc r-duc">👑</span><span class="rc r-assassin">🗡️</span><span class="rc r-capitaine">⚓</span><span class="rc r-comtesse">🌹</span></span></div>
+      <h1 class="ui-hero-title">BLUFF</h1>
+      <div class="ui-hero-sub">Mens, conteste, élimine. Le dernier à la cour gagne.</div>
+    </div>
+    <div class="ui-seg" role="tablist"><button type="button" class="on" aria-selected="true">Créer</button><button type="button" onclick="GYMRoom.show('join')">Rejoindre</button></div>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="create-name" maxlength="12" placeholder="Ex. Léa" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
+      <div class="avatar-row" id="create-avatar-row"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="error" id="create-err"></div>
+      <button class="ui-btn" id="btn-create">Créer la partie</button>
+    </div>
+  </div>
+
+  <div id="screen-join" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
+    </div>
+    <div class="ui-hero">
+      <div class="ui-hero-art"><span class="fan"><span class="rc r-duc">👑</span><span class="rc r-assassin">🗡️</span><span class="rc r-capitaine">⚓</span><span class="rc r-comtesse">🌹</span></span></div>
+      <h1 class="ui-hero-title">BLUFF</h1>
+      <div class="ui-hero-sub">Mens, conteste, élimine. Le dernier à la cour gagne.</div>
+    </div>
+    <div class="ui-seg" role="tablist"><button type="button" onclick="GYMRoom.show('create')">Créer</button><button type="button" class="on" aria-selected="true">Rejoindre</button></div>
+    <label class="ui-field">
+      <span class="ui-label">Code de la partie</span>
+      <input type="text" id="join-code" class="code-input" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    </label>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="join-name" maxlength="12" placeholder="Ex. Emma" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
+      <div class="avatar-row" id="join-avatar-row"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="error" id="join-err"></div>
+      <button class="ui-btn" id="btn-join">Rejoindre</button>
+    </div>
+  </div>
+
+  <div id="screen-wait" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <button class="ui-round" onclick="GYMRoom.leave('Quitter la salle d\'attente ?')" aria-label="Quitter">✕</button>
+      <div class="ui-top-mid">Antichambre</div>
+      <button class="ui-round" onclick="GYMRoom.share()" aria-label="Partager">📤</button>
+    </div>
+    <div class="ui-wait" style="gap:14px;padding-top:10px">
+      <button class="ui-code" id="wait-code"></button>
+      <div class="ui-code-hint" id="wait-hint">Touche le code pour copier le lien</div>
+      <div class="ui-row-head"><span>Joueurs</span><span id="wait-count"></span></div>
+      <div class="ui-chips" id="wait-players"></div>
+    </div>
+    <div class="ui-dock">
+      <button class="ui-btn hidden" id="btn-start">Lancer la partie</button>
+      <div class="muted pulse hidden" id="wait-note" style="text-align:center;padding:14px 0"></div>
+    </div>
+  </div>
+
+  <div id="screen-game" class="hidden">
+    <div class="ui-top">
+      <button class="ui-round" onclick="GYMRoom.leave()" aria-label="Quitter">✕</button>
+      <div class="ui-top-mid"><span class="bl-top" id="bl-top">…</span></div>
+      <button class="ui-round" data-rules aria-label="Règles">?</button>
+    </div>
+    <div class="opps" id="opps"></div>
+    <div class="stage" id="stage"></div>
+    <div class="me-panel" id="me-panel"></div>
+  </div>
+
+  <div id="screen-end" class="ui-screen has-dock hidden">
+    <div class="bl-end">
+      <div style="font-size:64px" id="end-emo">👑</div>
+      <h2 id="end-title">…</h2>
+      <p id="end-sub"></p>
+      <div class="ui-rank" id="end-rank" style="margin-top:8px"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="ui-dock-row">
+        <a class="ui-sq" href="index.html" aria-label="Accueil" style="text-decoration:none">🏠</a>
+        <button class="ui-btn" onclick="location.href='bluff.html'">🔁 Nouvelle partie</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ui-sheet" id="rules-sheet" aria-hidden="true">
+  <div class="ui-sheet-scrim" data-rules-close></div>
+  <div class="ui-sheet-body" role="dialog" aria-label="Règles">
+    <div class="ui-grab"></div>
+    <div class="ui-sheet-title">Les règles de la cour</div>
+    <div class="ui-step"><b>1</b><span>Chacun a <b>2 cartes</b> cachées et 2 pièces. Perds tes 2 cartes et tu quittes la cour. Le dernier en vie gagne.</span></div>
+    <div class="ui-step"><b>2</b><span>À ton tour, fais une action. Tu peux <b>prétendre</b> avoir n'importe quel personnage, même si tu ne l'as pas.</span></div>
+    <div class="ui-step"><b>3</b><span>Les autres peuvent <b>contester</b> : celui qui a tort perd une carte. Si tu avais bien le personnage, tu le remélanges et en pioches un autre.</span></div>
+    <div class="roles-table">
+      <div><span class="rc r-duc">👑<span class="n">Duc</span></span><span><b>Duc</b> : prend 3 pièces. Bloque l'aide étrangère.</span></div>
+      <div><span class="rc r-assassin">🗡️<span class="n">Assassin</span></span><span><b>Assassin</b> : paie 3 pièces pour éliminer une carte.</span></div>
+      <div><span class="rc r-capitaine">⚓<span class="n">Capitaine</span></span><span><b>Capitaine</b> : vole 2 pièces. Bloque le vol.</span></div>
+      <div><span class="rc r-ambassadeur">📜<span class="n">Ambassadeur</span></span><span><b>Ambassadeur</b> : échange ses cartes avec la pioche. Bloque le vol.</span></div>
+      <div><span class="rc r-comtesse">🌹<span class="n">Comtesse</span></span><span><b>Comtesse</b> : bloque l'assassinat.</span></div>
+    </div>
+    <div class="ui-step"><b>¤</b><span>Sans personnage : <b>Revenu</b> (+1), <b>Aide étrangère</b> (+2, le Duc peut bloquer), <b>Coup d'État</b> (7 pièces, imparable). À 10 pièces, le Coup d'État est obligatoire.</span></div>
+    <button class="ui-btn" data-rules-close>Compris</button>
+  </div>
+</div>
+
+<script src="realtime.js"></script>
+<script src="leave-guard.js"></script>
+<script src="recent-games.js"></script>
+<script src="feedback.js"></script>
+<script src="connection-banner.js"></script>
+<script src="avatar-picker.js"></script>
+<script src="game-link.js"></script>
+<script src="gym-ui.js"></script>
+<script src="gym-room.js"></script>
+<script>
+const R = GYMRoom, $ = id => document.getElementById(id), esc = R.esc, av = R.av;
+const ROLES = {
+  duc:{n:'Duc', e:'👑'}, assassin:{n:'Assassin', e:'🗡️'}, capitaine:{n:'Capitaine', e:'⚓'}, ambassadeur:{n:'Ambassadeur', e:'📜'}, comtesse:{n:'Comtesse', e:'🌹'}
+};
+const ACTIONS = {
+  revenu:{n:'Revenu', d:'+1 pièce', e:'🪙'},
+  aide:{n:'Aide étrangère', d:'+2 pièces', e:'🤲', blockBy:['duc'], anyBlock:true},
+  taxe:{n:'Taxe', d:'+3 pièces', claim:'duc'},
+  vol:{n:'Vol', d:'prend 2 pièces', claim:'capitaine', target:true, blockBy:['capitaine','ambassadeur']},
+  assassinat:{n:'Assassinat', d:'3 pièces · tue une carte', claim:'assassin', cost:3, target:true, blockBy:['comtesse']},
+  echange:{n:'Échange', d:'change tes cartes', claim:'ambassadeur'},
+  coup:{n:"Coup d'État", d:'7 pièces · imparable', e:'💥', cost:7, target:true}
+};
+const nm = (st, i) => st.players[i].name;
+const alive = (st, i) => st.hands[i].some(c => !c.dead);
+const aliveIdx = st => st.players.map((p,i)=>i).filter(i => alive(st, i));
+function log(st, msg){ st.log.push(msg); if(st.log.length > 30) st.log.shift(); }
+function rc(role, cls, extra){ const r = ROLES[role]; return '<span class="rc r-'+role+' '+(cls||'')+'"'+(extra||'')+'>'+r.e+'<span class="n">'+r.n+'</span></span>'; }
+
+function setup(st){
+  const deck = [];
+  Object.keys(ROLES).forEach(r => { for(let k=0;k<3;k++) deck.push(r); });
+  R.shuffle(deck);
+  st.hands = st.players.map(() => [{r:deck.pop(), dead:false}, {r:deck.pop(), dead:false}]);
+  st.coins = st.players.map(() => 2);
+  st.deck = deck;
+  st.turn = Math.floor(Math.random()*st.players.length);
+  st.phase = 'action'; st.pending = null; st.responses = {}; st.lose = null; st.exchange = null;
+  st.log = []; st.outOrder = []; st.winner = null;
+  log(st, 'La cour est ouverte. ' + nm(st, st.turn) + ' commence.');
+}
+function responders(st){
+  const p = st.pending; if(!p) return [];
+  if(st.phase==='block_respond') return aliveIdx(st).filter(i => i!==p.block.by);
+  const a = ACTIONS[p.type];
+  return aliveIdx(st).filter(i => {
+    if(i===p.actor) return false;
+    const canChallenge = a.claim && !p.challenged;
+    const canBlock = a.blockBy && (a.anyBlock || i===p.target);
+    return canChallenge || canBlock;
+  });
+}
+function nextTurn(st){
+  const al = aliveIdx(st);
+  if(al.length <= 1){ st.status = 'finished'; st.winner = al[0]; st.phase = 'over'; log(st, nm(st, al[0]) + ' règne sur la cour !'); return; }
+  const n = st.players.length;
+  for(let k=1;k<=n;k++){ const i = (st.turn + k) % n; if(alive(st, i)){ st.turn = i; break; } }
+  st.phase = 'action'; st.pending = null; st.responses = {}; st.lose = null; st.exchange = null;
+}
+function requireLoss(st, p, next){
+  const live = st.hands[p].filter(c => !c.dead);
+  if(!live.length) return cont(st, next);
+  if(live.length === 1){
+    live[0].dead = true; log(st, nm(st, p) + ' perd sa dernière carte (' + ROLES[live[0].r].n + ') et quitte la cour.');
+    st.outOrder.push(p);
+    return cont(st, next);
+  }
+  st.phase = 'lose'; st.lose = {p, next};
+}
+function cont(st, next){
+  const p = st.pending;
+  if(next==='end') return nextTurn(st);
+  if(next==='blocked'){ log(st, 'Action bloquée.'); return nextTurn(st); }
+  if(next==='fail'){ if(p.type==='assassinat') st.coins[p.actor] += 3; log(st, 'L’action échoue.'); return nextTurn(st); }
+  if(next==='exec') return execute(st);
+  if(next==='after_claim'){
+    // the claim held: the target may still block (steal / assassination)
+    const a = ACTIONS[p.type];
+    p.challenged = true;
+    if(a.blockBy && !a.anyBlock && alive(st, p.target) && alive(st, p.actor)){ st.phase = 'respond'; st.responses = {}; return; }
+    if(!alive(st, p.actor)) return nextTurn(st);
+    return execute(st);
+  }
+}
+function execute(st){
+  const p = st.pending, a = p.actor;
+  if(!alive(st, a)) return nextTurn(st);
+  switch(p.type){
+    case 'revenu': st.coins[a] += 1; break;
+    case 'aide': st.coins[a] += 2; break;
+    case 'taxe': st.coins[a] += 3; break;
+    case 'vol': { const k = Math.min(2, st.coins[p.target]); st.coins[p.target] -= k; st.coins[a] += k; log(st, nm(st,a)+' vole '+k+' pièce'+(k>1?'s':'')+' à '+nm(st,p.target)+'.'); break; }
+    case 'assassinat': case 'coup':
+      if(alive(st, p.target)){ log(st, nm(st, p.target) + ' est touché·e par ' + (p.type==='coup' ? 'le coup d’État' : 'l’assassin') + '.'); return requireLoss(st, p.target, 'end'); }
+      break;
+    case 'echange': {
+      const drawn = [st.deck.pop(), st.deck.pop()].filter(Boolean);
+      const keep = st.hands[a].filter(c => !c.dead).map(c => c.r);
+      st.exchange = {pool: keep.concat(drawn), keep: keep.length};
+      st.phase = 'exchange'; return;
+    }
+  }
+  nextTurn(st);
+}
+function challenge(st, claimant, role, challenger, truthNext, lieNext){
+  const card = st.hands[claimant].find(c => !c.dead && c.r===role);
+  if(card){
+    log(st, nm(st, claimant) + ' avait bien ' + (role==='comtesse'?'la ':'le ') + ROLES[role].n + ' ! ' + nm(st, challenger) + ' perd une carte.');
+    st.deck.push(card.r); R.shuffle(st.deck); card.r = st.deck.pop();
+    requireLoss(st, challenger, truthNext);
+  } else {
+    log(st, nm(st, claimant) + ' bluffait ! Pas de ' + ROLES[role].n + '.');
+    requireLoss(st, claimant, lieNext);
+  }
+}
+
+/* ---------- actions ---------- */
+let chosen = null, chosenTarget = null, exSel = [];
+function chooseAction(t){ chosen = chosen===t ? null : t; chosenTarget = null; render(R.state); }
+function chooseTarget(i){ chosenTarget = i; render(R.state); }
+function declare(){
+  const type = chosen, target = chosenTarget, a = ACTIONS[type];
+  if(!type || (a.target && target===null)) return;
+  chosen = null; chosenTarget = null;
+  R.act(st => {
+    if(st.phase!=='action' || st.turn!==R.me) return false;
+    if(st.coins[R.me] >= 10 && type!=='coup') return false;
+    if(a.cost && st.coins[R.me] < a.cost) return false;
+    if(a.target && (target===R.me || !alive(st, target))) return false;
+    if(a.cost) st.coins[R.me] -= a.cost;
+    st.pending = {type, actor:R.me, target: a.target ? target : null, claim: a.claim || null, challenged:false};
+    st.responses = {};
+    log(st, nm(st, R.me) + ' : ' + a.n + (a.target ? ' sur ' + nm(st, target) : '') + (a.claim ? ' (' + ROLES[a.claim].n + ')' : '') + '.');
+    if(type==='revenu' || type==='coup') return execute(st);
+    st.phase = 'respond';
+    if(!responders(st).length) execute(st);
+  });
+}
+function respond(kind, role){
+  R.act(st => {
+    if(st.phase!=='respond' && st.phase!=='block_respond') return false;
+    if(!responders(st).includes(R.me) || st.responses[R.me]) return false;
+    const p = st.pending, a = ACTIONS[p.type];
+    if(kind==='pass'){
+      st.responses[R.me] = 'pass';
+      if(responders(st).every(i => st.responses[i])){
+        if(st.phase==='respond') execute(st); else cont(st, 'blocked');
+      }
+      return;
+    }
+    if(kind==='challenge'){
+      if(st.phase==='respond'){
+        if(!a.claim || p.challenged) return false;
+        log(st, nm(st, R.me) + ' conteste !');
+        p.challenged = true;
+        challenge(st, p.actor, a.claim, R.me, 'after_claim', 'fail');
+      } else {
+        log(st, nm(st, R.me) + ' conteste le blocage !');
+        challenge(st, p.block.by, p.block.role, R.me, 'blocked', 'exec');
+      }
+      return;
+    }
+    if(kind==='block'){
+      if(st.phase!=='respond' || !a.blockBy || !a.blockBy.includes(role)) return false;
+      if(!a.anyBlock && R.me!==p.target) return false;
+      p.block = {by:R.me, role};
+      log(st, nm(st, R.me) + ' bloque avec ' + (role==='comtesse'?'la ':'le ') + ROLES[role].n + '.');
+      st.phase = 'block_respond'; st.responses = {};
+    }
+  });
+}
+function loseCard(ci){
+  R.act(st => {
+    if(st.phase!=='lose' || st.lose.p!==R.me) return false;
+    const c = st.hands[R.me][ci]; if(!c || c.dead) return false;
+    c.dead = true;
+    log(st, nm(st, R.me) + ' révèle et perd ' + (c.r==='comtesse'?'la ':'le ') + ROLES[c.r].n + '.');
+    if(!alive(st, R.me)) st.outOrder.push(R.me);
+    const next = st.lose.next; st.lose = null;
+    cont(st, next);
+  });
+}
+function toggleEx(k){ const i = exSel.indexOf(k); if(i>=0) exSel.splice(i,1); else if(exSel.length < R.state.exchange.keep) exSel.push(k); render(R.state); }
+function confirmExchange(){
+  const pick = exSel.slice(); exSel = [];
+  R.act(st => {
+    if(st.phase!=='exchange' || st.pending.actor!==R.me || pick.length!==st.exchange.keep) return false;
+    const pool = st.exchange.pool, keepRoles = pick.map(k => pool[k]);
+    const back = pool.filter((r, k) => !pick.includes(k));
+    let j = 0; st.hands[R.me].forEach(c => { if(!c.dead) c.r = keepRoles[j++]; });
+    st.deck.push(...back); R.shuffle(st.deck);
+    log(st, nm(st, R.me) + ' a échangé ses cartes.');
+    nextTurn(st);
+  });
+}
+
+/* ---------- rendering ---------- */
+function declText(st){
+  const p = st.pending; if(!p) return '';
+  const a = ACTIONS[p.type];
+  let html = '<div class="decl"><small>'+(st.phase==='block_respond' ? 'Blocage' : 'Annonce')+'</small>';
+  if(st.phase==='block_respond'){
+    html += '<b>'+esc(nm(st, p.block.by))+' bloque '+esc(a.n.toLowerCase())+' de '+esc(nm(st, p.actor))+'</b><span class="claim r-'+p.block.role+'" style="background:var(--rc)">'+ROLES[p.block.role].e+' prétend être '+ROLES[p.block.role].n+'</span>';
+  } else {
+    html += '<b>'+esc(nm(st, p.actor))+' · '+esc(a.n)+(a.target ? ' sur '+esc(nm(st, p.target)) : '')+'</b>' + (a.claim ? '<span class="claim r-'+a.claim+'" style="background:var(--rc)">'+ROLES[a.claim].e+' prétend être '+ROLES[a.claim].n+'</span>' : '');
+  }
+  return html + '</div>';
+}
+function render(st){
+  if(st.status==='finished'){ renderEnd(st); return; }
+  const me = R.me, myTurn = st.turn===me && st.phase==='action';
+  $('bl-top').textContent = st.phase==='action' ? (myTurn ? 'À TOI DE JOUER' : 'TOUR DE ' + nm(st, st.turn).toUpperCase()) : (st.phase==='lose' ? 'UNE CARTE TOMBE' : 'LA COUR DÉLIBÈRE');
+  $('opps').innerHTML = st.players.map((p, i) => {
+    if(i===me) return '';
+    const out = !alive(st, i);
+    const cards = st.hands[i].map(c => c.dead ? rc(c.r, 'dead') : '<span class="rc back"></span>').join('');
+    return '<div class="opp'+(st.turn===i?' turn':'')+(out?' out':'')+'"><div class="nm">'+av(p)+' '+esc(p.name)+'</div><div class="cs">'+cards+'</div><div class="coins">🪙 '+st.coins[i]+'</div></div>';
+  }).join('');
+
+  const logHtml = '<div class="log">'+st.log.slice(-3).map(l => '<div>'+esc(l)+'</div>').join('')+'</div>';
+  $('stage').innerHTML = (st.pending && (st.phase==='respond' || st.phase==='block_respond') ? declText(st) : '') + logHtml;
+
+  // my panel
+  const meAlive = alive(st, me);
+  const loseMine = st.phase==='lose' && st.lose.p===me;
+  const myCards = st.hands[me].map((c, ci) => loseMine && !c.dead ? rc(c.r, 'pickable', ' onclick="loseCard('+ci+')" role="button" tabindex="0"') : rc(c.r, c.dead?'dead':'')).join('');
+  let html = '<div class="me-row"><div class="me-cards">'+myCards+'</div><div class="me-info"><span class="coins">🪙 '+st.coins[me]+'</span><small>'+(meAlive ? 'Tes cartes · seul·e toi les vois' : 'Tu as quitté la cour')+'</small></div></div>';
+
+  if(loseMine){
+    html += '<div class="ui-turn mine"><span class="t">Perds une carte</span><span class="s">Touche celle que tu sacrifies</span></div>';
+  } else if(st.phase==='exchange' && st.pending.actor===me){
+    const ex = st.exchange;
+    html += '<div class="ui-turn mine"><span class="t">Échange</span><span class="s">Garde '+ex.keep+' carte'+(ex.keep>1?'s':'')+'</span></div>' +
+      '<div class="ex-pool">'+ex.pool.map((r,k) => rc(r, exSel.includes(k)?'sel':'', ' onclick="toggleEx('+k+')" role="button" tabindex="0"')).join('')+'</div>' +
+      '<button class="ui-btn" onclick="confirmExchange()"'+(exSel.length!==ex.keep?' disabled':'')+'>Garder ces cartes</button>';
+  } else if(myTurn){
+    const coins = st.coins[me], must = coins >= 10;
+    html += '<div class="acts">' + Object.keys(ACTIONS).map(t => {
+      const a = ACTIONS[t];
+      const dis = (must && t!=='coup') || (a.cost && coins < a.cost);
+      const icon = a.claim ? '<i class="r-'+a.claim+'">'+ROLES[a.claim].e+'</i>' : '<i>'+a.e+'</i>';
+      return '<button type="button" class="act'+(chosen===t?' on':'')+(t==='coup'?' wide':'')+'" onclick="chooseAction(\''+t+'\')"'+(dis?' disabled':'')+'>'+icon+'<span>'+a.n+'<small>'+a.d+(a.claim ? ' · '+ROLES[a.claim].n : '')+'</small></span></button>';
+    }).join('') + '</div>';
+    if(chosen){
+      const a = ACTIONS[chosen];
+      if(a.target){
+        html += '<div class="targets">'+aliveIdx(st).filter(i => i!==me).map(i => '<button type="button" class="'+(chosenTarget===i?'on':'')+'" onclick="chooseTarget('+i+')">'+av(st.players[i])+' '+esc(nm(st,i))+'</button>').join('')+'</div>';
+      }
+      html += '<button class="ui-btn" onclick="declare()"'+(a.target && chosenTarget===null ? ' disabled' : '')+'>'+(a.claim ? 'Annoncer · '+ROLES[a.claim].n : 'Jouer · '+a.n)+'</button>';
+    }
+  } else if((st.phase==='respond' || st.phase==='block_respond') && responders(st).includes(me) && !st.responses[me]){
+    const p = st.pending, a = ACTIONS[p.type];
+    let btns = '<button class="b-pass" onclick="respond(\'pass\')">Laisser passer</button>';
+    const canChal = st.phase==='block_respond' || (a.claim && !p.challenged);
+    if(canChal) btns += '<button class="b-chal" onclick="respond(\'challenge\')">Contester !</button>';
+    html += '<div class="resp"><div class="resp-row">'+btns+'</div>';
+    if(st.phase==='respond' && a.blockBy && (a.anyBlock || me===p.target)){
+      html += '<div class="resp-row">'+a.blockBy.map(r => '<button class="b-block r-'+r+'" onclick="respond(\'block\',\''+r+'\')">Bloquer · '+ROLES[r].e+' '+ROLES[r].n+'</button>').join('')+'</div>';
+    }
+    html += '</div>';
+    if(window.GYMFeedback && lastBuzz!==st.rev){ lastBuzz = st.rev; window.GYMFeedback.ok(); }
+  } else {
+    let w = '';
+    if(st.phase==='action') w = nm(st, st.turn) + ' réfléchit…';
+    else if(st.phase==='lose') w = nm(st, st.lose.p) + ' choisit la carte qu’il perd…';
+    else if(st.phase==='exchange') w = nm(st, st.pending.actor) + ' échange ses cartes…';
+    else { const waiting = responders(st).filter(i => !st.responses[i]).map(i => nm(st, i)); w = 'En attente de ' + waiting.join(', ') + '…'; }
+    html += '<div class="bl-wait pulse">'+esc(w)+'</div>';
+  }
+  $('me-panel').innerHTML = html;
+}
+let lastBuzz = null;
+function renderEnd(st){
+  const w = st.winner;
+  const order = [w].concat(st.outOrder.slice().reverse());
+  st.players.forEach((p,i) => { if(!order.includes(i)) order.push(i); });
+  $('end-emo').textContent = w===R.me ? '👑' : '🎭';
+  $('end-title').textContent = w===R.me ? 'Tu règnes sur la cour !' : nm(st, w) + ' règne sur la cour';
+  $('end-sub').textContent = 'Le dernier à garder une carte gagne.';
+  $('end-rank').innerHTML = order.map((i, pos) => '<div><span class="pos">'+(pos+1)+'</span><span class="av">'+av(st.players[i])+'</span><span class="nm">'+esc(nm(st,i))+(i===R.me?' (toi)':'')+'</span><span class="pts">'+(i===w ? '👑' : '')+'</span></div>').join('');
+  if(w===R.me && window.GYMFeedback) window.GYMFeedback.win();
+}
+
+R.init({
+  key:'bl', table:'bl_games', title:'Bluff', page:'bluff.html', min:2, max:6,
+  start: setup,
+  render
+});
+</script>
+<script src="install-tutorial.js" defer></script>
+</body>
+</html>

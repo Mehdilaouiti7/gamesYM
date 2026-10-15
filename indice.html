@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Games Room · Un indice chacun</title>
+<meta name="theme-color" content="#efeaff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Games Room">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gym-ui.css">
+<style>
+  /* ---------- Un indice chacun — « Mur de post-it » ---------- */
+  :root{
+    --wall:#efeaff; --ink:#2d2a4a; --violet:#6c4cf1; --violet-dk:#4a2fc0;
+    --py:#ffe66d; --pp:#ffb3d1; --pg:#b8f2c9; --pb:#b7dcff; --po:#ffd0a1;
+    --bg:#efeaff radial-gradient(rgba(108,76,241,.14) 1.2px,transparent 1.4px) 0 0/18px 18px; --bg-solid:#efeaff;
+    --fg:#2d2a4a; --dim:#6b6790; --surface:#fff; --surface-2:#f6f3ff; --soft:rgba(108,76,241,.1); --line:#cfc6f5;
+    --accent:#6c4cf1; --accent-fg:#fff; --accent-sh:#4a2fc0;
+    --sel:#6c4cf1; --sel-fg:#fff; --ok:#6c4cf1; --ok-fg:#fff; --wait-bg:#fff; --danger:#e0476b;
+    --display:'Caveat',cursive; --display-weight:700;
+    --seg-on:#fff; --seg-on-fg:#2d2a4a;
+    --code-bg:#ffe66d; --code-fg:#2d2a4a; --code-sh:#d8bf3c; --code-font:'Caveat',cursive;
+    --scrim:rgba(45,42,74,.45); --sheet:#fff;
+    --end-bg:#6c4cf1 radial-gradient(rgba(255,255,255,.14) 1.2px,transparent 1.4px) 0 0/18px 18px; --end-solid:#6c4cf1; --end-fg:#fff; --end-soft:rgba(255,255,255,.16);
+    --end-btn-bg:#ffe66d; --end-btn-fg:#2d2a4a; --end-btn-sh:#d8bf3c;
+  }
+  .ui-field input:focus{border-color:var(--violet)}
+  .ui-field input[type=text]{box-shadow:0 2px 0 var(--line)}
+  .avatar-opt{box-shadow:0 2px 0 var(--line)}
+  .avatar-opt.sel{background:var(--violet);box-shadow:none}
+  .ui-hero{gap:4px}
+  .ui-hero-title{font-size:56px;line-height:.95}
+  .ui-hero-sub{color:var(--dim)}
+  .notes{display:flex;gap:6px;justify-content:center;margin-bottom:6px}
+  .note{background:var(--py);color:var(--ink);font-family:'Caveat',cursive;font-weight:700;box-shadow:0 6px 10px rgba(45,42,74,.15);position:relative}
+  .note::before{content:"";position:absolute;top:-6px;left:50%;width:34px;height:12px;margin-left:-17px;background:rgba(255,255,255,.6);transform:rotate(-3deg)}
+  .notes .note{width:64px;height:58px;display:flex;align-items:center;justify-content:center;font-size:22px}
+  .notes .note:nth-child(1){background:var(--pp);transform:rotate(-6deg)} .notes .note:nth-child(2){background:var(--pg);transform:rotate(3deg)} .notes .note:nth-child(3){background:var(--pb);transform:rotate(-2deg)}
+  .ui-code span{border-radius:4px;font-size:44px}
+  .ui-code span:nth-child(2){background:var(--pp)} .ui-code span:nth-child(3){background:var(--pg)} .ui-code span:nth-child(4){background:var(--pb)}
+  .ui-chips span{box-shadow:0 2px 0 var(--line)}
+
+  #screen-game{min-height:calc(100dvh - env(safe-area-inset-top));display:flex;flex-direction:column;gap:12px;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  .ui-top-mid{font-family:'Caveat',cursive;font-size:22px;font-weight:700}
+  .progress{display:flex;gap:4px;justify-content:center}
+  .progress span{width:16px;height:20px;border-radius:3px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line)}
+  .progress span.ok{background:var(--pg);box-shadow:none}
+  .progress span.ko{background:#d9d3f0;box-shadow:none;position:relative}
+  .progress span.ko::after{content:"✕";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#8d87b0}
+  .progress span.cur{box-shadow:inset 0 0 0 2px var(--violet)}
+  .mystery{align-self:center;width:min(260px,80%);padding:22px 16px;text-align:center;transform:rotate(-1.5deg)}
+  .mystery small{display:block;font-family:'Fredoka',sans-serif;font-weight:500;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#8a7a2a}
+  .mystery b{display:block;font-size:44px;line-height:1.05;margin-top:4px;word-break:break-word}
+  .mystery.secret b{font-size:72px}
+  .guesser{display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;color:var(--dim)}
+  .guesser b{color:var(--fg)}
+  .board{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px;padding:6px 2px}
+  .clue-note{min-height:92px;padding:16px 8px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px}
+  .clue-note b{font-size:28px;line-height:1;word-break:break-word}
+  .clue-note small{font-family:'Fredoka',sans-serif;font-size:11px;color:rgba(45,42,74,.65)}
+  .clue-note.c0{background:var(--py);transform:rotate(-2deg)} .clue-note.c1{background:var(--pp);transform:rotate(1.5deg)} .clue-note.c2{background:var(--pg);transform:rotate(-1deg)}
+  .clue-note.c3{background:var(--pb);transform:rotate(2deg)} .clue-note.c4{background:var(--po);transform:rotate(-2.5deg)} .clue-note.c5{background:var(--py);transform:rotate(1deg)}
+  .clue-note.blank{background:#fff;box-shadow:inset 0 0 0 2px dashed var(--line);border:2px dashed var(--line);color:var(--dim)}
+  .clue-note.blank::before{display:none}
+  .clue-note.struck{opacity:.55}
+  .clue-note.struck b{text-decoration:line-through;text-decoration-thickness:3px;text-decoration-color:var(--danger)}
+  .clue-note .why{font-family:'Fredoka',sans-serif;font-size:11px;font-weight:600;color:var(--danger)}
+  .clue-note.tap{cursor:pointer}
+  .clue-note:disabled{opacity:1;cursor:default}
+  .clue-note.struck:disabled{opacity:.55}
+  .clue-note.hidden-clue{background:#e6e0fb;color:#9b95c0}
+  @media (prefers-reduced-motion:no-preference){ .clue-note.pop{animation:uiPop .35s cubic-bezier(.22,1,.36,1)} }
+  .ui-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+  .ui-foot > .ui-btn{flex:none}
+  .ui-dock-row .ui-btn.alt{flex:0 0 auto;width:auto;padding:0 18px;font-size:16px;background:#fff;color:var(--fg);box-shadow:0 5px 0 var(--line)}
+  .write{display:flex;gap:8px}
+  .write input{flex:1;min-width:0;height:58px;border-radius:14px;border:2px solid var(--violet);background:#fff;color:var(--fg);padding:0 16px;font-family:'Caveat',cursive;font-weight:700;font-size:28px;outline:none}
+  .write .ui-btn{flex:0 0 auto;width:auto;padding:0 18px}
+  .iu-wait{color:var(--dim);text-align:center;font-size:15px;padding:8px 0}
+  .result{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+  .result .big{font-size:56px;line-height:1}
+  .result h2{font-family:'Caveat',cursive;font-size:40px;line-height:1}
+  .result p{color:var(--dim)}
+  .guess-note{background:#fff;padding:8px 16px;font-size:30px;transform:rotate(1deg)}
+
+  .iu-end{display:flex;flex-direction:column;align-items:center;gap:10px;padding:40px 0 0;text-align:center}
+  .iu-end .sc{font-family:'Caveat',cursive;font-weight:700;font-size:120px;line-height:.9}
+  .iu-end .sc small{font-size:44px;opacity:.75}
+  .iu-end h2{font-family:'Caveat',cursive;font-size:42px;line-height:1}
+  .iu-end p{opacity:.85}
+
+  .ui-sheet-title{font-size:34px}
+  .ui-step > b:first-child{border-radius:6px}
+</style>
+</head>
+<body data-screen="create">
+<div class="frame">
+  <div id="screen-create" class="ui-screen has-dock">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
+    </div>
+    <div class="ui-hero">
+      <div class="ui-hero-art"><span class="notes"><span class="note">mer</span><span class="note">sable</span><span class="note">été</span></span></div>
+      <h1 class="ui-hero-title">Un indice chacun</h1>
+      <div class="ui-hero-sub">Tous ensemble, faites deviner 13 mots</div>
+    </div>
+    <div class="ui-seg" role="tablist"><button type="button" class="on" aria-selected="true">Créer</button><button type="button" onclick="GYMRoom.show('join')">Rejoindre</button></div>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="create-name" maxlength="12" placeholder="Ex. Léa" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
+      <div class="avatar-row" id="create-avatar-row"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="error" id="create-err"></div>
+      <button class="ui-btn" id="btn-create">Créer la partie</button>
+    </div>
+  </div>
+
+  <div id="screen-join" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
+    </div>
+    <div class="ui-hero">
+      <div class="ui-hero-art"><span class="notes"><span class="note">mer</span><span class="note">sable</span><span class="note">été</span></span></div>
+      <h1 class="ui-hero-title">Un indice chacun</h1>
+      <div class="ui-hero-sub">Tous ensemble, faites deviner 13 mots</div>
+    </div>
+    <div class="ui-seg" role="tablist"><button type="button" onclick="GYMRoom.show('create')">Créer</button><button type="button" class="on" aria-selected="true">Rejoindre</button></div>
+    <label class="ui-field">
+      <span class="ui-label">Code de la partie</span>
+      <input type="text" id="join-code" class="code-input" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    </label>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="join-name" maxlength="12" placeholder="Ex. Emma" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
+      <div class="avatar-row" id="join-avatar-row"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="error" id="join-err"></div>
+      <button class="ui-btn" id="btn-join">Rejoindre</button>
+    </div>
+  </div>
+
+  <div id="screen-wait" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <button class="ui-round" onclick="GYMRoom.leave('Quitter la salle d\'attente ?')" aria-label="Quitter">✕</button>
+      <div class="ui-top-mid">Le mur</div>
+      <button class="ui-round" onclick="GYMRoom.share()" aria-label="Partager">📤</button>
+    </div>
+    <div class="ui-wait" style="gap:14px;padding-top:10px">
+      <button class="ui-code" id="wait-code"></button>
+      <div class="ui-code-hint" id="wait-hint">Touche le code pour copier le lien</div>
+      <div class="ui-row-head"><span>Joueurs</span><span id="wait-count"></span></div>
+      <div class="ui-chips" id="wait-players"></div>
+    </div>
+    <div class="ui-dock">
+      <button class="ui-btn hidden" id="btn-start">Lancer la partie</button>
+      <div class="muted pulse hidden" id="wait-note" style="text-align:center;padding:14px 0"></div>
+    </div>
+  </div>
+
+  <div id="screen-game" class="hidden">
+    <div class="ui-top">
+      <button class="ui-round" onclick="GYMRoom.leave()" aria-label="Quitter">✕</button>
+      <div class="ui-top-mid" id="iu-top">Carte 1 / 13</div>
+      <button class="ui-round" data-rules aria-label="Règles">?</button>
+    </div>
+    <div class="progress" id="progress"></div>
+    <div id="iu-body" style="flex:1;display:flex;flex-direction:column;gap:12px"></div>
+  </div>
+
+  <div id="screen-end" class="ui-screen has-dock hidden">
+    <div class="iu-end">
+      <div class="sc" id="end-score">0<small>/13</small></div>
+      <h2 id="end-title">…</h2>
+      <p id="end-sub"></p>
+    </div>
+    <div class="ui-dock">
+      <div class="ui-dock-row">
+        <a class="ui-sq" href="index.html" aria-label="Accueil" style="text-decoration:none">🏠</a>
+        <button class="ui-btn" onclick="location.href='indice.html'">🔁 Nouvelle partie</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ui-sheet" id="rules-sheet" aria-hidden="true">
+  <div class="ui-sheet-scrim" data-rules-close></div>
+  <div class="ui-sheet-body" role="dialog" aria-label="Règles">
+    <div class="ui-grab"></div>
+    <div class="ui-sheet-title">Comment jouer</div>
+    <div class="ui-step"><b>1</b><span>Jeu <b>coopératif</b> : tout le monde joue ensemble pour faire deviner 13 mots. À chaque carte, un joueur différent devine.</span></div>
+    <div class="ui-step"><b>2</b><span>Les autres voient le mot mystère et écrivent chacun <b>un seul mot</b> d'indice, en secret.</span></div>
+    <div class="ui-step"><b>3</b><span>Les <b>indices identiques s'annulent</b> automatiquement ! Soyez originaux. Vous pouvez aussi rayer un indice interdit avant de les montrer.</span></div>
+    <div class="ui-step"><b>★</b><span>Bonne réponse : +1 carte. Passer : la carte est perdue. Mauvaise réponse : la carte <b>et la suivante</b> sont perdues.</span></div>
+    <button class="ui-btn" data-rules-close>Compris</button>
+  </div>
+</div>
+
+<script src="realtime.js"></script>
+<script src="leave-guard.js"></script>
+<script src="recent-games.js"></script>
+<script src="feedback.js"></script>
+<script src="connection-banner.js"></script>
+<script src="avatar-picker.js"></script>
+<script src="game-link.js"></script>
+<script src="gym-ui.js"></script>
+<script src="gym-room.js"></script>
+<script>
+const WORDS = ['PLAGE','DÉSERT','CHAMEAU','OLIVE','JASMIN','COUSCOUS','HAMMAM','MÉDINA','MOSQUÉE','PALMIER','SOLEIL','LUNE','ÉTOILE','NUAGE','PLUIE','NEIGE',
+'MONTAGNE','VOLCAN','ÎLE','FORÊT','RIVIÈRE','PONT','CHÂTEAU','ROI','PIRATE','TRÉSOR','DRAGON','FANTÔME','ROBOT','FUSÉE','AVION','TRAIN','VÉLO','TAXI',
+'ÉCOLE','PROFESSEUR','MÉDECIN','HÔPITAL','POMPIER','POLICE','PRISON','BANQUE','MARCHÉ','BOULANGERIE','PAIN','FROMAGE','CHOCOLAT','GÂTEAU','GLACE',
+'CAFÉ','THÉ','ORANGE','CITRON','PASTÈQUE','DATTE','FIGUE','PIMENT','HARISSA','PIZZA','SANDWICH','POISSON','REQUIN','BALEINE','DAUPHIN','LION','SINGE',
+'ÉLÉPHANT','GIRAFE','CHAT','CHIEN','CHEVAL','HIBOU','ABEILLE','PAPILLON','ARAIGNÉE','SERPENT','MARIAGE','ANNIVERSAIRE','CADEAU','BALLON','FOOTBALL',
+'STADE','ARBITRE','MÉDAILLE','PISCINE','SKI','GUITARE','PIANO','TAMBOUR','CHANSON','DANSE','CINÉMA','THÉÂTRE','LIVRE','JOURNAL','LETTRE','TÉLÉPHONE',
+'ORDINATEUR','TÉLÉVISION','RADIO','CAMÉRA','PHOTO','MIROIR','PARFUM','SAVON','BROSSE','LUNETTES','MONTRE','BAGUE','CHAPEAU','PARAPLUIE','VALISE',
+'PASSEPORT','HÔTEL','TENTE','FEU','BOUGIE','LAMPE','CLÉ','PORTE','FENÊTRE','JARDIN','FLEUR','ROSE','ARBRE','POMME','CAROTTE','TOMATE','OEUF','POULE',
+'VACHE','MOUTON','LAIT','MIEL','SUCRE','SEL','CUISINE','FOUR','COUTEAU','ASSIETTE','BOUTEILLE','VERRE','EAU','MER','BATEAU','PHARE','ANCRE','SIRÈNE',
+'MAGICIEN','SORCIÈRE','VAMPIRE','ZOMBIE','HÉROS','MASQUE','CAPE','COURONNE','ÉPÉE','BOUCLIER','FLÈCHE','CIBLE','PUZZLE','DÉ','CARTE','ÉCHECS'];
+const R = GYMRoom, $ = id => document.getElementById(id), esc = R.esc, av = R.av;
+const TOTAL = 13;
+const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'').replace(/(es|s|x)$/,'');
+
+function setupGame(st){
+  st.deck = R.shuffle([...new Set(WORDS)]).slice(0, TOTAL);
+  st.cardIdx = 0; st.score = 0; st.marks = new Array(TOTAL).fill(null);
+  st.guesser = Math.floor(Math.random()*st.players.length);
+  newCard(st);
+}
+function newCard(st){ st.phase = 'clue'; st.clues = {}; st.struck = {}; st.auto = {}; st.guess = null; st.outcome = null; }
+function writers(st){ return st.players.map((p,i)=>i).filter(i => i!==st.guesser); }
+function word(st){ return st.deck[st.cardIdx]; }
+function autoCheck(st){
+  const w = norm(word(st)), groups = {};
+  writers(st).forEach(i => { const n = norm(st.clues[i]); (groups[n] = groups[n] || []).push(i); });
+  Object.keys(groups).forEach(n => {
+    const g = groups[n];
+    if(!n || n===w || w.includes(n) && n.length>3 || n.includes(w)) g.forEach(i => { st.struck[i] = true; st.auto[i] = 'mot interdit'; });
+    else if(g.length > 1) g.forEach(i => { st.struck[i] = true; st.auto[i] = 'doublon'; });
+  });
+}
+
+/* ---------- actions ---------- */
+function sendClue(){
+  const v = ($('clue-in').value||'').trim().replace(/\s+/g,' ');
+  if(!v) return;
+  if(v.includes(' ')){ $('clue-err').textContent = 'Un seul mot.'; return; }
+  R.act(st => {
+    if(st.phase!=='clue' || R.me===st.guesser) return false;
+    st.clues[R.me] = v.slice(0, 22);
+    if(writers(st).every(i => st.clues[i])){ autoCheck(st); st.phase = 'check'; }
+  });
+}
+function editClue(){ R.act(st => { if(st.phase!=='clue' || !st.clues[R.me]) return false; delete st.clues[R.me]; }); }
+function toggleStrike(i){ R.act(st => { if(st.phase!=='check' || R.me===st.guesser) return false; if(st.struck[i]) delete st.struck[i]; else st.struck[i] = true; }); }
+function showClues(){ R.act(st => { if(st.phase!=='check' || R.me===st.guesser) return false; st.phase = 'guess'; }); }
+function sendGuess(pass){
+  const v = pass ? '' : ($('guess-in').value||'').trim();
+  if(!pass && !v) return;
+  R.act(st => {
+    if(st.phase!=='guess' || R.me!==st.guesser) return false;
+    st.guess = pass ? null : v.slice(0, 30);
+    if(pass) st.outcome = 'pass';
+    else st.outcome = norm(v)===norm(word(st)) ? 'ok' : 'miss';
+    if(st.outcome==='ok') st.score++;
+    st.phase = 'result';
+  });
+}
+function acceptAnyway(){ R.act(st => { if(st.phase!=='result' || st.outcome!=='miss' || R.me===st.guesser) return false; st.outcome = 'ok'; st.score++; }); }
+function nextCard(){ R.act(st => {
+  if(st.phase!=='result') return false;
+  st.marks[st.cardIdx] = st.outcome==='ok' ? 'ok' : 'ko';
+  let step = 1;
+  if(st.outcome==='miss' && st.cardIdx + 1 < TOTAL){ st.marks[st.cardIdx + 1] = 'ko'; step = 2; }
+  st.cardIdx += step;
+  if(st.cardIdx >= TOTAL){ st.status = 'finished'; return; }
+  st.guesser = (st.guesser + 1) % st.players.length;
+  newCard(st);
+}); }
+
+/* ---------- rendering ---------- */
+function progress(st){
+  $('progress').innerHTML = Array.from({length:TOTAL}, (_, i) => '<span class="'+(st.marks[i]||'')+(i===st.cardIdx && st.status==='playing'?' cur':'')+'"></span>').join('');
+}
+function noteHtml(st, i, opts){
+  const p = st.players[i], c = st.clues[i], col = 'c' + (i % 6);
+  const struck = !!st.struck[i];
+  if(opts.hide) return '<div class="note clue-note '+(struck?'hidden-clue':col)+'"><b>'+(struck ? '✕' : esc(c))+'</b><small>'+av(p)+' '+esc(p.name)+'</small></div>';
+  if(!c) return '<div class="note clue-note blank"><b>…</b><small>'+av(p)+' '+esc(p.name)+'</small></div>';
+  const tap = opts.tap ? ' onclick="toggleStrike('+i+')"' : ' disabled';
+  return '<button type="button" class="note clue-note '+col+(struck?' struck':'')+(opts.tap?' tap':'')+'"'+tap+'><b>'+(opts.mask ? '✓' : esc(c))+'</b><small>'+av(p)+' '+esc(p.name)+'</small>'+(struck && st.auto[i] ? '<span class="why">'+st.auto[i]+'</span>' : (struck ? '<span class="why">rayé</span>' : ''))+'</button>';
+}
+function render(st){
+  progress(st);
+  if(st.status==='finished'){ renderEnd(st); return; }
+  $('iu-top').textContent = 'Carte ' + Math.min(st.cardIdx + 1, TOTAL) + ' / ' + TOTAL + ' · ' + st.score + ' ✓';
+  const body = $('iu-body'), g = st.guesser, isG = R.me===g, gp = st.players[g];
+  const guesserLine = '<div class="guesser">'+av(gp)+' <b>'+(isG ? 'Tu devines' : esc(gp.name)+' devine')+'</b></div>';
+  const mystery = isG ? '<div class="note mystery secret"><small>Mot mystère</small><b>?</b></div>' : '<div class="note mystery"><small>Mot mystère</small><b>'+esc(word(st))+'</b></div>';
+
+  if(st.phase==='clue'){
+    const mine = st.clues[R.me], done = writers(st).filter(i => st.clues[i]).length;
+    let foot;
+    if(isG) foot = '<div class="iu-wait pulse">Les autres écrivent leurs indices… ('+done+'/'+writers(st).length+')</div>';
+    else if(mine) foot = '<div class="iu-wait">Ton indice : <b>'+esc(mine)+'</b> · <button type="button" style="color:var(--violet);font-weight:600" onclick="editClue()">modifier</button><br><span class="pulse">En attente des autres ('+done+'/'+writers(st).length+')</span></div>';
+    else foot = '<form class="write" onsubmit="sendClue();return false;"><input id="clue-in" maxlength="22" autocomplete="off" placeholder="Ton indice"><button class="ui-btn" type="submit">Coller</button></form><div class="error" id="clue-err"></div>';
+    const keep = $('clue-in') ? $('clue-in').value : '';
+    body.innerHTML = guesserLine + mystery + '<div class="board">'+writers(st).map(i => (st.clues[i] ? noteHtml(st, i, {mask: i!==R.me}) : noteHtml(st, i, {}))).join('')+'</div>' + '<div class="ui-foot">'+foot+'</div>';
+    if($('clue-in')) $('clue-in').value = keep;
+    return;
+  }
+  if(st.phase==='check'){
+    const left = writers(st).filter(i => !st.struck[i]).length;
+    body.innerHTML = guesserLine + mystery +
+      (isG ? '<div class="iu-wait pulse">Les autres vérifient les indices…</div>' : '<p class="muted" style="text-align:center">Les doublons sont rayés automatiquement. Touche un indice pour le rayer ou le remettre.</p>') +
+      '<div class="board">'+writers(st).map(i => isG ? '<div class="note clue-note hidden-clue"><b>?</b><small>'+av(st.players[i])+' '+esc(st.players[i].name)+'</small></div>' : noteHtml(st, i, {tap:true})).join('')+'</div>' +
+      '<div class="ui-foot">'+(isG ? '' : '<button class="ui-btn" onclick="showClues()">Montrer '+left+' indice'+(left>1?'s':'')+' à '+esc(gp.name)+'</button>')+'</div>';
+    return;
+  }
+  if(st.phase==='guess'){
+    const visible = writers(st).filter(i => !st.struck[i]);
+    body.innerHTML = guesserLine + (isG ? '' : mystery) +
+      '<div class="board">'+writers(st).map(i => noteHtml(st, i, {hide:true})).join('')+'</div>' +
+      (visible.length ? '' : '<p class="muted" style="text-align:center">Aucun indice n’a survécu… 😬</p>') +
+      '<div class="ui-foot">'+(isG
+        ? '<form class="write" onsubmit="sendGuess(false);return false;"><input id="guess-in" maxlength="30" autocomplete="off" placeholder="Ta réponse"><button class="ui-btn" type="submit">Deviner</button></form><button class="ui-btn alt" style="flex:none;width:100%;box-shadow:0 5px 0 var(--line);background:#fff;color:var(--fg)" onclick="sendGuess(true)">Passer</button>'
+        : '<div class="iu-wait pulse">'+esc(gp.name)+' réfléchit…</div>')+'</div>';
+    return;
+  }
+  if(st.phase==='result'){
+    const o = st.outcome;
+    const head = o==='ok' ? '<div class="big">🎉</div><h2>Trouvé !</h2>' : (o==='pass' ? '<div class="big">🤷</div><h2>Passé</h2><p>La carte est perdue.</p>' : '<div class="big">😵</div><h2>Raté…</h2><p>Cette carte et la suivante sont perdues.</p>');
+    body.innerHTML = '<div class="result">'+head+'<div class="note mystery"><small>Le mot était</small><b>'+esc(word(st))+'</b></div>' +
+      (st.guess ? '<div class="note guess-note">« '+esc(st.guess)+' »</div>' : '') + '</div>' +
+      '<div class="board">'+writers(st).map(i => noteHtml(st, i, {})).join('')+'</div>' +
+      '<div class="ui-foot">'+(o==='miss' && !isG ? '<div class="ui-dock-row"><button class="ui-btn alt" onclick="acceptAnyway()">C’est bon quand même</button><button class="ui-btn" onclick="nextCard()">Carte suivante</button></div>' : '<button class="ui-btn" onclick="nextCard()">'+(st.cardIdx + 1 >= TOTAL ? 'Voir le score' : 'Carte suivante')+'</button>')+'</div>';
+    if(window.GYMFeedback && lastFx!==st.cardIdx+o){ lastFx = st.cardIdx+o; (o==='ok' ? window.GYMFeedback.ok() : window.GYMFeedback.mistake()); }
+  }
+}
+let lastFx = '';
+function renderEnd(st){
+  const s = st.score;
+  const msg = s===13 ? 'Score parfait !' : s===12 ? 'Incroyable !' : s===11 ? 'Génial !' : s>=9 ? 'Super équipe !' : s>=7 ? 'Bien joué !' : s>=4 ? 'Pas mal, on retente ?' : 'On recommence ?';
+  $('end-score').innerHTML = s + '<small>/' + TOTAL + '</small>';
+  $('end-title').textContent = msg;
+  $('end-sub').textContent = st.players.map(p => av(p)).join(' ') + ' · tous ensemble';
+  if(s >= 9 && window.GYMFeedback) window.GYMFeedback.win();
+}
+
+R.init({
+  key:'ui', table:'ui_games', title:'Un indice chacun', page:'indice.html', min:3, max:7,
+  start: setupGame,
+  render
+});
+</script>
+<script src="install-tutorial.js" defer></script>
+</body>
+</html>

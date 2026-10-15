@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Games Room · Agents secrets</title>
+<meta name="theme-color" content="#0c1726">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Games Room">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gym-ui.css">
+<style>
+  /* ---------- Agents secrets — « Salle de briefing » ---------- */
+  :root{
+    --navy:#0c1726; --panel:#14243a; --o:#ff7a1a; --o-dk:#b04f05; --t:#19c2ae; --t-dk:#0b7f71; --neutral:#e8dfc9; --ink:#1d2430;
+    --bg:#0c1726 linear-gradient(rgba(120,170,255,.07) 1px,transparent 1px) 0 0/24px 24px, #0c1726 linear-gradient(90deg,rgba(120,170,255,.07) 1px,transparent 1px) 0 0/24px 24px; --bg-solid:#0c1726;
+    --fg:#e6eefc; --dim:#8ea3c2; --surface:#14243a; --surface-2:#1b2f4a; --soft:rgba(140,180,255,.1); --line:rgba(140,180,255,.25);
+    --accent:#e6eefc; --accent-fg:#0c1726; --accent-sh:#7f93b3;
+    --sel:#e6eefc; --sel-fg:#0c1726; --ok:#e6eefc; --ok-fg:#0c1726; --wait-bg:rgba(140,180,255,.08); --danger:#ff8f8f;
+    --display:'Chakra Petch',system-ui,sans-serif; --display-weight:700;
+    --seg-on:#e6eefc; --seg-on-fg:#0c1726;
+    --code-bg:#14243a; --code-fg:#e6eefc; --code-sh:rgba(140,180,255,.3); --code-font:'Share Tech Mono',monospace;
+    --scrim:rgba(3,8,16,.7); --sheet:#14243a;
+    --end-bg:#0c1726; --end-solid:#0c1726; --end-fg:#e6eefc; --end-soft:rgba(140,180,255,.1);
+    --end-btn-bg:#e6eefc; --end-btn-fg:#0c1726; --end-btn-sh:#7f93b3;
+    --team:var(--o);
+  }
+  body.t1{--team:var(--t)}
+  body[data-screen=end].win0{--end-bg:radial-gradient(500px 420px at 50% 20%,rgba(255,122,26,.45),transparent 70%), #0c1726}
+  body[data-screen=end].win1{--end-bg:radial-gradient(500px 420px at 50% 20%,rgba(25,194,174,.45),transparent 70%), #0c1726}
+  .mono{font-family:'Share Tech Mono',monospace}
+  .ui-field input:focus{border-color:var(--fg)}
+  .avatar-opt.sel{background:var(--fg);box-shadow:none}
+  .ui-hero{gap:8px}
+  .ui-hero-title{font-size:40px;letter-spacing:2px;text-transform:uppercase}
+  .ui-hero-sub{color:var(--dim)}
+  .ag-logo{display:grid;grid-template-columns:repeat(3,26px);gap:4px}
+  .ag-logo span{height:20px;border-radius:4px;background:var(--neutral)}
+  .ag-logo span.o{background:var(--o)} .ag-logo span.t{background:var(--t)} .ag-logo span.x{background:#05080d;box-shadow:inset 0 0 0 2px #ff4d4d}
+  .ui-code span{border-radius:8px;box-shadow:inset 0 0 0 2px var(--line);font-weight:400}
+
+  .teams{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .team{border-radius:18px;padding:12px 10px;display:flex;flex-direction:column;gap:8px;text-align:left;min-width:0}
+  .team.t0{background:linear-gradient(180deg,rgba(255,122,26,.25),rgba(255,122,26,.06))}
+  .team.t1{background:linear-gradient(180deg,rgba(25,194,174,.25),rgba(25,194,174,.06))}
+  .team h3{font-family:'Chakra Petch',sans-serif;font-size:16px;letter-spacing:.14em;text-align:center}
+  .team.t0 h3{color:var(--o)} .team.t1 h3{color:var(--t)}
+  .team .p{padding:10px;border-radius:12px;background:rgba(255,255,255,.07);font-weight:600;display:flex;gap:6px;align-items:center;min-width:0}
+  .team .p span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .team .p.chief{box-shadow:inset 0 0 0 2px currentColor}
+  .team.t0 .p.chief{color:var(--o)} .team.t1 .p.chief{color:var(--t)}
+  .team .p.me{background:rgba(255,255,255,.16)}
+  .team-actions{width:100%;display:flex;gap:8px}
+  .team-actions button{flex:1;height:44px;border-radius:12px;background:var(--surface);font-weight:600;font-size:14px}
+
+  #screen-game{min-height:calc(100dvh - env(safe-area-inset-top));display:flex;flex-direction:column;gap:10px;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  .ag-score{display:flex;align-items:center;gap:10px;justify-content:center;font-family:'Chakra Petch',sans-serif;font-weight:700}
+  .ag-score .s{min-width:44px;padding:4px 10px;border-radius:8px;text-align:center;font-size:18px;color:#0c1726}
+  .ag-score .s0{background:var(--o)} .ag-score .s1{background:var(--t)}
+  .ag-score small{font-size:11px;color:var(--dim);font-weight:500;font-family:'Fredoka',sans-serif}
+  .ag-banner{border-radius:14px;padding:10px 14px;background:var(--surface);box-shadow:inset 4px 0 0 var(--team);display:flex;flex-direction:column;gap:2px}
+  .ag-banner small{font-size:12px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}
+  .ag-banner b{font-family:'Chakra Petch',sans-serif;font-size:19px}
+  .ag-banner .clue{font-family:'Share Tech Mono',monospace;font-size:22px;color:var(--team)}
+  .ag-role{font-size:12px;color:var(--dim);text-align:center}
+  .ag-role b{color:var(--fg)}
+  .grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+  .card{min-height:52px;border-radius:8px;background:var(--neutral);color:var(--ink);display:flex;align-items:center;justify-content:center;text-align:center;padding:4px 2px;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:11px;line-height:1.1;text-transform:uppercase;letter-spacing:.02em;word-break:break-word;hyphens:auto;transition:transform .12s, box-shadow .12s, background .2s}
+  .card.can{cursor:pointer}
+  .card.can:active{transform:scale(.94)}
+  .card.sel{box-shadow:0 0 0 3px var(--team),0 0 16px var(--team);transform:translateY(-2px)}
+  .card:disabled{opacity:1;cursor:default}
+  /* chief's key: tinted borders on hidden cards */
+  .card.k-o{box-shadow:inset 0 0 0 3px var(--o)} .card.k-t{box-shadow:inset 0 0 0 3px var(--t)} .card.k-x{box-shadow:inset 0 0 0 3px #05080d;background:#9c9583}
+  .card.k-o.sel,.card.k-t.sel{box-shadow:inset 0 0 0 3px currentColor,0 0 0 3px var(--team)}
+  /* revealed */
+  .card.r-o{background:var(--o);color:#3a1600}
+  .card.r-t{background:var(--t);color:#002b26}
+  .card.r-n{background:#5a6274;color:#c6cbd6}
+  .card.r-x{background:#05080d;color:#ff6b6b}
+  .card.r-o,.card.r-t,.card.r-n,.card.r-x{box-shadow:none}
+  .card.r-o span,.card.r-t span,.card.r-n span{opacity:.75}
+  @media (prefers-reduced-motion:no-preference){ .card.just{animation:agFlip .45s ease} }
+  @keyframes agFlip{0%{transform:rotateY(90deg)}100%{transform:none}}
+  .ag-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+  .ag-foot .ui-btn{flex:none}
+  .ag-clue-form{display:flex;flex-direction:column;gap:8px}
+  .ag-clue-form input{height:54px;border-radius:14px;border:2px solid var(--team);background:var(--surface);color:var(--fg);padding:0 16px;font-family:'Share Tech Mono',monospace;font-size:22px;text-transform:uppercase;outline:none}
+  .nums{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+  .nums button{height:42px;border-radius:10px;background:var(--surface);font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:18px}
+  .nums button.on{background:var(--team);color:#0c1726}
+  .ag-wait{color:var(--dim);text-align:center;font-size:15px;padding:12px 0}
+  .ag-log{display:flex;gap:6px;flex-wrap:wrap;font-family:'Share Tech Mono',monospace;font-size:13px}
+  .ag-log span{padding:3px 8px;border-radius:6px;background:var(--surface)}
+  .ag-log span.t0{color:var(--o)} .ag-log span.t1{color:var(--t)}
+  .ui-dock-row .ui-btn.alt{flex:0 0 auto;width:auto;padding:0 16px;font-size:15px;background:var(--surface);color:var(--fg);box-shadow:none}
+  .ag-foot .ui-dock-row .ui-btn:not(.alt){flex:1;width:auto;background:var(--team);color:#0c1726;box-shadow:none}
+
+  .ag-end{display:flex;flex-direction:column;align-items:center;gap:12px;padding:30px 0 0;text-align:center}
+  .ag-end h2{font-family:'Chakra Petch',sans-serif;font-size:34px;line-height:1.05;letter-spacing:.06em;text-transform:uppercase;text-wrap:balance}
+  .ag-end p{color:var(--dim)}
+  .ag-end .grid{width:100%;margin-top:8px}
+  .ag-end .card{min-height:40px;font-size:9px}
+
+  .ui-sheet-title{font-family:'Chakra Petch',sans-serif;letter-spacing:.06em}
+  .ui-step > b:first-child{border-radius:6px;background:var(--fg);color:var(--navy)}
+</style>
+</head>
+<body data-screen="create">
+<div class="frame">
+  <div id="screen-create" class="ui-screen has-dock">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
+    </div>
+    <div class="ui-hero">
+      <div class="ui-hero-art"><span class="ag-logo"><span class="o"></span><span></span><span class="t"></span><span class="t"></span><span class="x"></span><span class="o"></span><span></span><span class="o"></span><span class="t"></span></span></div>
+      <h1 class="ui-hero-title">Agents secrets</h1>
+      <div class="ui-hero-sub">Deux équipes, un indice, vingt-cinq noms de code</div>
+    </div>
+    <div class="ui-seg" role="tablist"><button type="button" class="on" aria-selected="true">Créer</button><button type="button" onclick="GYMRoom.show('join')">Rejoindre</button></div>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="create-name" maxlength="12" placeholder="Ex. Léa" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
+      <div class="avatar-row" id="create-avatar-row"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="error" id="create-err"></div>
+      <button class="ui-btn" id="btn-create">Créer la partie</button>
+    </div>
+  </div>
+
+  <div id="screen-join" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
+    </div>
+    <div class="ui-hero">
+      <div class="ui-hero-art"><span class="ag-logo"><span class="o"></span><span></span><span class="t"></span><span class="t"></span><span class="x"></span><span class="o"></span><span></span><span class="o"></span><span class="t"></span></span></div>
+      <h1 class="ui-hero-title">Agents secrets</h1>
+      <div class="ui-hero-sub">Deux équipes, un indice, vingt-cinq noms de code</div>
+    </div>
+    <div class="ui-seg" role="tablist"><button type="button" onclick="GYMRoom.show('create')">Créer</button><button type="button" class="on" aria-selected="true">Rejoindre</button></div>
+    <label class="ui-field">
+      <span class="ui-label">Code de la partie</span>
+      <input type="text" id="join-code" class="code-input" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    </label>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="join-name" maxlength="12" placeholder="Ex. Emma" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
+      <div class="avatar-row" id="join-avatar-row"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="error" id="join-err"></div>
+      <button class="ui-btn" id="btn-join">Rejoindre</button>
+    </div>
+  </div>
+
+  <div id="screen-wait" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <button class="ui-round" onclick="GYMRoom.leave('Quitter la salle d\'attente ?')" aria-label="Quitter">✕</button>
+      <div class="ui-top-mid">Salle de briefing</div>
+      <button class="ui-round" onclick="GYMRoom.share()" aria-label="Partager">📤</button>
+    </div>
+    <div class="ui-wait" style="gap:14px;padding-top:10px">
+      <button class="ui-code" id="wait-code"></button>
+      <div class="ui-code-hint" id="wait-hint">Touche le code pour copier le lien</div>
+      <div class="ui-row-head"><span>Joueurs</span><span id="wait-count"></span></div>
+      <div class="ui-chips" id="wait-players"></div>
+      <div class="ui-row-head" style="margin-top:6px"><span>Équipes</span><span class="mono" id="team-hint"></span></div>
+      <div class="teams" id="teams"></div>
+      <div class="team-actions"><button type="button" onclick="switchTeam()">⇄ Changer d'équipe</button><button type="button" onclick="becomeChief()">👑 Devenir chef</button></div>
+    </div>
+    <div class="ui-dock">
+      <button class="ui-btn hidden" id="btn-start">Lancer la partie</button>
+      <div class="muted pulse hidden" id="wait-note" style="text-align:center;padding:14px 0"></div>
+    </div>
+  </div>
+
+  <div id="screen-game" class="hidden">
+    <div class="ui-top">
+      <button class="ui-round" onclick="GYMRoom.leave()" aria-label="Quitter">✕</button>
+      <div class="ui-top-mid ag-score" id="ag-score"></div>
+      <button class="ui-round" data-rules aria-label="Règles">?</button>
+    </div>
+    <div class="ag-banner" id="ag-banner"></div>
+    <div class="grid" id="ag-grid"></div>
+    <div class="ag-role" id="ag-role"></div>
+    <div class="ag-log" id="ag-log"></div>
+    <div class="ag-foot" id="ag-foot"></div>
+  </div>
+
+  <div id="screen-end" class="ui-screen has-dock hidden">
+    <div class="ag-end">
+      <div style="font-size:56px" id="end-emo">🏆</div>
+      <h2 id="end-title">…</h2>
+      <p id="end-sub"></p>
+      <div class="grid" id="end-grid"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="ui-dock-row">
+        <a class="ui-sq" href="index.html" aria-label="Accueil" style="text-decoration:none">🏠</a>
+        <button class="ui-btn" onclick="location.href='agents.html'">🔁 Nouvelle partie</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ui-sheet" id="rules-sheet" aria-hidden="true">
+  <div class="ui-sheet-scrim" data-rules-close></div>
+  <div class="ui-sheet-body" role="dialog" aria-label="Règles">
+    <div class="ui-grab"></div>
+    <div class="ui-sheet-title">Briefing</div>
+    <div class="ui-step"><b>1</b><span>Deux équipes, <b style="color:#ff7a1a">orange</b> et <b style="color:#19c2ae">turquoise</b>, chacune avec un <b>chef</b>. Seuls les chefs voient quels mots appartiennent à quelle équipe.</span></div>
+    <div class="ui-step"><b>2</b><span>À son tour, le chef donne <b>un mot</b> et <b>un nombre</b> (ex. « MER · 2 ») pour faire deviner plusieurs de ses agents d'un coup.</span></div>
+    <div class="ui-step"><b>3</b><span>Son équipe retourne les mots un par un (nombre + 1 essais). Mot neutre ou adverse : le tour s'arrête.</span></div>
+    <div class="ui-step"><b>☠</b><span>Le mot <b>assassin</b> fait perdre immédiatement. La première équipe qui trouve tous ses agents gagne.</span></div>
+    <button class="ui-btn" data-rules-close>Compris</button>
+  </div>
+</div>
+
+<script src="realtime.js"></script>
+<script src="leave-guard.js"></script>
+<script src="recent-games.js"></script>
+<script src="feedback.js"></script>
+<script src="connection-banner.js"></script>
+<script src="avatar-picker.js"></script>
+<script src="game-link.js"></script>
+<script src="gym-ui.js"></script>
+<script src="gym-room.js"></script>
+<script>
+const WORDS = ['AVION','BANQUE','PLAGE','LUNE','SOLEIL','MONTAGNE','DÉSERT','CHAMEAU','PALMIER','OLIVE','CAFÉ','THÉ','CINÉMA','ÉCOLE','HÔPITAL','POLICE','PRISON','CHÂTEAU',
+'ROI','REINE','PRINCE','DRAGON','ROBOT','ALIEN','FUSÉE','ÉTOILE','PLANÈTE','OCÉAN','BATEAU','PIRATE','TRÉSOR','CARTE','BOUSSOLE','PHARE','PORT','PONT','TOUR',
+'TRAIN','GARE','MÉTRO','TAXI','VÉLO','MOTO','CAMION','ROUTE','DOUANE','PASSEPORT','HÔTEL','PISCINE','SAUNA','HAMMAM','SAVON','PARFUM','MIROIR','PEIGNE',
+'CHAPEAU','LUNETTES','MONTRE','BAGUE','COLLIER','DIAMANT','OR','ARGENT','PIÈCE','BILLET','BOURSE','MARCHÉ','SOUK','ÉPICE','PIMENT','HARISSA','COUSCOUS',
+'PAIN','FROMAGE','CITRON','ORANGE','POMME','BANANE','DATTE','FIGUE','RAISIN','VIN','EAU','GLACE','NEIGE','PLUIE','ORAGE','ÉCLAIR','VENT','NUAGE',
+'ARC','FLÈCHE','ÉPÉE','BOUCLIER','CANON','BOMBE','ESPION','AGENT','CODE','CLÉ','SERRURE','PORTE','FENÊTRE','MUR','TOIT','JARDIN','FLEUR','ROSE','JASMIN',
+'ARBRE','FORÊT','LOUP','LION','TIGRE','OURS','SINGE','SERPENT','AIGLE','HIBOU','POULE','CHAT','CHIEN','CHEVAL','POISSON','REQUIN','BALEINE','CRABE',
+'ARAIGNÉE','ABEILLE','MIEL','CIRE','BOUGIE','LAMPE','ÉCRAN','TÉLÉPHONE','RADIO','MUSIQUE','GUITARE','PIANO','TAMBOUR','DANSE','FÊTE','MARIAGE','GÂTEAU',
+'CADEAU','BALLON','STADE','MATCH','ARBITRE','BUT','COUPE','MÉDAILLE','COURSE','RECORD','CHAMPION','HÉROS','MASQUE','CAPE','FANTÔME','VAMPIRE','SORCIÈRE',
+'MAGIE','LIVRE','PAGE','PLUME','ENCRE','LETTRE','TIMBRE','POSTE','JOURNAL','PHOTO','CAMÉRA','FILM','STAR','ÉTÉ','HIVER','NUIT','JOUR','RÊVE','OMBRE',
+'LUMIÈRE','FEU','GLAÇON','PIERRE','SABLE','VERRE','PAPIER','BOIS','FER','CORDE','NŒUD','ANCRE','VOILE','ÎLE','VOLCAN','GROTTE','MINE','TUNNEL','PYRAMIDE',
+'MOMIE','TEMPLE','COLONNE','STATUE','MUSÉE','TABLEAU','PEINTRE','CHEF','CUISINE','FOUR','COUTEAU','FOURCHETTE','ASSIETTE','VERRE','BOUTEILLE','SAC',
+'VALISE','POCHE','ZÉRO','DOCTEUR','INFIRMIÈRE','VACCIN','VIRUS','LABO','ATOME','LASER','SATELLITE','ANTENNE','RÉSEAU','PIRATE','VIRUS','MOT','JEU','DÉ','CARTE'];
+const R = GYMRoom, $ = id => document.getElementById(id), esc = R.esc, av = R.av;
+const TEAM = ['Orange','Turquoise'], KEYC = {o:0, t:1};
+
+function teamOf(st, i){ return st.teams[i]; }
+function members(st, t){ return st.players.map((p,i)=>i).filter(i => st.teams[i]===t); }
+function fixChiefs(st){ [0,1].forEach(t => { if(st.chiefs[t]===null || st.teams[st.chiefs[t]]!==t){ const m = members(st, t); st.chiefs[t] = m.length ? m[0] : null; } }); }
+function switchTeam(){ R.act(st => { if(st.status!=='waiting') return false; st.teams[R.me] = 1 - st.teams[R.me]; fixChiefs(st); }); }
+function becomeChief(){ R.act(st => { if(st.status!=='waiting') return false; const t = st.teams[R.me]; if(st.chiefs[t]===R.me) return false; st.chiefs[t] = R.me; }); }
+
+function startGame(st){
+  fixChiefs(st);
+  const uniq = [...new Set(WORDS)];
+  st.words = R.shuffle(uniq).slice(0, 25);
+  const first = Math.random() < .5 ? 0 : 1;
+  const key = [];
+  for(let i=0;i<9;i++) key.push(first===0?'o':'t');
+  for(let i=0;i<8;i++) key.push(first===0?'t':'o');
+  for(let i=0;i<7;i++) key.push('n');
+  key.push('x');
+  st.key = R.shuffle(key);
+  st.revealed = new Array(25).fill(false);
+  st.first = first; st.turn = first; st.phase = 'clue'; st.clue = null; st.log = []; st.lastReveal = null; st.winner = null; st.reason = null;
+}
+function left(st, t){ const k = t===0?'o':'t'; return st.key.filter((c,i) => c===k && !st.revealed[i]).length; }
+function endTurn(st){ st.turn = 1 - st.turn; st.phase = 'clue'; st.clue = null; }
+
+/* ---------- actions ---------- */
+let pickedNum = 1, selected = null;
+function setNum(n){ pickedNum = n; render(R.state); }
+function sendClue(){
+  const w = ($('clue-in').value || '').trim().toUpperCase().replace(/\s+/g,' ');
+  if(!w){ $('clue-err').textContent = 'Écris ton indice.'; return; }
+  if(w.includes(' ')){ $('clue-err').textContent = 'Un seul mot.'; return; }
+  const st0 = R.state;
+  if(st0.words.some((x,i) => !st0.revealed[i] && x===w)){ $('clue-err').textContent = 'L’indice ne peut pas être un mot de la grille.'; return; }
+  const n = pickedNum;
+  R.act(st => {
+    if(st.phase!=='clue' || st.chiefs[st.turn]!==R.me) return false;
+    st.clue = {w: w.slice(0,20), n, team: st.turn};
+    st.guessesLeft = n===0 ? 25 : n + 1;
+    st.phase = 'guess';
+    st.log.push({w: st.clue.w, n, team: st.turn});
+  });
+}
+function pick(i){ selected = selected===i ? null : i; render(R.state); }
+function reveal(){
+  const i = selected; if(i===null) return;
+  selected = null;
+  R.act(st => {
+    if(st.phase!=='guess' || st.teams[R.me]!==st.turn || st.chiefs[st.turn]===R.me || st.revealed[i]) return false;
+    st.revealed[i] = true;
+    st.lastReveal = {i, by: R.me};
+    const k = st.key[i], mine = st.turn===0 ? 'o' : 't';
+    if(k==='x'){ st.status = 'finished'; st.winner = 1 - st.turn; st.reason = 'assassin'; return; }
+    if(left(st, 0)===0){ st.status = 'finished'; st.winner = 0; st.reason = 'all'; return; }
+    if(left(st, 1)===0){ st.status = 'finished'; st.winner = 1; st.reason = 'all'; return; }
+    if(k===mine){ st.guessesLeft--; if(st.guessesLeft<=0) endTurn(st); }
+    else endTurn(st);
+  });
+}
+function passTurn(){ R.act(st => { if(st.phase!=='guess' || st.teams[R.me]!==st.turn || st.chiefs[st.turn]===R.me) return false; endTurn(st); }); }
+
+/* ---------- rendering ---------- */
+function renderTeams(st){
+  fixChiefs(st);
+  $('teams').innerHTML = [0,1].map(t => '<div class="team t'+t+'"><h3>'+TEAM[t].toUpperCase()+'</h3>' +
+    members(st, t).map(i => '<div class="p'+(st.chiefs[t]===i?' chief':'')+(i===R.me?' me':'')+'"><span>'+(st.chiefs[t]===i?'👑':av(st.players[i]))+'</span><span>'+esc(st.players[i].name)+(i===R.me?' (toi)':'')+'</span></div>').join('') + '</div>').join('');
+  $('team-hint').textContent = members(st,0).length + ' vs ' + members(st,1).length;
+}
+let lastRevealKey = null;
+function cardHtml(st, i, chiefView, canPick){
+  const w = esc(st.words[i]);
+  if(st.revealed[i]){
+    const k = st.key[i];
+    const just = st.lastReveal && st.lastReveal.i===i && lastRevealKey!==i+'|'+st.rev ? ' just' : '';
+    return '<button type="button" class="card r-'+k+just+'" disabled>'+(k==='x' ? '☠ ' : '')+'<span>'+w+'</span></button>';
+  }
+  let cls = 'card' + (chiefView ? ' k-'+st.key[i] : '') + (canPick ? ' can' : '') + (selected===i ? ' sel' : '');
+  return '<button type="button" class="'+cls+'"'+(canPick ? ' onclick="pick('+i+')"' : ' disabled')+'>'+w+'</button>';
+}
+function render(st){
+  if(st.status==='finished'){ renderEnd(st); return; }
+  const myTeam = st.teams[R.me], chief = st.chiefs[myTeam]===R.me;
+  document.body.classList.toggle('t1', st.turn===1);
+  $('ag-score').innerHTML = '<span class="s s0">'+left(st,0)+'</span><small>agents restants</small><span class="s s1">'+left(st,1)+'</span>';
+  const turnChief = st.players[st.chiefs[st.turn]];
+  if(st.phase==='clue'){
+    $('ag-banner').innerHTML = '<small>Équipe '+TEAM[st.turn].toLowerCase()+'</small><b>'+(st.chiefs[st.turn]===R.me ? 'À toi de donner un indice' : esc(turnChief.name)+' cherche un indice…')+'</b>';
+  } else {
+    const c = st.clue;
+    $('ag-banner').innerHTML = '<small>Équipe '+TEAM[st.turn].toLowerCase()+' · '+(st.guessesLeft>=25 ? 'essais illimités' : st.guessesLeft+' essai'+(st.guessesLeft>1?'s':'')+' restant'+(st.guessesLeft>1?'s':''))+'</small><span class="clue">'+esc(c.w)+' · '+(c.n===0?'∞':c.n)+'</span>';
+  }
+  const canPick = st.phase==='guess' && myTeam===st.turn && !chief;
+  if(!canPick) selected = null;
+  $('ag-grid').innerHTML = st.words.map((w,i) => cardHtml(st, i, chief, canPick)).join('');
+  if(st.lastReveal) lastRevealKey = st.lastReveal.i+'|'+st.rev;
+  $('ag-role').innerHTML = 'Tu es <b>'+(chief ? 'chef' : 'agent')+'</b> · équipe <b style="color:'+(myTeam===0?'var(--o)':'var(--t)')+'">'+TEAM[myTeam].toLowerCase()+'</b>' + (chief ? ' · les couleurs ne sont visibles que pour toi' : '');
+  $('ag-log').innerHTML = st.log.slice(-6).map(l => '<span class="t'+l.team+'">'+esc(l.w)+' · '+(l.n===0?'∞':l.n)+'</span>').join('');
+
+  let foot = '';
+  if(st.phase==='clue' && st.chiefs[st.turn]===R.me){
+    const keep = $('clue-in') ? $('clue-in').value : '';
+    foot = '<form class="ag-clue-form" onsubmit="sendClue();return false;"><input id="clue-in" maxlength="20" autocomplete="off" placeholder="TON INDICE" value="'+esc(keep)+'">' +
+      '<div class="nums">'+[0,1,2,3,4,5].map(n => '<button type="button" class="'+(pickedNum===n?'on':'')+'" onclick="setNum('+n+')">'+(n===0?'∞':n)+'</button>').join('')+'</div>' +
+      '<div class="error" id="clue-err"></div><button class="ui-btn" type="submit" style="background:var(--team);color:#0c1726;box-shadow:none">Envoyer l’indice</button></form>';
+  } else if(canPick){
+    foot = '<div class="ui-dock-row"><button class="ui-btn alt" onclick="passTurn()">Fin du tour</button><button class="ui-btn" onclick="reveal()"'+(selected===null?' disabled':'')+'>'+(selected===null ? 'Touche un mot' : 'Retourner « '+esc(st.words[selected])+' »')+'</button></div>';
+  } else {
+    foot = '<div class="ag-wait pulse">'+(st.phase==='clue' ? 'En attente de l’indice…' : (myTeam===st.turn ? 'Ton équipe cherche…' : 'L’équipe '+TEAM[st.turn].toLowerCase()+' cherche…'))+'</div>';
+  }
+  $('ag-foot').innerHTML = foot;
+  if(myTeam===st.turn && st.phase!==lastPhase && window.GYMFeedback) window.GYMFeedback.ok();
+  lastPhase = st.phase;
+}
+let lastPhase = null;
+function renderEnd(st){
+  const w = st.winner, mine = st.teams[R.me]===w;
+  document.body.classList.toggle('win0', w===0); document.body.classList.toggle('win1', w===1);
+  $('end-emo').textContent = mine ? '🏆' : (st.reason==='assassin' ? '☠️' : '🕶️');
+  $('end-title').innerHTML = 'Équipe <span style="color:'+(w===0?'var(--o)':'var(--t)')+'">'+TEAM[w].toLowerCase()+'</span> gagne';
+  $('end-sub').textContent = st.reason==='assassin' ? 'L’équipe '+TEAM[1-w].toLowerCase()+' a touché l’assassin.' : 'Tous ses agents ont été trouvés.';
+  $('end-grid').innerHTML = st.words.map((x,i) => '<div class="card r-'+st.key[i]+'"><span>'+(st.key[i]==='x'?'☠ ':'')+esc(x)+'</span></div>').join('');
+  if(mine && window.GYMFeedback) window.GYMFeedback.win();
+}
+
+R.init({
+  key:'ag', table:'ag_games', title:'Agents secrets', page:'agents.html', min:4, max:8,
+  newState(st){ st.teams = [0]; st.chiefs = [0, null]; },
+  onJoin(st, idx){ const a = st.teams.filter(t => t===0).length, b = st.teams.filter(t => t===1).length; st.teams.push(a<=b ? 0 : 1); fixChiefs(st); },
+  canStart(st){ return members(st,0).length < 2 || members(st,1).length < 2 ? 'Il faut 2 joueurs par équipe' : ''; },
+  start: startGame,
+  renderWait: renderTeams,
+  render
+});
+</script>
+<script src="install-tutorial.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Games Room · L'Intrus</title>
+<meta name="theme-color" content="#1d2a2f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Games Room">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gym-ui.css">
+<style>
+  /* ---------- L'Intrus — « Salle d'interrogatoire » ---------- */
+  :root{
+    --slate:#1d2a2f; --slate-2:#26363c; --file:#efe9dc; --file-ink:#2a2622; --lamp:#f4e04d; --stamp:#d7263d;
+    --bg:radial-gradient(520px 360px at 50% -40px,rgba(244,224,77,.22),transparent 70%) , #1d2a2f; --bg-solid:#1d2a2f;
+    --fg:#e9e4d8; --dim:#9fb0ad; --surface:#26363c; --surface-2:#2f4249; --soft:rgba(255,255,255,.07); --line:rgba(233,228,216,.22);
+    --accent:#f4e04d; --accent-fg:#1d2a2f; --accent-sh:#a8971f;
+    --sel:#f4e04d; --sel-fg:#1d2a2f; --ok:#f4e04d; --ok-fg:#1d2a2f; --wait-bg:rgba(255,255,255,.06); --danger:#ff7a87;
+    --display:'Special Elite',ui-monospace,monospace; --display-weight:400;
+    --seg-on:#efe9dc; --seg-on-fg:#1d2a2f;
+    --code-bg:#efe9dc; --code-fg:#1d2a2f; --code-sh:#a89f8c; --code-font:'Special Elite',monospace;
+    --scrim:rgba(0,0,0,.6); --sheet:#efe9dc;
+    --end-bg:radial-gradient(520px 420px at 50% 20%,rgba(244,224,77,.25),transparent 70%), #1d2a2f; --end-solid:#1d2a2f; --end-fg:#e9e4d8; --end-soft:rgba(255,255,255,.07);
+    --end-btn-bg:#f4e04d; --end-btn-fg:#1d2a2f; --end-btn-sh:#a8971f; --rank1-bg:#f4e04d; --rank1-fg:#1d2a2f;
+  }
+  .ui-field input:focus{border-color:var(--lamp)}
+  .avatar-opt.sel{background:var(--lamp);box-shadow:none}
+  .ui-hero{gap:8px}
+  .ui-hero-title{font-size:46px;letter-spacing:1px}
+  .ui-hero-sub{color:var(--dim)}
+  .lamp{width:96px;height:96px;position:relative;display:flex;align-items:flex-end;justify-content:center}
+  .lamp::before{content:"";position:absolute;top:0;left:50%;width:2px;height:22px;background:#6d7d7a}
+  .lamp b{width:66px;height:38px;border-radius:40px 40px 6px 6px;background:#3f5258;position:relative;top:-28px;box-shadow:0 18px 40px 12px rgba(244,224,77,.35)}
+  .lamp b::after{content:"";position:absolute;left:50%;bottom:-6px;width:22px;height:12px;margin-left:-11px;border-radius:0 0 12px 12px;background:var(--lamp)}
+  .lamp i{position:absolute;bottom:0;font-style:normal;font-size:34px}
+  .ui-code span{border-radius:6px;font-weight:400}
+  .ui-chips span{background:var(--surface)}
+  .ui-chips span.host{background:var(--file);color:var(--file-ink)}
+
+  /* Case file */
+  .file{position:relative;background:var(--file);color:var(--file-ink);border-radius:6px 18px 18px 18px;padding:18px 18px 22px;box-shadow:0 14px 30px rgba(0,0,0,.35)}
+  .file::before{content:"";position:absolute;top:-12px;left:0;width:110px;height:14px;background:var(--file);border-radius:8px 8px 0 0}
+  .file small{font-family:'Special Elite',monospace;font-size:12px;letter-spacing:.14em;color:#7b7266}
+  .file .w{font-family:'Special Elite',monospace;font-size:clamp(32px,10vw,44px);line-height:1.1;margin-top:6px;word-break:break-word}
+  .file .stamp{position:absolute;right:14px;top:14px;transform:rotate(9deg);border:3px solid var(--stamp);color:var(--stamp);font-family:'Special Elite',monospace;font-size:13px;padding:3px 8px;border-radius:4px;letter-spacing:.12em;opacity:.85}
+  .file.hidden-word .w{filter:blur(14px);user-select:none}
+  .file-tap{font-size:13px;color:#7b7266;margin-top:10px}
+  .file.mini{padding:10px 14px;border-radius:6px 14px 14px 14px;display:flex;align-items:center;gap:10px;box-shadow:none}
+  .file.mini::before{width:60px;height:8px;top:-7px}
+  .file.mini .w{font-size:20px;margin:0;flex:1}
+  .file.mini small{font-size:10px}
+
+  #screen-game{min-height:calc(100dvh - env(safe-area-inset-top));display:flex;flex-direction:column;gap:12px;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+  .in-top{font-family:'Special Elite',monospace;font-size:15px;letter-spacing:.06em}
+  .suspects{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+  .suspect{position:relative;background:var(--file);color:var(--file-ink);border-radius:8px;padding:8px 6px 6px;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.25);transition:transform .12s, box-shadow .12s}
+  .suspect .ph{height:54px;border-radius:4px;background:repeating-linear-gradient(0deg,#d8d0be 0 9px,#cfc6b2 9px 10px);display:flex;align-items:center;justify-content:center;font-size:32px}
+  .suspect .nm{font-family:'Special Elite',monospace;font-size:13px;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .suspect .tag{font-size:11px;color:#7b7266;min-height:1.2em}
+  .suspect.speaking{box-shadow:0 0 0 3px var(--lamp),0 0 26px rgba(244,224,77,.45);transform:translateY(-2px)}
+  .suspect.out{opacity:.45}
+  .suspect.out::after{content:"ÉLIMINÉ";position:absolute;left:50%;top:38%;transform:translate(-50%,-50%) rotate(-14deg);border:2px solid var(--stamp);color:var(--stamp);font-family:'Special Elite',monospace;font-size:12px;padding:1px 5px;background:rgba(239,233,220,.85)}
+  .suspect.pick{cursor:pointer}
+  .suspect.pick:active{transform:scale(.96)}
+  .suspect.voted{box-shadow:0 0 0 3px var(--stamp);transform:translateY(-2px)}
+  .suspect.voted::before{content:"✕";position:absolute;right:6px;top:4px;color:var(--stamp);font-weight:700}
+  .suspect:disabled{opacity:1;cursor:default}
+  .suspect.out:disabled{opacity:.45}
+  .clues{display:flex;flex-direction:column;gap:6px}
+  .clue-lap{font-size:12px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
+  .clue{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:var(--surface)}
+  .clue .av{font-size:20px}
+  .clue .nm{font-size:13px;color:var(--dim);width:72px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .clue b{font-family:'Special Elite',monospace;font-weight:400;font-size:19px;flex:1;min-width:0;word-break:break-word}
+  @media (prefers-reduced-motion:no-preference){ .clue.new{animation:uiPop .35s cubic-bezier(.22,1,.36,1)} }
+  .in-input{display:flex;gap:8px}
+  .in-input input{flex:1;min-width:0;height:56px;border-radius:16px;border:2px solid var(--lamp);background:var(--surface);color:var(--fg);padding:0 16px;font-family:'Special Elite',monospace;font-size:20px;outline:none}
+  .in-input .ui-btn{flex:0 0 auto;width:auto;padding:0 20px}
+  .in-wait{color:var(--dim);text-align:center;font-size:15px;padding:10px 0}
+  .in-res{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding-top:10px}
+  .in-res .big{font-size:64px;line-height:1}
+  .in-res h2{font-family:'Special Elite',monospace;font-weight:400;font-size:28px;line-height:1.15;text-wrap:balance}
+  .in-res p{color:var(--dim)}
+  .stamp-big{display:inline-block;transform:rotate(-6deg);border:4px solid var(--stamp);color:var(--stamp);font-family:'Special Elite',monospace;font-size:26px;padding:4px 14px;border-radius:6px;letter-spacing:.1em;background:rgba(239,233,220,.92)}
+  .stamp-big.ok{border-color:#3f8f5a;color:#3f8f5a}
+  @media (prefers-reduced-motion:no-preference){ .stamp-big{animation:inStamp .45s cubic-bezier(.3,1.6,.5,1)} }
+  @keyframes inStamp{from{transform:rotate(-6deg) scale(2.2);opacity:0}}
+  .words{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+  .words .file{padding:12px 14px 14px}
+  .words .file .w{font-size:24px}
+  .score-list{width:100%;display:flex;flex-direction:column;gap:6px}
+  .score-list div{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:var(--surface)}
+  .score-list .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .score-list b{font-family:'Special Elite',monospace;font-weight:400;font-size:18px}
+  .score-list .plus{color:var(--lamp);font-size:13px}
+  .in-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+  .in-foot > .ui-btn{flex:none}
+  .ui-dock-row .ui-btn.alt{flex:0 0 auto;width:auto;padding:0 18px;font-size:16px;background:var(--surface);color:var(--fg);box-shadow:none}
+
+  .ui-sheet-body{color:var(--file-ink)}
+  .ui-sheet-title{font-size:26px;color:var(--file-ink)}
+  .ui-step > b:first-child{background:var(--slate);color:var(--lamp);border-radius:4px;font-family:'Special Elite',monospace;font-weight:400}
+  .ui-sheet .ui-btn{background:var(--slate);color:var(--lamp)}
+</style>
+</head>
+<body data-screen="create">
+<div class="frame">
+  <div id="screen-create" class="ui-screen has-dock">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
+    </div>
+    <div class="ui-hero">
+      <div class="ui-hero-art"><span class="lamp"><b></b><i>🕵️</i></span></div>
+      <h1 class="ui-hero-title">L'INTRUS</h1>
+      <div class="ui-hero-sub">Un mot pour tous… sauf un. Démasquez-le.</div>
+    </div>
+    <div class="ui-seg" role="tablist"><button type="button" class="on" aria-selected="true">Créer</button><button type="button" onclick="GYMRoom.show('join')">Rejoindre</button></div>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="create-name" maxlength="12" placeholder="Ex. Léa" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
+      <div class="avatar-row" id="create-avatar-row"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="error" id="create-err"></div>
+      <button class="ui-btn" id="btn-create">Créer la partie</button>
+    </div>
+  </div>
+
+  <div id="screen-join" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
+    </div>
+    <div class="ui-hero">
+      <div class="ui-hero-art"><span class="lamp"><b></b><i>🕵️</i></span></div>
+      <h1 class="ui-hero-title">L'INTRUS</h1>
+      <div class="ui-hero-sub">Un mot pour tous… sauf un. Démasquez-le.</div>
+    </div>
+    <div class="ui-seg" role="tablist"><button type="button" onclick="GYMRoom.show('create')">Créer</button><button type="button" class="on" aria-selected="true">Rejoindre</button></div>
+    <label class="ui-field">
+      <span class="ui-label">Code de la partie</span>
+      <input type="text" id="join-code" class="code-input" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    </label>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="join-name" maxlength="12" placeholder="Ex. Emma" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
+      <div class="avatar-row" id="join-avatar-row"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="error" id="join-err"></div>
+      <button class="ui-btn" id="btn-join">Rejoindre</button>
+    </div>
+  </div>
+
+  <div id="screen-wait" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <button class="ui-round" onclick="GYMRoom.leave('Quitter la salle d\'attente ?')" aria-label="Quitter">✕</button>
+      <div class="ui-top-mid">Salle d'interrogatoire</div>
+      <button class="ui-round" onclick="GYMRoom.share()" aria-label="Partager">📤</button>
+    </div>
+    <div class="ui-wait" style="gap:14px;padding-top:10px">
+      <button class="ui-code" id="wait-code"></button>
+      <div class="ui-code-hint" id="wait-hint">Touche le code pour copier le lien</div>
+      <div class="ui-row-head"><span>Joueurs</span><span id="wait-count"></span></div>
+      <div class="ui-chips" id="wait-players"></div>
+    </div>
+    <div class="ui-dock">
+      <button class="ui-btn hidden" id="btn-start">Lancer la partie</button>
+      <div class="muted pulse hidden" id="wait-note" style="text-align:center;padding:14px 0"></div>
+    </div>
+  </div>
+
+  <div id="screen-game" class="hidden">
+    <div class="ui-top">
+      <button class="ui-round" onclick="GYMRoom.leave()" aria-label="Quitter">✕</button>
+      <div class="ui-top-mid"><span class="in-top" id="in-top">MANCHE 1</span></div>
+      <button class="ui-round" data-rules aria-label="Règles">?</button>
+    </div>
+    <div id="in-body" style="flex:1;display:flex;flex-direction:column;gap:12px"></div>
+  </div>
+
+  <div id="screen-end" class="ui-screen has-dock hidden">
+    <div class="in-res" style="padding-top:40px">
+      <div class="big">🗂️</div>
+      <h2 id="end-title">Dossier clos</h2>
+      <p id="end-sub"></p>
+      <div class="ui-rank" id="end-rank" style="margin-top:10px"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="ui-dock-row">
+        <a class="ui-sq" href="index.html" aria-label="Accueil" style="text-decoration:none">🏠</a>
+        <button class="ui-btn" onclick="location.href='intrus.html'">🔁 Nouvelle partie</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ui-sheet" id="rules-sheet" aria-hidden="true">
+  <div class="ui-sheet-scrim" data-rules-close></div>
+  <div class="ui-sheet-body" role="dialog" aria-label="Règles">
+    <div class="ui-grab"></div>
+    <div class="ui-sheet-title">Comment jouer</div>
+    <div class="ui-step"><b>1</b><span>Tout le monde reçoit le même mot secret… sauf l'<b>intrus</b>, qui a un mot proche. Personne ne sait qui est l'intrus, pas même lui.</span></div>
+    <div class="ui-step"><b>2</b><span>Chacun son tour, donne <b>un mot</b> qui décrit ton mot, sans trop en dire (l'intrus écoute !).</span></div>
+    <div class="ui-step"><b>3</b><span>Puis tout le monde vote pour éliminer un suspect. En cas d'égalité, personne ne sort et on refait un tour.</span></div>
+    <div class="ui-step"><b>★</b><span>Intrus éliminé : chaque civil gagne <b>2 points</b>. L'intrus tient jusqu'à ce qu'il ne reste que 2 joueurs : il gagne <b>5 points</b>.</span></div>
+    <button class="ui-btn" data-rules-close>Compris</button>
+  </div>
+</div>
+
+<script src="realtime.js"></script>
+<script src="leave-guard.js"></script>
+<script src="recent-games.js"></script>
+<script src="feedback.js"></script>
+<script src="connection-banner.js"></script>
+<script src="avatar-picker.js"></script>
+<script src="game-link.js"></script>
+<script src="gym-ui.js"></script>
+<script src="gym-room.js"></script>
+<script>
+// Word pairs: everyone gets one side, the intruder gets the other.
+const PAIRS = [
+  ['Couscous','Mloukhia'],['Lablabi','Chorba'],['Brik','Fricassé'],['Harissa','Ketchup'],['Sidi Bou Saïd','La Marsa'],['Djerba','Kerkennah'],
+  ['Café','Thé'],['Plage','Piscine'],['Chat','Lion'],['Taxi','Louage'],['Mariage','Fiançailles'],['Hammam','Sauna'],['Médina','Souk'],
+  ['Baklawa','Makroud'],['Jasmin','Rose'],['Football','Handball'],['Ramadan','Aïd'],['Oud','Guitare'],['Chéchia','Casquette'],['Dattes','Figues'],
+  ['Olive','Avocat'],['Professeur','Directeur'],['Avion','Hélicoptère'],['Train','Métro'],['Pizza','Mlawi'],['Bus','Louage'],['Montagne','Colline'],
+  ['Lune','Soleil'],['Neige','Grêle'],['Téléphone','Tablette'],['Instagram','TikTok'],['Messi','Ronaldo'],['Espérance','Club Africain'],
+  ['Coiffeur','Barbier'],['Médecin','Pharmacien'],['Boulangerie','Pâtisserie'],['Ojja','Chakchouka'],['Bsissa','Zrir'],['Sahara','Oasis'],
+  ['Mosquée','Église'],['Marché','Supermarché'],['Vélo','Trottinette'],['Moto','Scooter'],['Chameau','Cheval'],['Requin','Dauphin'],
+  ['Pastèque','Melon'],['Orange','Mandarine'],['Citron','Lime'],['Fromage','Beurre'],['Lait','Lben'],['Pain','Tabouna'],['Thon','Sardine'],
+  ['Mer','Lac'],['Forêt','Jardin'],['Hôpital','Clinique'],['École','Lycée'],['Université','École'],['Cinéma','Théâtre'],['Concert','Festival'],
+  ['Netflix','YouTube'],['WhatsApp','Messenger'],['Ordinateur','Télévision'],['Clé','Cadenas'],['Parapluie','Imperméable'],['Lunettes','Lentilles'],
+  ['Montre','Bracelet'],['Bague','Collier'],['Chaussures','Sandales'],['Burnous','Jebba'],['Henné','Maquillage'],['Parfum','Encens'],
+  ['Chien','Loup'],['Aigle','Faucon'],['Abeille','Guêpe'],['Fourmi','Araignée'],['Pompier','Policier'],['Avocat','Juge'],['Pilote','Hôtesse'],
+  ['Plombier','Électricien'],['Guitare','Violon'],['Piano','Darbouka'],['Danse','Gym'],['Natation','Plongée'],['Ski','Surf'],['Tennis','Padel'],
+  ['Échecs','Dames'],['Chkobba','Rami'],['Anniversaire','Fête'],['Valise','Sac à dos'],['Hôtel','Camping'],['Passeport','Carte d\'identité']
+];
+const R = GYMRoom, $ = id => document.getElementById(id), esc = R.esc, av = R.av;
+const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9؀-ۿ]/g,'');
+
+function newRound(st){
+  st.round = (st.round||0) + 1;
+  const used = st.used || [];
+  let pool = PAIRS.map((p,i)=>i).filter(i => !used.includes(i));
+  if(!pool.length){ st.used = []; pool = PAIRS.map((p,i)=>i); }
+  const pi = pool[Math.floor(Math.random()*pool.length)];
+  st.used = (st.used||[]).concat([pi]);
+  const flip = Math.random() < .5;
+  st.words = {civ: PAIRS[pi][flip?1:0], intrus: PAIRS[pi][flip?0:1]};
+  st.intrus = Math.floor(Math.random()*st.players.length);
+  st.alive = st.players.map(() => true);
+  st.seen = [];
+  st.phase = 'reveal';
+  st.lap = 1;
+  st.clues = [];
+  st.votes = {};
+  st.starter = (st.round - 1) % st.players.length;
+  st.turnPos = 0;
+  st.result = null;
+  st.gains = null;
+}
+function order(st){
+  const n = st.players.length, out = [];
+  for(let k=0;k<n;k++){ const i = (st.starter + k) % n; if(st.alive[i]) out.push(i); }
+  return out;
+}
+function speaker(st){ const o = order(st); return o[st.turnPos]; }
+function aliveCount(st){ return st.alive.filter(Boolean).length; }
+function myWord(st){ return R.me===st.intrus ? st.words.intrus : st.words.civ; }
+
+function resolveVotes(st){
+  const counts = {};
+  Object.values(st.votes).forEach(t => { counts[t] = (counts[t]||0) + 1; });
+  const max = Math.max(...Object.values(counts));
+  const top = Object.keys(counts).filter(k => counts[k]===max).map(Number);
+  st.lastVotes = st.votes;
+  if(top.length > 1){ st.result = {type:'tie', counts}; st.phase = 'result'; return; }
+  const out = top[0];
+  st.alive[out] = false;
+  if(out === st.intrus){
+    st.result = {type:'caught', out, counts};
+    st.gains = st.players.map((p,i) => i===st.intrus ? 0 : 2);
+  } else if(aliveCount(st) <= 2){
+    st.result = {type:'escaped', out, counts};
+    st.gains = st.players.map((p,i) => i===st.intrus ? 5 : 0);
+  } else {
+    st.result = {type:'innocent', out, counts};
+  }
+  if(st.gains) st.scores = st.scores.map((s,i) => s + st.gains[i]);
+  st.phase = 'result';
+}
+
+/* ---------- actions ---------- */
+function markSeen(){ R.act(st => {
+  if(st.phase!=='reveal' || st.seen.includes(R.me)) return false;
+  st.seen.push(R.me);
+  if(st.seen.length >= st.players.length){ st.phase = 'clues'; st.turnPos = 0; }
+}); }
+function giveClue(){
+  const input = $('clue-in'); const w = input.value.trim().replace(/\s+/g,' ');
+  if(!w) return;
+  if(norm(w) === norm(myWord(R.state)) || norm(myWord(R.state)).includes(norm(w)) && norm(w).length > 3){ $('clue-err').textContent = "Tu ne peux pas donner ton mot !"; return; }
+  R.act(st => {
+    if(st.phase!=='clues' || speaker(st)!==R.me) return false;
+    st.clues.push({p:R.me, w:w.slice(0,24), lap:st.lap});
+    st.turnPos++;
+    if(st.turnPos >= order(st).length){ st.phase = 'vote'; st.votes = {}; }
+  });
+}
+function vote(t){ R.act(st => {
+  if(st.phase!=='vote' || !st.alive[R.me] || !st.alive[t] || t===R.me) return false;
+  st.votes[R.me] = t;
+  const voters = order(st);
+  if(voters.every(i => st.votes[i]!==undefined)) resolveVotes(st);
+}); }
+function continueAfterResult(){ R.act(st => {
+  if(st.phase!=='result') return false;
+  if(st.result.type==='caught' || st.result.type==='escaped'){ st.phase = 'round_end'; return; }
+  st.lap++; st.votes = {}; st.turnPos = 0; st.phase = 'clues';
+  // next lap starts with the next alive player
+  const n = st.players.length;
+  for(let k=1;k<=n;k++){ const i = (st.starter + k) % n; if(st.alive[i]){ st.starter = i; break; } }
+}); }
+function nextRound(){ R.act(st => { if(st.phase!=='round_end') return false; newRound(st); }); }
+function endGame(){ R.act(st => { if(st.phase!=='round_end') return false; st.status = 'finished'; }); }
+
+/* ---------- rendering ---------- */
+let wordShown = false, lastPhaseKey = '';
+function toggleWord(){ wordShown = !wordShown; render(R.state); }
+function suspectsHtml(st, opts){
+  return '<div class="suspects">' + st.players.map((p, i) => {
+    const out = !st.alive[i];
+    let cls = 'suspect' + (out ? ' out' : '');
+    if(opts.speaking===i) cls += ' speaking';
+    const canPick = opts.pick && !out && i!==R.me;
+    if(canPick) cls += ' pick';
+    if(opts.voted===i) cls += ' voted';
+    const tag = opts.tag ? opts.tag(i) : '';
+    return '<button type="button" class="'+cls+'"'+(canPick ? ' onclick="vote('+i+')"' : ' disabled')+'><div class="ph">'+av(p)+'</div><div class="nm">'+esc(p.name)+(i===R.me?' (toi)':'')+'</div><div class="tag">'+tag+'</div></button>';
+  }).join('') + '</div>';
+}
+function cluesHtml(st){
+  if(!st.clues.length) return '';
+  let html = '<div class="clues">', lap = 0;
+  st.clues.forEach((c, k) => {
+    if(c.lap!==lap){ lap = c.lap; html += '<div class="clue-lap">Tour '+lap+'</div>'; }
+    const p = st.players[c.p];
+    html += '<div class="clue'+(k===st.clues.length-1?' new':'')+'"><span class="av">'+av(p)+'</span><span class="nm">'+esc(p.name)+'</span><b>'+esc(c.w)+'</b></div>';
+  });
+  return html + '</div>';
+}
+function miniWord(st){
+  return '<button type="button" class="file mini" onclick="toggleWord()" style="text-align:left"><small>TON MOT</small><span class="w">'+(wordShown ? esc(myWord(st)) : '••••••')+'</span><small>'+(wordShown?'cacher':'voir')+'</small></button>';
+}
+function render(st){
+  const body = $('in-body');
+  const alive = st.alive ? st.alive[R.me] : true;
+  $('in-top').textContent = 'MANCHE ' + st.round + (st.phase==='clues'||st.phase==='vote' ? ' · TOUR ' + st.lap : '');
+  if(st.status==='finished'){ renderEnd(st); return; }
+  const key = st.phase + '|' + st.round + '|' + st.lap;
+  if(key!==lastPhaseKey){ if(st.phase!=='clues') wordShown = false; lastPhaseKey = key; }
+
+  if(st.phase==='reveal'){
+    const seen = st.seen.includes(R.me);
+    body.innerHTML =
+      '<div class="file'+(wordShown?'':' hidden-word')+'" onclick="toggleWord()" role="button" tabindex="0"><span class="stamp">CONFIDENTIEL</span><small>DOSSIER N°'+String(st.round).padStart(3,'0')+' · TON MOT</small><div class="w">'+esc(myWord(st))+'</div><div class="file-tap">'+(wordShown ? 'Touche pour cacher' : 'Cache ton écran, puis touche pour voir ton mot')+'</div></div>' +
+      '<p class="muted" style="text-align:center">Tu es peut-être l’intrus… ou pas. Personne ne le sait.</p>' +
+      suspectsHtml(st, {tag: i => st.seen.includes(i) ? '✓ prêt' : '…'}) +
+      '<div class="in-foot">' + (seen ? '<div class="in-wait pulse">En attente des autres ('+st.seen.length+'/'+st.players.length+')</div>' : '<button class="ui-btn" onclick="markSeen()">J’ai mémorisé mon mot</button>') + '</div>';
+    return;
+  }
+  if(st.phase==='clues'){
+    const sp = speaker(st), mine = sp===R.me;
+    if(mine && window.GYMFeedback && lastSpeaker!==sp) window.GYMFeedback.ok();
+    lastSpeaker = sp;
+    const keepVal = $('clue-in') ? $('clue-in').value : '';
+    body.innerHTML = miniWord(st) +
+      suspectsHtml(st, {speaking: sp, tag: i => i===sp ? '🎙 parle' : (st.clues.some(c => c.p===i && c.lap===st.lap) ? '✓' : '')}) +
+      cluesHtml(st) +
+      '<div class="in-foot">' + (mine
+        ? '<div class="ui-turn mine"><span class="t">À toi !</span><span class="s">Un seul mot</span></div><form class="in-input" onsubmit="giveClue();return false;"><input id="clue-in" maxlength="24" autocomplete="off" placeholder="Ton indice…"><button class="ui-btn" type="submit">Dire</button></form><div class="error" id="clue-err"></div>'
+        : '<div class="in-wait">'+(alive ? '' : 'Tu es éliminé·e — tu observes. ')+'<span class="pulse">'+esc(st.players[sp].name)+' cherche son indice…</span></div>') + '</div>';
+    if(mine){ const inp = $('clue-in'); inp.value = keepVal; }
+    return;
+  }
+  if(st.phase==='vote'){
+    const voted = st.votes[R.me];
+    const nVoters = order(st).length, nVoted = Object.keys(st.votes).length;
+    body.innerHTML = miniWord(st) + cluesHtml(st) +
+      '<div class="ui-turn'+(alive && voted===undefined ? ' mine' : '')+'"><span class="t">'+(alive ? (voted===undefined ? 'Vote !' : 'Vote enregistré') : 'Vote en cours')+'</span><span class="s">'+nVoted+' / '+nVoters+' ont voté</span></div>' +
+      suspectsHtml(st, {pick: alive, voted, tag: i => !st.alive[i] ? '' : (st.votes[i]!==undefined ? 'a voté' : '')}) +
+      '<p class="muted" style="text-align:center">'+(alive ? 'Touche le suspect que tu veux éliminer. Tu peux changer tant que tout le monde n’a pas voté.' : 'Tu ne votes plus.')+'</p>';
+    return;
+  }
+  if(st.phase==='result'){
+    const r = st.result, p = r.out!==undefined ? st.players[r.out] : null;
+    const tally = st.players.map((pl,i) => r.counts[i] ? av(pl)+' '+esc(pl.name)+' : '+r.counts[i] : '').filter(Boolean).join(' · ');
+    let html = '<div class="in-res">';
+    if(r.type==='tie') html += '<div class="big">⚖️</div><h2>Égalité</h2><p>Personne n’est éliminé. On refait un tour d’indices.</p>';
+    else if(r.type==='caught') html += '<div class="big">'+av(p)+'</div><h2>'+esc(p.name)+' était…</h2><span class="stamp-big ok">L’INTRUS</span><p>Bien joué, les civils gagnent la manche.</p>';
+    else if(r.type==='escaped') html += '<div class="big">'+av(p)+'</div><h2>'+esc(p.name)+' était…</h2><span class="stamp-big">INNOCENT</span><p>Il ne reste que deux suspects : <b>'+esc(st.players[st.intrus].name)+'</b> était l’intrus et s’en sort !</p>';
+    else html += '<div class="big">'+av(p)+'</div><h2>'+esc(p.name)+' était…</h2><span class="stamp-big">INNOCENT</span><p>L’intrus court toujours. Nouveau tour d’indices.</p>';
+    html += '<p class="muted" style="font-size:13px">Votes : '+tally+'</p></div>';
+    html += '<div class="in-foot"><button class="ui-btn" onclick="continueAfterResult()">'+(r.type==='caught'||r.type==='escaped' ? 'Voir les mots' : 'Tour suivant')+'</button></div>';
+    body.innerHTML = html;
+    if(window.GYMFeedback && lastResultKey!==key){ lastResultKey = key; (r.type==='caught' ? window.GYMFeedback.ok() : window.GYMFeedback.mistake()); }
+    return;
+  }
+  if(st.phase==='round_end'){
+    const intr = st.players[st.intrus];
+    const order2 = st.players.map((p,i)=>i).sort((a,b) => st.scores[b]-st.scores[a]);
+    body.innerHTML = '<div class="in-res"><h2>'+(st.result.type==='caught' ? 'Les civils gagnent' : 'L’intrus gagne')+'</h2></div>' +
+      '<div class="words"><div class="file"><small>LES CIVILS</small><div class="w">'+esc(st.words.civ)+'</div></div><div class="file"><span class="stamp">INTRUS</span><small>'+av(intr)+' '+esc(intr.name).toUpperCase()+'</small><div class="w">'+esc(st.words.intrus)+'</div></div></div>' +
+      '<div class="score-list">'+order2.map(i => '<div><span>'+av(st.players[i])+'</span><span class="nm">'+esc(st.players[i].name)+(i===R.me?' (toi)':'')+'</span>'+(st.gains && st.gains[i] ? '<span class="plus">+'+st.gains[i]+'</span>' : '')+'<b>'+st.scores[i]+'</b></div>').join('')+'</div>' +
+      '<div class="in-foot"><div class="ui-dock-row"><button class="ui-btn alt" onclick="endGame()">🏁 Terminer</button><button class="ui-btn" onclick="nextRound()">Manche suivante</button></div></div>';
+    return;
+  }
+}
+let lastSpeaker = null, lastResultKey = '';
+function renderEnd(st){
+  const order2 = st.players.map((p,i)=>i).sort((a,b) => st.scores[b]-st.scores[a]);
+  const w = order2[0];
+  $('end-title').textContent = w===R.me ? 'Tu remportes l’enquête !' : st.players[w].name + ' remporte l’enquête';
+  $('end-sub').textContent = st.round + ' manche' + (st.round>1?'s':'');
+  $('end-rank').innerHTML = order2.map((i, pos) => '<div><span class="pos">'+(pos+1)+'</span><span class="av">'+av(st.players[i])+'</span><span class="nm">'+esc(st.players[i].name)+(i===R.me?' (toi)':'')+'</span><span class="pts">'+st.scores[i]+'</span></div>').join('');
+  if(w===R.me && window.GYMFeedback) window.GYMFeedback.win();
+}
+
+R.init({
+  key:'in', table:'in_games', title:"L'Intrus", page:'intrus.html', min:3, max:8,
+  newState(st){ st.scores = [0]; st.round = 0; st.used = []; },
+  onJoin(st){ st.scores.push(0); },
+  start(st){ newRound(st); },
+  render
+});
+</script>
+<script src="install-tutorial.js" defer></script>
+</body>
+</html>
