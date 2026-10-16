@@ -283,6 +283,7 @@ function saveRole(c, idx){ try{ localStorage.setItem('tm-role-'+c, String(idx));
 function loadRole(c){ try{ const v=localStorage.getItem('tm-role-'+c); return v===null?null:parseInt(v,10); }catch(e){ return null; } }
 
 async function loadState(c){
+  if(PREVIEW) return state ? JSON.parse(JSON.stringify(state)) : null;
   try{
     const r = await fetch(SB_URL+"/rest/v1/tm_games?code=eq."+encodeURIComponent(c)+"&select=state", {headers:HEADERS});
     if(!r.ok){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return null; }
@@ -292,6 +293,7 @@ async function loadState(c){
   }catch(e){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return null; }
 }
 async function saveState(st){
+  if(PREVIEW) return true;
   try{
     const r = await fetch(SB_URL+"/rest/v1/tm_games", {
       method:"POST",
@@ -303,6 +305,7 @@ async function saveState(st){
   }catch(e){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return false; }
 }
 async function saveResult(st){
+  if(PREVIEW) return;
   try{
     await fetch(SB_URL+"/rest/v1/tm_results", {
       method:"POST", headers:HEADERS,
@@ -605,6 +608,24 @@ function shareCode(){ window.GYMUI.share(code, 'The Mind', $('wait-hint')); }
     if(loadRole(qcode)!==null) joinGame();
   }
 })();
+
+/* Instant feedback: a move is first played on a local copy (no network) so it shows
+   at once, then played for real; the real save confirms it, or reverts it if refused. */
+let PREVIEW = false;
+function fast(action){
+  return async function(){
+    if(busy || !state) return;
+    const before = state;
+    // Moves that depend on chance are not previewed, so nothing shown can change afterwards.
+    const rnd = Math.random;
+    PREVIEW = true; Math.random = () => { throw new Error('chance'); };
+    try{ await action.apply(this, arguments); }catch(e){ state = before; }
+    Math.random = rnd; PREVIEW = false; busy = false;
+    state = before;
+    return action.apply(this, arguments);
+  };
+}
+playCard = fast(playCard);
 </script>
 <script src="install-tutorial.js" defer></script>
 </body>

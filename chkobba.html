@@ -104,6 +104,7 @@
   .ui-turn .t{font-family:'Fredoka',sans-serif;font-weight:700;font-size:17px}
   .hand-row{display:flex;justify-content:center;gap:10px;align-items:flex-end;min-height:130px}
   .hand-row .c{width:92px;height:130px;font-size:36px;box-shadow:0 8px 18px rgba(0,0,0,.3);transition:transform .15s, box-shadow .15s}
+  @media (max-width:350px){ .hand-row{gap:7px} .hand-row .c{width:82px;height:116px;font-size:32px} }
   .hand-row .c.can{cursor:pointer}
   .hand-row .c.sel{box-shadow:0 0 0 3px var(--gold),0 12px 24px rgba(0,0,0,.35);transform:translateY(-16px)}
   .hand-row .c.off{filter:saturate(.6) brightness(.9)}
@@ -329,6 +330,7 @@ function sideOf(st, idx){ return st.maxPlayers===2 ? idx : idx % 2; }
 function mySide(){ return sideOf(state, me); }
 
 async function loadState(c){
+  if(PREVIEW) return state ? JSON.parse(JSON.stringify(state)) : null;
   try{
     const r = await fetch(SB_URL+"/rest/v1/cb_games?code=eq."+encodeURIComponent(c)+"&select=state", {headers:HEADERS});
     if(!r.ok){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return null; }
@@ -338,6 +340,7 @@ async function loadState(c){
   }catch(e){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return null; }
 }
 async function saveState(st){
+  if(PREVIEW) return true;
   try{
     const r = await fetch(SB_URL+"/rest/v1/cb_games", {
       method:"POST",
@@ -349,6 +352,7 @@ async function saveState(st){
   }catch(e){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return false; }
 }
 async function saveResult(st){
+  if(PREVIEW) return;
   try{
     const sideNames = [[],[]];
     st.players.forEach((p, idx) => { if(p) sideNames[sideOf(st, idx)].push(p.name); });
@@ -792,6 +796,24 @@ function shareCode(){ window.GYMUI.share(code, 'Chkobba', $('wait-hint')); }
     if(loadRole(qcode)!==null) joinGame();
   }
 })();
+
+/* Instant feedback: a move is first played on a local copy (no network) so it shows
+   at once, then played for real; the real save confirms it, or reverts it if refused. */
+let PREVIEW = false;
+function fast(action){
+  return async function(){
+    if(busy || !state) return;
+    const before = state;
+    // Moves that depend on chance are not previewed, so nothing shown can change afterwards.
+    const rnd = Math.random;
+    PREVIEW = true; Math.random = () => { throw new Error('chance'); };
+    try{ await action.apply(this, arguments); }catch(e){ state = before; }
+    Math.random = rnd; PREVIEW = false; busy = false;
+    state = before;
+    return action.apply(this, arguments);
+  };
+}
+commitPlay = fast(commitPlay);
 </script>
 <script src="install-tutorial.js" defer></script>
 </body>

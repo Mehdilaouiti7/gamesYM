@@ -90,11 +90,16 @@
   .bs-turn{font-size:13px;font-weight:600;color:var(--accent);text-align:center;min-height:1.2em}
   .ui-turn{padding:10px 14px;border-radius:14px}
   .ui-turn .t{font-size:19px}
-  .pile-row{display:flex;align-items:flex-end;justify-content:center;gap:18px;padding:8px 0 4px}
-  .pile{display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.55;pointer-events:none;transition:opacity .15s;background:none}
+  .pile-row{display:grid;grid-template-columns:repeat(3,86px);justify-content:center;align-items:end;gap:10px;padding:8px 0 4px}
+  .pile-row > *{justify-self:center;min-width:0}
+  #pile-deck{grid-column:1}
+  #pending-zone{grid-column:2}
+  #pile-discard{grid-column:3}
+  .pile-row:has(#pending-zone.hidden)::before{content:'';grid-column:2;grid-row:1;justify-self:center;width:66px;height:92px;margin-bottom:19px;border-radius:12px;border:2px dashed rgba(58,91,217,.2);box-sizing:border-box}
+  .pile{display:flex;flex-direction:column;align-items:center;gap:4px;width:86px;padding:0;opacity:.55;pointer-events:none;transition:opacity .15s;background:none}
   .pile.active{opacity:1;pointer-events:auto;cursor:pointer}
   .pile.active:active .pc{transform:translateY(2px)}
-  .pile small{font-size:11px;color:var(--dim)}
+  .pile small,.pending small{font-size:11px;color:var(--dim);white-space:nowrap;text-align:center}
   .pile.active small{color:var(--fg);font-weight:600}
   .pc{width:66px;height:92px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:34px}
   .pc.back{background:repeating-linear-gradient(45deg,#2c4a8a 0 8px,#3a5bd9 8px 16px);box-shadow:0 3px 0 #1e3570}
@@ -339,6 +344,7 @@ function loadRole(c){ try{ const v=localStorage.getItem('sk-role-'+c); return v=
 function others(){ return state.players.map((p,idx)=>idx).filter(idx=>idx!==me); }
 
 async function loadState(c){
+  if(PREVIEW) return state ? JSON.parse(JSON.stringify(state)) : null;
   try{
     const r = await fetch(SB_URL+"/rest/v1/sk_games?code=eq."+encodeURIComponent(c)+"&select=state", {headers:HEADERS});
     if(!r.ok){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return null; }
@@ -348,6 +354,7 @@ async function loadState(c){
   }catch(e){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return null; }
 }
 async function saveState(st){
+  if(PREVIEW) return true;
   try{
     const r = await fetch(SB_URL+"/rest/v1/sk_games", {
       method:"POST",
@@ -359,6 +366,7 @@ async function saveState(st){
   }catch(e){ if(window.GYMConnection) window.GYMConnection.reportFailure(); return false; }
 }
 async function saveResult(st){
+  if(PREVIEW) return;
   try{
     await fetch(SB_URL+"/rest/v1/sk_results", {
       method:"POST", headers:HEADERS,
@@ -881,6 +889,27 @@ function shareCode(){ window.GYMUI.share(code, 'Skyjo', $('wait-hint')); }
     if(loadRole(qcode)!==null) joinGame();
   }
 })();
+
+/* Instant feedback: a move is first played on a local copy (no network) so it shows
+   at once, then played for real; the real save confirms it, or reverts it if refused. */
+let PREVIEW = false;
+function fast(action){
+  return async function(){
+    if(busy || !state) return;
+    const before = state;
+    // Moves that depend on chance are not previewed, so nothing shown can change afterwards.
+    const rnd = Math.random;
+    PREVIEW = true; Math.random = () => { throw new Error('chance'); };
+    try{ await action.apply(this, arguments); }catch(e){ state = before; }
+    Math.random = rnd; PREVIEW = false; busy = false;
+    state = before;
+    return action.apply(this, arguments);
+  };
+}
+drawFromDeck = fast(drawFromDeck);
+takeDiscard = fast(takeDiscard);
+discardPending = fast(discardPending);
+cellClick = fast(cellClick);
 </script>
 <script src="install-tutorial.js" defer></script>
 </body>
