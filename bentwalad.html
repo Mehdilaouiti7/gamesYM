@@ -91,22 +91,26 @@
 
   .bw-judge-head h2{font-size:24px;font-weight:700}
   .bw-judge-head p{font-size:13px;color:var(--dim)}
-  .bw-cats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0}
-  .bw-cats::-webkit-scrollbar{display:none}
-  .bw-cats button{flex-shrink:0;padding:8px 12px;border-radius:999px;background:var(--paper);font-family:'Marhey',sans-serif;font-size:15px;white-space:nowrap}
-  .bw-cats button.on{background:var(--ink);color:var(--paper)}
-  .bw-answers{display:flex;flex-direction:column;gap:8px}
-  .bw-ans{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--paper);text-align:left;width:100%}
+  .bw-answers{display:flex;flex-direction:column;gap:6px}
+  .bw-sec{display:flex;align-items:center;gap:10px;margin-top:12px;padding-bottom:2px;border-bottom:2px solid var(--rule)}
+  .bw-sec:first-child{margin-top:0}
+  .bw-sec h3{flex:1;min-width:0;font-family:'Marhey',sans-serif;font-weight:700;font-size:20px;color:var(--terra);text-align:right;order:2;overflow-wrap:anywhere}
+  .bw-sec .n{font-size:12px;color:var(--dim);order:1;white-space:nowrap}
+  .bw-sec .all{order:0;flex:none;padding:6px 11px;border-radius:999px;background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;white-space:nowrap}
+  .bw-sec .all.off{background:var(--paper);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--rule)}
+  .bw-ans{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:14px;background:var(--paper);text-align:left;width:100%}
+  .bw-none{font-size:14px;color:var(--dim);padding:4px 2px}
   .bw-ans .av{font-size:22px}
   .bw-ans .t{flex:1;min-width:0;font-size:17px;font-weight:500;overflow-wrap:anywhere}
   .bw-ans .t small{display:block;font-size:12px;color:var(--dim);font-weight:400}
-  .bw-ans .mk{width:36px;height:36px;flex-shrink:0;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center}
+  .bw-ans .mk{width:30px;height:30px;flex-shrink:0;border-radius:9px;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center}
   .bw-ans.ok{box-shadow:inset 0 0 0 2px var(--ok)}
   .bw-ans.no .mk{background:transparent;border:2px dashed var(--rule)}
-  .bw-ans.empty{background:none;border:2px dashed var(--rule);color:var(--dim)}
+  .bw-ans.empty{background:none;border:2px dashed var(--rule);color:var(--dim);padding:5px 12px}
+  .bw-ans.empty .av{font-size:18px}
   .bw-ans.empty .t{font-weight:400}
   .bw-ans:disabled{opacity:1;cursor:default}
-  .bw-nav{display:flex;gap:10px;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  .bw-nav{display:flex;gap:10px;position:sticky;bottom:0;z-index:5;margin:0 -16px;padding:14px 16px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(rgba(232,213,176,0),var(--kraft) 30%)}
   .bw-nav .ui-sq{background:var(--paper)}
   .bw-nav .ui-btn{background:var(--ink);color:var(--paper);box-shadow:none;font-size:17px}
   .bw-nav .ui-btn.go{background:var(--terra);box-shadow:0 5px 0 var(--terra-sh)}
@@ -282,7 +286,6 @@
 
     <div id="judging-zone" class="hidden" style="flex:1;display:flex;flex-direction:column;gap:10px">
       <div class="bw-judge-head"><h2 id="judge-title">🧐 À toi d'arbitrer</h2><p id="judge-subtitle"></p></div>
-      <div class="bw-cats" id="judge-cats"></div>
       <div class="bw-answers" id="judge-form" style="flex:1"></div>
       <div class="bw-nav" id="judge-nav"></div>
     </div>
@@ -837,6 +840,19 @@ function toggleValidity(catKey, idx, checked){
     if(res && queued===1) applyIncomingState(res.st, true);
   });
 }
+function setCategoryValidity(catKey, checked){
+  if(!state || state.phase!=='judging' || me!==state.judgeIdx || !state.judgeValidity[catKey]) return Promise.resolve();
+  const apply = st => { st.players.forEach((p, idx) => { if(answerText(st, idx, catKey)) st.judgeValidity[catKey][idx] = checked; }); };
+  apply(state);
+  renderJudging();
+  return enqueue(async () => {
+    const res = await mutateState(code, st => {
+      if(st.phase!=='judging' || !st.judgeValidity[catKey]) return false;
+      apply(st);
+    });
+    if(res && queued===1) applyIncomingState(res.st, true);
+  });
+}
 async function nextRound(){
   if(busy || !state || state.phase!=='reveal') return;
   await act(st => {
@@ -856,7 +872,6 @@ async function endGame(){
 
 /* ---------- rendering ---------- */
 const LETTER_NAMES = {'ا':['Alif','A'],'ب':['Ba','B'],'ت':['Ta','T'],'ث':['Tha','Th'],'ج':['Jim','J'],'ح':['Ḥa','H'],'خ':['Kha','Kh'],'د':['Dal','D'],'ذ':['Dhal','Dh'],'ر':['Ra','R'],'ز':['Zay','Z'],'س':['Sin','S'],'ش':['Chin','Ch'],'ص':['Sad','S'],'ض':['Dad','D'],'ط':['Ṭa','T'],'ظ':['Ẓa','Dh'],'ع':['Ayn','3'],'غ':['Ghayn','Gh'],'ف':['Fa','F'],'ق':['Qaf','Q'],'ك':['Kaf','K'],'ل':['Lam','L'],'م':['Mim','M'],'ن':['Nun','N'],'هـ':['Ha','H'],'و':['Waw','W / Ou'],'ي':['Ya','Y / I']};
-let judgeCat = 0;
 function letterName(l){ const n = LETTER_NAMES[l]; return n ? n[0]+' · « '+n[1]+' »' : '…'; }
 function updateFilled(){
   const filled = cats().filter(cat => { const el = $('inp-'+state.round+'-'+cat.key); return el && el.value.trim(); }).length;
@@ -891,7 +906,6 @@ function renderBoard(){
         '<label for="inp-'+state.round+'-'+cat.key+'" dir="auto">'+esc(cat.label)+'</label></div>'
       ).join('');
       renderedRound = state.round;
-      judgeCat = 0;
       updateFilled();
     }
   } else if(ph==='reveal_pending'){
@@ -905,29 +919,33 @@ function renderBoard(){
 
   if(needsSpin) spinWheel(state.letter, state.round);
 }
-function setJudgeCat(i){ judgeCat = Math.max(0, Math.min(cats().length-1, i)); renderJudging(); }
+function answerText(st, idx, key){ return (st.answers[idx] && st.answers[idx][key]) ? String(st.answers[idx][key]).trim() : ''; }
+// All categories on one page: each section lists every player's answer, with a tick-all / untick-all button.
 function renderJudging(){
   const isJudge = me===state.judgeIdx;
   const judgeName = state.players[state.judgeIdx].name;
-  const cat = cats()[judgeCat];
   $('judge-title').textContent = isJudge ? "🧐 À toi d'arbitrer" : "🧐 " + judgeName + " arbitre";
   $('judge-subtitle').textContent = isJudge
-    ? "Touche chaque bonne réponse pour la valider · tout le monde voit tes choix"
+    ? "Coche chaque bonne réponse · tout le monde voit tes choix"
     : "Les réponses validées apparaissent en direct";
-  $('judge-cats').innerHTML = cats().map((c, i) => '<button class="'+(i===judgeCat?'on':'')+'" dir="auto" onclick="setJudgeCat('+i+')">'+esc(c.label)+'</button>').join('');
-  const onChip = $('judge-cats').children[judgeCat];
-  if(onChip) onChip.scrollIntoView({inline:'center', block:'nearest'});
-  $('judge-form').innerHTML = state.players.map((p, idx) => {
-    const text = (state.answers[idx] && state.answers[idx][cat.key]) ? String(state.answers[idx][cat.key]).trim() : '';
-    if(!text) return '<div class="bw-ans empty"><span class="av">'+pAvatar(p)+'</span><span class="t">— vide —<small>'+esc(p.name)+'</small></span></div>';
-    const ok = !!state.judgeValidity[cat.key][idx];
-    return '<button type="button" class="bw-ans'+(ok?' ok':' no')+'"'+(isJudge ? ' onclick="toggleValidity(\''+cat.key+'\','+idx+','+(!ok)+')"' : ' disabled')+'>'+
-      '<span class="av">'+pAvatar(p)+'</span><span class="t">'+esc(text)+'<small>'+esc(p.name)+'</small></span><span class="mk">'+(ok?'✓':'')+'</span></button>';
+  $('judge-form').innerHTML = cats().map(cat => {
+    const valid = state.judgeValidity[cat.key] || {};
+    const filled = state.players.map((p, idx) => idx).filter(idx => answerText(state, idx, cat.key));
+    const nOk = filled.filter(idx => valid[idx]).length;
+    const allOn = filled.length > 0 && nOk === filled.length;
+    const head = '<div class="bw-sec"><h3 dir="auto">'+esc(cat.label)+'</h3><span class="n">'+nOk+'/'+filled.length+'</span>'+
+      (isJudge && filled.length ? '<button type="button" class="all'+(allOn?' off':'')+'" onclick="setCategoryValidity(\''+cat.key+'\','+(!allOn)+')">'+(allOn?'Tout décocher':'Tout cocher')+'</button>' : '')+'</div>';
+    if(!filled.length) return head + '<div class="bw-none">Personne n\'a répondu</div>';
+    return head + state.players.map((p, idx) => {
+      const text = answerText(state, idx, cat.key);
+      if(!text) return '<div class="bw-ans empty"><span class="av">'+pAvatar(p)+'</span><span class="t">— vide —<small>'+esc(p.name)+'</small></span></div>';
+      const ok = !!valid[idx];
+      return '<button type="button" class="bw-ans'+(ok?' ok':' no')+'"'+(isJudge ? ' onclick="toggleValidity(\''+cat.key+'\','+idx+','+(!ok)+')"' : ' disabled')+'>'+
+        '<span class="av">'+pAvatar(p)+'</span><span class="t">'+esc(text)+'<small>'+esc(p.name)+'</small></span><span class="mk">'+(ok?'✓':'')+'</span></button>';
+    }).join('');
   }).join('');
-  const last = judgeCat === cats().length-1;
-  $('judge-nav').innerHTML = '<button class="ui-sq" onclick="setJudgeCat('+(judgeCat-1)+')" aria-label="Catégorie précédente"'+(judgeCat===0?' disabled':'')+'>‹</button>' +
-    (last && isJudge ? '<button class="ui-btn go" onclick="confirmScores()">Valider les scores ✓</button>'
-                     : (last ? '<button class="ui-btn" disabled>⏳ '+esc(judgeName)+' valide…</button>' : '<button class="ui-btn" onclick="setJudgeCat('+(judgeCat+1)+')">Catégorie suivante ›</button>'));
+  $('judge-nav').innerHTML = isJudge ? '<button class="ui-btn go" onclick="confirmScores()">Valider les scores ✓</button>'
+                                     : '<button class="ui-btn" disabled>⏳ '+esc(judgeName)+' valide…</button>';
 }
 function renderReveal(){
   $('reveal-round').textContent = state.round;
