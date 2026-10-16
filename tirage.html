@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Games Room · Tirage au sort</title>
+<meta name="theme-color" content="#b81d33">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Games Room">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Bungee&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gym-ui.css">
+<style>
+  /* ---------- Tirage au sort — « Tombola » ---------- */
+  :root{
+    --red:#b81d33; --red-dk:#86122a; --cream:#fff4e0; --gold:#ffc53d; --gold-dk:#d99a12; --ink:#3a0d16;
+    --bg:#b81d33 repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 22px,transparent 22px 44px); --bg-solid:#b81d33;
+    --fg:#fff4e0; --dim:rgba(255,244,224,.72); --surface:#fff4e0; --surface-2:#ffe9c4; --soft:rgba(0,0,0,.18); --line:rgba(255,244,224,.35);
+    --accent:#ffc53d; --accent-fg:#3a0d16; --accent-sh:#d99a12; --danger:#ffd6dc;
+    --display:'Bungee',sans-serif; --display-weight:400;
+    --seg-on:#fff4e0; --seg-on-fg:#3a0d16;
+    --scrim:rgba(40,6,14,.55); --sheet:#fff4e0;
+    --end-bg:var(--bg); --end-solid:#b81d33; --end-fg:#fff4e0; --end-soft:rgba(0,0,0,.18);
+    --end-btn-bg:#ffc53d; --end-btn-fg:#3a0d16; --end-btn-sh:#d99a12;
+  }
+  .ui-hero-title{font-size:38px;line-height:1;text-shadow:0 4px 0 var(--red-dk)}
+  .ui-hero-art{gap:0}
+  .ticket-art{display:inline-block;background:var(--gold);color:var(--ink);font-family:'Bungee',sans-serif;font-size:20px;padding:10px 18px;border-radius:6px;transform:rotate(-4deg);box-shadow:0 5px 0 var(--gold-dk);
+    -webkit-mask:radial-gradient(circle 7px at 0 50%,transparent 98%,#000) left/51% 100% no-repeat,radial-gradient(circle 7px at 100% 50%,transparent 98%,#000) right/51% 100% no-repeat;
+            mask:radial-gradient(circle 7px at 0 50%,transparent 98%,#000) left/51% 100% no-repeat,radial-gradient(circle 7px at 100% 50%,transparent 98%,#000) right/51% 100% no-repeat}
+  .ui-seg button{color:var(--dim)}
+  .ui-sheet-body{color:var(--ink)}
+  .ui-sheet-title{font-size:24px}
+
+  /* name entry */
+  .add-row{display:flex;gap:8px}
+  .add-row input{flex:1;min-width:0;height:54px;border-radius:16px;border:none;background:var(--cream);color:var(--ink);font:500 17px 'Fredoka',sans-serif;padding:0 16px;outline:none;box-shadow:0 4px 0 var(--red-dk)}
+  .add-row input::placeholder{color:#a07a80}
+  .add-row button{width:54px;height:54px;flex:none;border-radius:16px;background:var(--gold);color:var(--ink);font-size:28px;font-weight:700;box-shadow:0 4px 0 var(--gold-dk)}
+  .add-row button:active{transform:translateY(2px);box-shadow:0 2px 0 var(--gold-dk)}
+  .names{display:flex;flex-wrap:wrap;gap:8px}
+  .name{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:8px 8px 8px 14px;border-radius:999px;background:var(--cream);color:var(--ink);font-weight:600;font-size:16px;box-shadow:0 3px 0 var(--red-dk)}
+  .name span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .name button{width:24px;height:24px;flex:none;border-radius:50%;background:rgba(58,13,22,.12);font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center}
+  .names-empty{color:var(--dim);font-size:14px;line-height:1.4;width:100%;text-align:center;padding:14px;border:2px dashed var(--line);border-radius:16px}
+  .count-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--dim)}
+  .count-row button{color:var(--dim);text-decoration:underline;font-size:14px}
+  .hint{text-align:center;font-size:14px;color:var(--dim);min-height:1.3em}
+
+  /* draw screen */
+  #screen-draw{min-height:calc(100dvh - env(safe-area-inset-top))}
+  .ui-top-mid{font-family:'Bungee',sans-serif;font-size:15px;letter-spacing:.04em}
+  .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:10px 0}
+  .reel-box{position:relative;width:min(300px,100%);background:var(--gold);border-radius:22px;padding:12px;box-shadow:0 7px 0 var(--gold-dk),0 18px 40px rgba(40,6,14,.35)}
+  .reel-box::before,.reel-box::after{content:"";position:absolute;top:50%;width:0;height:0;border:12px solid transparent;margin-top:-12px;z-index:2}
+  .reel-box::before{left:-2px;border-left-color:var(--ink)}
+  .reel-box::after{right:-2px;border-right-color:var(--ink)}
+  .reel{height:180px;overflow:hidden;border-radius:12px;background:var(--cream);position:relative}
+  .reel::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(var(--cream),rgba(255,244,224,0) 32%,rgba(255,244,224,0) 68%,var(--cream))}
+  .reel-line{position:absolute;left:8px;right:8px;top:60px;height:60px;border-top:2px dashed rgba(184,29,51,.35);border-bottom:2px dashed rgba(184,29,51,.35);pointer-events:none;z-index:1}
+  .strip{will-change:transform}
+  .strip div{height:60px;display:flex;align-items:center;justify-content:center;padding:0 14px;font-family:'Bungee',sans-serif;font-size:24px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .winner{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-height:96px}
+  .winner small{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+  .winner b{font-family:'Bungee',sans-serif;font-weight:400;font-size:34px;line-height:1.05;word-break:break-word;text-shadow:0 4px 0 var(--red-dk)}
+  .winner.wait{visibility:hidden}
+  @media (prefers-reduced-motion:no-preference){ .winner.show b{animation:uiPop .45s cubic-bezier(.22,1,.36,1)} }
+
+  .teams{width:100%;display:grid;grid-template-columns:1fr;gap:12px;align-content:center}
+  .team{display:flex;align-items:center;gap:12px;background:var(--cream);color:var(--ink);border-radius:10px;padding:12px 16px;box-shadow:0 5px 0 var(--red-dk);position:relative;opacity:0;transform:translateY(12px) rotate(var(--r,0deg))}
+  .team.in{opacity:1;transform:rotate(var(--r,0deg));transition:opacity .3s, transform .35s cubic-bezier(.22,1,.36,1)}
+  .team-n{flex:none;width:44px;height:44px;border-radius:50%;background:var(--red);color:var(--cream);font-family:'Bungee',sans-serif;font-size:18px;display:flex;align-items:center;justify-content:center}
+  .team-names{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-weight:600;font-size:18px}
+  .team-names span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+  .team-names i{font-style:normal;color:var(--red);font-family:'Bungee',sans-serif;font-size:14px}
+  .team.trio .team-n{background:var(--gold-dk)}
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:40;overflow:hidden}
+  .confetti i{position:absolute;top:-20px;width:9px;height:14px;border-radius:2px;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+  .ui-dock-row > .ui-btn{flex:1}
+  .ui-btn.alt{color:var(--ink);box-shadow:0 5px 0 var(--red-dk)}
+</style>
+</head>
+<body data-screen="setup">
+<div class="frame">
+  <div id="screen-setup" class="ui-screen has-dock">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Comment ça marche</button>
+    </div>
+    <div class="ui-hero">
+      <div class="ui-hero-art"><span class="ticket-art">Nº 07</span></div>
+      <h1 class="ui-hero-title">Tirage au sort</h1>
+      <div class="ui-hero-sub">Sur un seul téléphone · sans code</div>
+    </div>
+    <div class="ui-seg" role="tablist">
+      <button type="button" data-mode="winner" onclick="setMode('winner')">🏆 Un gagnant</button>
+      <button type="button" data-mode="teams" onclick="setMode('teams')">👥 Équipes de 2</button>
+    </div>
+    <div class="ui-field">
+      <span class="ui-label">Les participants</span>
+      <form class="add-row" onsubmit="addFromInput();return false">
+        <input type="text" id="name-input" maxlength="200" placeholder="Prénom (ou Léa, Omar, Sami…)" autocomplete="off" enterkeyhint="done">
+        <button type="submit" aria-label="Ajouter">+</button>
+      </form>
+    </div>
+    <div class="names" id="names"></div>
+    <div class="count-row" id="count-row"><span id="count"></span><button type="button" onclick="clearAll()">Tout effacer</button></div>
+    <div class="ui-dock">
+      <div class="hint" id="hint"></div>
+      <button class="ui-btn" id="btn-draw" onclick="startDraw()">Lancer le tirage</button>
+    </div>
+  </div>
+
+  <div id="screen-draw" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <button class="ui-round" onclick="backToSetup()" aria-label="Modifier la liste">←</button>
+      <div class="ui-top-mid" id="draw-title"></div>
+      <span class="ui-round ghost"></span>
+    </div>
+    <div class="stage" id="stage-winner">
+      <div class="reel-box"><div class="reel"><div class="reel-line"></div><div class="strip" id="strip"></div></div></div>
+      <div class="winner wait" id="winner"><small>Le gagnant est</small><b id="winner-name"></b></div>
+    </div>
+    <div class="stage hidden" id="stage-teams"><div class="teams" id="teams"></div></div>
+    <div class="ui-dock">
+      <div class="ui-dock-row">
+        <button class="ui-btn alt" onclick="backToSetup()">Modifier</button>
+        <button class="ui-btn" id="btn-again" onclick="startDraw()">Relancer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ui-sheet" id="rules-sheet" aria-hidden="true">
+  <div class="ui-sheet-scrim" data-rules-close></div>
+  <div class="ui-sheet-body" role="dialog" aria-label="Comment ça marche">
+    <div class="ui-grab"></div>
+    <div class="ui-sheet-title">Comment ça marche</div>
+    <div class="ui-step"><b>1</b><span>Tout se passe sur <b>ce téléphone</b> : pas de code, pas d'invitation. Ajoute les prénoms un par un, ou colle-en plusieurs séparés par des virgules.</span></div>
+    <div class="ui-step"><b>2</b><span><b>Un gagnant</b> tire une seule personne. <b>Équipes de 2</b> forme des binômes au hasard ; avec un nombre impair, la dernière équipe est un trio.</span></div>
+    <div class="ui-step"><b>3</b><span>« Relancer » refait un tirage avec la même liste. La liste est gardée pour la prochaine fois.</span></div>
+    <button class="ui-btn" data-rules-close>Compris</button>
+  </div>
+</div>
+
+<script src="gym-ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const KEY = 'gym-tirage';
+let names = [], mode = 'winner', spinning = false, timers = [];
+
+try{ const s = JSON.parse(localStorage.getItem(KEY) || '{}'); if(Array.isArray(s.names)) names = s.names.filter(n => typeof n==='string').slice(0, 60); if(s.mode==='teams') mode = 'teams'; }catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify({names, mode})); }catch(e){} }
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// Fair random integer in [0, n) from the crypto generator.
+function rand(n){
+  if(window.crypto && crypto.getRandomValues){
+    const max = Math.floor(0x100000000 / n) * n, a = new Uint32Array(1);
+    do{ crypto.getRandomValues(a); }while(a[0] >= max);
+    return a[0] % n;
+  }
+  return Math.floor(Math.random() * n);
+}
+function shuffle(arr){ const a = arr.slice(); for(let i = a.length - 1; i > 0; i--){ const j = rand(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+function addFromInput(){
+  const inp = $('name-input');
+  const parts = inp.value.split(/[,;\n]+/).map(s => s.trim().slice(0, 24)).filter(Boolean);
+  for(const p of parts){
+    if(names.length >= 60) break;
+    if(!names.some(n => n.toLowerCase() === p.toLowerCase())) names.push(p);
+  }
+  inp.value = '';
+  save(); renderSetup();
+}
+function removeName(i){ names.splice(i, 1); save(); renderSetup(); }
+function clearAll(){ if(!names.length || confirm('Effacer toute la liste ?')){ names = []; save(); renderSetup(); } }
+function setMode(m){ mode = m; save(); renderSetup(); }
+
+function minFor(m){ return m === 'teams' ? 4 : 2; }
+function renderSetup(){
+  document.querySelectorAll('.ui-seg button').forEach(b => { const on = b.dataset.mode === mode; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+  $('names').innerHTML = names.length
+    ? names.map((n, i) => '<span class="name"><span>'+esc(n)+'</span><button type="button" aria-label="Retirer '+esc(n)+'" onclick="removeName('+i+')">✕</button></span>').join('')
+    : '<div class="names-empty">Ajoute au moins '+minFor(mode)+' prénoms.<br>Astuce : tu peux en coller plusieurs d\'un coup, séparés par des virgules.</div>';
+  $('count-row').classList.toggle('hidden', !names.length);
+  $('count').textContent = names.length + (names.length > 1 ? ' participants' : ' participant');
+  const need = minFor(mode) - names.length;
+  let hint = '';
+  if(need > 0) hint = 'Encore ' + need + ' prénom' + (need > 1 ? 's' : '') + ' à ajouter';
+  else if(mode === 'teams') hint = Math.floor(names.length / 2) + ' équipes' + (names.length % 2 ? ' (dont un trio)' : '');
+  $('hint').textContent = hint;
+  $('btn-draw').disabled = need > 0;
+}
+
+function show(id){
+  ['setup','draw'].forEach(s => $('screen-'+s).classList.toggle('hidden', s !== id));
+  document.body.dataset.screen = id;
+  scrollTo(0, 0);
+}
+function stopTimers(){ timers.forEach(clearTimeout); timers = []; document.querySelectorAll('.confetti').forEach(c => c.remove()); }
+function backToSetup(){ stopTimers(); spinning = false; show('setup'); renderSetup(); }
+
+function startDraw(){
+  if(spinning) return;
+  const v = $('name-input').value.trim(); if(v) addFromInput();
+  if(names.length < minFor(mode)) return;
+  stopTimers();
+  show('draw');
+  $('stage-winner').classList.toggle('hidden', mode !== 'winner');
+  $('stage-teams').classList.toggle('hidden', mode !== 'teams');
+  if(mode === 'winner') drawWinner(); else drawTeams();
+}
+
+const ROW = 60, REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function drawWinner(){
+  $('draw-title').textContent = 'Un gagnant';
+  const win = rand(names.length);
+  // Build a long strip of shuffled names ending (centered) on the winner.
+  const loops = Math.max(4, Math.ceil(36 / names.length));
+  let seq = [];
+  for(let k = 0; k < loops; k++) seq = seq.concat(shuffle(names));
+  seq.push(names[win]);
+  seq.push(names[rand(names.length)]);
+  const strip = $('strip');
+  strip.innerHTML = [names[rand(names.length)]].concat(seq).map(n => '<div>'+esc(n)+'</div>').join('');
+  const target = seq.length - 2 + 1;           // index of the winner row in the strip
+  const end = -(target - 1) * ROW;             // winner sits in the middle row
+  strip.style.transition = 'none'; strip.style.transform = 'translateY(0)';
+  void strip.offsetHeight;
+  const dur = REDUCED ? 0 : 3600;
+  strip.style.transition = dur ? 'transform '+dur+'ms cubic-bezier(.12,.75,.18,1)' : 'none';
+  strip.style.transform = 'translateY('+end+'px)';
+  const w = $('winner'); w.classList.add('wait'); w.classList.remove('show');
+  spinning = true; $('btn-again').disabled = true;
+  timers.push(setTimeout(() => {
+    $('winner-name').textContent = names[win];
+    w.classList.remove('wait'); w.classList.add('show');
+    spinning = false; $('btn-again').disabled = false;
+    if(navigator.vibrate) navigator.vibrate(60);
+    confetti();
+  }, dur + 120));
+}
+
+function drawTeams(){
+  const order = shuffle(names), teams = [];
+  for(let i = 0; i + 1 < order.length; i += 2) teams.push([order[i], order[i + 1]]);
+  if(order.length % 2) teams[teams.length - 1].push(order[order.length - 1]);
+  $('draw-title').textContent = teams.length + ' équipes';
+  $('teams').innerHTML = teams.map((t, i) => '<div class="team'+(t.length > 2 ? ' trio' : '')+'" style="--r:'+((i % 2 ? 1 : -1) * (0.6 + (i % 3) * 0.4))+'deg"><div class="team-n">'+(i + 1)+'</div><div class="team-names">'+t.map(n => '<span>'+esc(n)+'</span>').join('<i>&amp;</i>')+'</div></div>').join('');
+  const els = [...document.querySelectorAll('.team')];
+  const step = REDUCED ? 0 : Math.min(450, 2400 / els.length);
+  spinning = true; $('btn-again').disabled = true;
+  els.forEach((el, i) => timers.push(setTimeout(() => { el.classList.add('in'); if(navigator.vibrate) navigator.vibrate(20); }, 150 + i * step)));
+  timers.push(setTimeout(() => { spinning = false; $('btn-again').disabled = false; confetti(); }, 300 + els.length * step));
+}
+
+function confetti(){
+  if(REDUCED) return;
+  const box = document.createElement('div'); box.className = 'confetti';
+  const colors = ['#ffc53d','#fff4e0','#ff8fa3','#7ee0c3','#ffffff'];
+  for(let i = 0; i < 60; i++){
+    const c = document.createElement('i');
+    c.style.left = (rand(1000) / 10) + '%';
+    c.style.background = colors[i % colors.length];
+    c.style.animationDuration = (1.8 + rand(160) / 100) + 's';
+    c.style.animationDelay = (rand(40) / 100) + 's';
+    box.appendChild(c);
+  }
+  document.body.appendChild(box);
+  timers.push(setTimeout(() => box.remove(), 4200));
+}
+
+renderSetup();
+</script>
+</body>
+</html>

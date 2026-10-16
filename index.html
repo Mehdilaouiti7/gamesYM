@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Bowlby+One+SC&family=Anton&family=Patrick+Hand&family=Lilita+One&family=Baloo+2:wght@800&family=Unbounded:wght@400;700&family=Reem+Kufi:wght@500;700&family=Archivo+Black&family=Special+Elite&family=Chakra+Petch:wght@700&family=Cinzel:wght@700&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Bowlby+One+SC&family=Anton&family=Patrick+Hand&family=Lilita+One&family=Baloo+2:wght@800&family=Unbounded:wght@400;700&family=Reem+Kufi:wght@500;700&family=Archivo+Black&family=Special+Elite&family=Chakra+Petch:wght@700&family=Cinzel:wght@700&family=Caveat:wght@700&family=Bungee&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="gym-ui.css">
 <style>
   /* ---------- Vache & Taureau — « La Ferme » ---------- */
@@ -241,6 +241,10 @@
   .t-ui .ui-notes span{font-family:'Caveat',cursive;font-weight:700;font-size:15px;padding:1px 6px;background:#ffe66d;transform:rotate(-4deg);box-shadow:0 2px 3px rgba(45,42,74,.15)}
   .t-ui .ui-notes span+span{background:#ffb3d1;transform:rotate(3deg)}
   .t-ui .tile-name{font-family:'Caveat',cursive;font-weight:700;font-size:24px;line-height:1}
+  .t-ti{background:#b81d33 repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 12px,transparent 12px 24px);color:#fff4e0}
+  .t-ti .tile-n{background:rgba(0,0,0,.2)}
+  .t-ti .ti-ticket{font-family:'Bungee',sans-serif;font-size:12px;background:#ffc53d;color:#3a0d16;padding:4px 8px;border-radius:4px;transform:rotate(-5deg);box-shadow:0 2px 0 #d99a12}
+  .t-ti .tile-name{font-family:'Bungee',sans-serif;font-size:16px;line-height:1.05}
   .t-tb{
     grid-column:1 / -1;flex-direction:row;align-items:center;justify-content:flex-start;gap:14px;padding:12px 14px;
     background:#1a0f14;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,59,92,.4);
@@ -371,6 +375,10 @@
       <a class="tile t-ui" data-cat="group" href="indice.html">
         <div class="tile-top"><span class="ui-notes"><span>mer</span><span>été</span></span><span class="tile-n">3–7</span></div>
         <div class="tile-name">Un indice chacun</div>
+      </a>
+      <a class="tile t-ti" data-cat="group" href="tirage.html">
+        <div class="tile-top"><span class="ti-ticket">Nº 07</span><span class="tile-n">2+</span></div>
+        <div class="tile-name">Tirage au sort</div>
       </a>
       <a class="tile t-tb" data-cat="group" href="taboo.html">
         <span class="tb-buzzer"></span>
