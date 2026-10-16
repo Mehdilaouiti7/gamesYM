@@ -37,9 +37,9 @@
   .ui-sheet-title{font-size:24px}
 
   /* name entry */
-  .add-row{display:flex;gap:8px}
-  .add-row input{flex:1;min-width:0;height:54px;border-radius:16px;border:none;background:var(--cream);color:var(--ink);font:500 17px 'Fredoka',sans-serif;padding:0 16px;outline:none;box-shadow:0 4px 0 var(--red-dk)}
-  .add-row input::placeholder{color:#a07a80}
+  .add-row{display:flex;gap:8px;align-items:flex-start}
+  .add-row textarea{flex:1;min-width:0;min-height:54px;max-height:150px;resize:none;overflow-y:auto;border-radius:16px;border:none;background:var(--cream);color:var(--ink);font:500 17px/24px 'Fredoka',sans-serif;padding:15px 16px;outline:none;box-shadow:0 4px 0 var(--red-dk);white-space:pre-wrap;overflow-wrap:anywhere;display:block}
+  .add-row textarea::placeholder{color:#a07a80}
   .add-row button{width:54px;height:54px;flex:none;border-radius:16px;background:var(--gold);color:var(--ink);font-size:28px;font-weight:700;box-shadow:0 4px 0 var(--gold-dk)}
   .add-row button:active{transform:translateY(2px);box-shadow:0 2px 0 var(--gold-dk)}
   .names{display:flex;flex-wrap:wrap;gap:8px}
@@ -105,8 +105,8 @@
     <div class="ui-field">
       <span class="ui-label">Les participants</span>
       <form class="add-row" onsubmit="addFromInput();return false">
-        <input type="text" id="name-input" maxlength="200" placeholder="Prénom (ou Léa, Omar, Sami…)" autocomplete="off" enterkeyhint="done">
-        <button type="submit" aria-label="Ajouter">+</button>
+        <textarea id="people-input" rows="1" maxlength="400" placeholder="Ex. Léa, Omar, Sami" autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="words" enterkeyhint="enter" oninput="fitInput()" onkeydown="onKey(event)" onblur="addFromInput()"></textarea>
+        <button type="submit" aria-label="Ajouter" onpointerdown="event.preventDefault()">+</button>
       </form>
     </div>
     <div class="names" id="names"></div>
@@ -171,15 +171,20 @@ function rand(n){
 function shuffle(arr){ const a = arr.slice(); for(let i = a.length - 1; i > 0; i--){ const j = rand(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
 function addFromInput(){
-  const inp = $('name-input');
+  const inp = $('people-input');
   const parts = inp.value.split(/[,;\n]+/).map(s => s.trim().slice(0, 24)).filter(Boolean);
+  if(!parts.length) return;
   for(const p of parts){
     if(names.length >= 60) break;
     if(!names.some(n => n.toLowerCase() === p.toLowerCase())) names.push(p);
   }
-  inp.value = '';
+  inp.value = ''; fitInput();
   save(); renderSetup();
 }
+// The field grows with its content so every typed name stays visible.
+function fitInput(){ const t = $('people-input'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 150) + 'px'; }
+// Enter adds the name; read the value on the next tick so the iOS keyboard has committed the word.
+function onKey(e){ if(e.key === 'Enter' && !e.isComposing){ e.preventDefault(); setTimeout(addFromInput, 0); } }
 function removeName(i){ names.splice(i, 1); save(); renderSetup(); }
 function clearAll(){ if(!names.length || confirm('Effacer toute la liste ?')){ names = []; save(); renderSetup(); } }
 function setMode(m){ mode = m; save(); renderSetup(); }
@@ -210,7 +215,7 @@ function backToSetup(){ stopTimers(); spinning = false; show('setup'); renderSet
 
 function startDraw(){
   if(spinning) return;
-  const v = $('name-input').value.trim(); if(v) addFromInput();
+  const v = $('people-input').value.trim(); if(v) addFromInput();
   if(names.length < minFor(mode)) return;
   stopTimers();
   show('draw');
