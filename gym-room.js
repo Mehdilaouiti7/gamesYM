@@ -171,12 +171,24 @@ window.GYMRoom = (function(){
     G.render(st);
   }
   // Run one game action against the latest saved state, then redraw.
+  // The move is first applied to a local copy and shown at once (unless it depends
+  // on chance), then saved for real; a refused save puts the previous state back.
   async function act(fn){
     if(R.busy) return null;
     R.busy = true;
+    const before = R.state;
+    if(before){
+      const draft = JSON.parse(JSON.stringify(before)), rnd = Math.random;
+      let ok = true;
+      Math.random = () => { throw new Error('chance'); };
+      try{ if(fn(draft) === false) ok = false; }catch(e){ ok = false; }
+      Math.random = rnd;
+      if(ok) apply(draft, true);
+    }
     const res = await mutate(R.code, fn);
     R.busy = false;
     if(res) apply(res.st, true);
+    else if(before) apply(before, true);
     return res;
   }
 

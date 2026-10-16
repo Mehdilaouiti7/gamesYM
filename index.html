@@ -160,7 +160,7 @@
   .tile-top{display:flex;justify-content:space-between;align-items:flex-start}
   .tile-emo{font-size:22px;line-height:1}
   .tile-n{font-size:11px;font-weight:600;border-radius:999px;padding:3px 8px;line-height:1.2;white-space:nowrap}
-  .tile-split{display:flex;align-items:baseline;justify-content:space-between;gap:6px;white-space:nowrap}
+  .tile-split{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:0 6px;white-space:nowrap;min-width:0}
   .tile .ar{font-family:'Reem Kufi',sans-serif}
 
   .t-vt{background:#f4ecd8;color:#5a2a1c}
@@ -853,16 +853,8 @@ function resultIcons(t, v){
   return html;
 }
 
-async function submitGuess(guess){
-  if(!state || state.roundPhase!=='duel' || state.turn !== me) return;
-  const err = validSecret(guess);
-  if(err){ $('guess-err').textContent = err; return; }
-  $('guess-err').textContent = "";
-  busy = true;
-
-  const st = await loadState(code) || state;
-  if(st.roundPhase!=='duel' || st.turn !== me || st.status!=='playing'){ busy=false; state=st; renderGame(); return; }
-
+function applyGuess(st, guess){
+  if(st.roundPhase!=='duel' || st.turn !== me || st.status!=='playing') return false;
   const secretOpp = st.players[opp()].secret;
   const res = score(secretOpp, guess);
   st.guesses.push({by:me, guess, t:res.t, v:res.v});
@@ -886,8 +878,22 @@ async function submitGuess(guess){
   } else {
     st.turn = opp();
   }
+}
+async function submitGuess(guess){
+  if(busy || !state || state.roundPhase!=='duel' || state.turn !== me) return;
+  const err = validSecret(guess);
+  if(err){ $('guess-err').textContent = err; return; }
+  $('guess-err').textContent = "";
+  busy = true;
+  // Show the guess and its result at once (the end screen waits for the real save).
+  const before = state;
+  const draft = JSON.parse(JSON.stringify(state));
+  if(applyGuess(draft, guess) !== false && draft.status!=='finished'){ state = draft; if(guessPad) guessPad.clear(); renderGame(); }
+
+  const st = await loadState(code) || JSON.parse(JSON.stringify(before));
+  if(applyGuess(st, guess) === false){ busy=false; state=st; renderGame(); return; }
   const ok = await saveState(st);
-  if(!ok){ busy=false; $('guess-err').textContent = "Erreur réseau, réessaie."; return; }
+  if(!ok){ busy=false; state = before; renderGame(); $('guess-err').textContent = "Erreur réseau, réessaie."; return; }
   state = st;
   if(guessPad) guessPad.clear();
   busy = false;
