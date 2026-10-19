@@ -97,9 +97,51 @@
   .table-empty{color:var(--dim);font-size:14px;padding:30px 0}
   .cb-alt{padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.25);font-size:13px}
   .cb-alt b{color:var(--gold)}
-  .cb-event{font-size:13px;color:var(--dim);text-align:center;min-height:1.2em}
-  .cb-event.chkobba{color:var(--gold);font-weight:700;font-size:16px}
-  @media (prefers-reduced-motion:no-preference){ .cb-event.chkobba{animation:uiPop .5s cubic-bezier(.22,1,.36,1)} }
+  .cb-mid.armed{cursor:pointer}
+  .cb-mid.armed .table-row{border-radius:18px;box-shadow:0 0 0 2px rgba(242,193,78,.45);background:rgba(0,0,0,.12)}
+  .table-row{padding:8px;transition:box-shadow .15s, background .15s}
+  .table-row .c.ghost{visibility:hidden}
+  .table-row .c:not(:disabled){cursor:pointer}
+  .table-drop{width:68px;height:96px;border-radius:10px;border:2px dashed rgba(253,246,227,.45);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--dim);text-align:center;line-height:1.2;padding:4px}
+  /* last moves */
+  .cb-last{display:flex;flex-direction:column;gap:4px;width:100%;background:rgba(0,0,0,.18);border-radius:14px;padding:7px 10px;text-align:left;min-height:44px;justify-content:center}
+  .cb-last:empty{display:none}
+  .lm{display:flex;align-items:center;gap:6px;font-size:13px;min-width:0;opacity:.6}
+  .lm.new{opacity:1}
+  .lm .who{max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dim)}
+  .lm.new .who{color:var(--fg);font-weight:600}
+  .lm .ar{color:var(--gold);font-weight:700}
+  .lm .tag{margin-left:auto;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--gold);color:#3a2c10;white-space:nowrap}
+  .lm .tag.haya{background:var(--red);color:#fff}
+  .lm .more{margin-left:auto;font-size:11px;color:var(--dim);white-space:nowrap}
+  .lm .tag + .more{margin-left:4px}
+  .mc{display:inline-flex;align-items:center;justify-content:center;width:26px;height:36px;flex:none;border-radius:5px;background:var(--cream);color:#1d1d1d;font-weight:700;font-size:13px;line-height:1;flex-direction:column}
+  .mc i{font-style:normal;font-size:11px}
+  .mc.red{color:var(--red)}
+  .mcs{display:flex;gap:3px;flex-wrap:wrap;min-width:0}
+  .ui-sheet .hist{display:flex;flex-direction:column;gap:6px;max-height:55vh;overflow-y:auto}
+  .ui-sheet .hist .lm{opacity:1;background:#efe6cc;border-radius:12px;padding:6px 10px;color:#1f3a2c}
+  .ui-sheet .hist .lm .who{color:#1f3a2c;font-weight:600}
+  .ui-sheet .hist .lm .ar{color:#a47d1f}
+  .ui-sheet .hist .mc{box-shadow:0 0 0 1px #d6caa6}
+  .ui-sheet .hist-empty{color:#5c7466;font-size:14px}
+  .snd-row{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid #e3d8b8;font-size:16px;cursor:pointer;margin:0}
+  .snd-row span{flex:1}
+  .snd-row small{display:block;font-size:12px;color:#5c7466}
+  .snd-row input{width:46px;height:28px;appearance:none;-webkit-appearance:none;border-radius:999px;background:#cfc5a5;position:relative;flex:none;transition:background .15s;cursor:pointer}
+  .snd-row input::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .15s}
+  .snd-row input:checked{background:var(--felt)}
+  .snd-row input:checked::after{transform:translateX(18px)}
+  /* flying cards and celebrations */
+  .cb-fx{position:fixed;inset:0;pointer-events:none;z-index:55;overflow:hidden}
+  .cb-fx .c{position:absolute;width:68px;height:96px;font-size:26px;box-shadow:0 10px 24px rgba(0,0,0,.4);will-change:transform}
+  .hand-row .c.drag{transition:none;z-index:20;position:relative;box-shadow:0 0 0 3px var(--gold),0 22px 40px rgba(0,0,0,.45);pointer-events:none}
+  .hand-row .c.can{touch-action:none}
+  .cb-pop{position:fixed;left:50%;top:42%;z-index:58;transform:translate(-50%,-50%);pointer-events:none;text-align:center;color:var(--gold);text-shadow:0 4px 0 rgba(0,0,0,.35),0 0 30px rgba(242,193,78,.6)}
+  .cb-pop b{display:block;font-family:'Reem Kufi',sans-serif;font-size:76px;line-height:1.1}
+  .cb-pop span{display:block;font-size:20px;font-weight:700;color:var(--cream)}
+  .cb-pop.small b{font-size:52px}
+  .cb-flash{position:fixed;inset:0;z-index:54;pointer-events:none;background:radial-gradient(circle at 50% 42%,rgba(242,193,78,.55),rgba(192,57,43,.25) 45%,transparent 75%)}
   .ui-turn{padding:10px 14px;border-radius:14px}
   .ui-turn .t{font-family:'Fredoka',sans-serif;font-weight:700;font-size:17px}
   .hand-row{display:flex;justify-content:center;gap:10px;align-items:flex-end;min-height:130px}
@@ -133,6 +175,7 @@
   .ui-sheet-title .ar{font-family:'Reem Kufi',sans-serif;font-size:20px;color:var(--blue);font-weight:500}
   .ui-step > b:first-child{background:var(--blue);color:#fff}
   .ui-sheet .ui-btn{background:var(--felt);color:var(--cream)}
+  .ui-top .ui-round.snd{font-size:18px}
 </style>
 </head>
 <body data-screen="create">
@@ -229,14 +272,15 @@
     <div class="ui-top">
       <button class="ui-round" onclick="confirmQuitMatch()" aria-label="Quitter">✕</button>
       <div class="ui-top-mid cb-score" id="scoreboard-row"></div>
+      <button class="ui-round snd" id="snd-btn" onclick="openSheet('snd-sheet')" aria-label="Son">🔊</button>
       <button class="ui-round" data-rules aria-label="Règles">?</button>
     </div>
     <div id="cb-play" style="flex:1;display:flex;flex-direction:column;gap:8px">
       <div class="opp-row" id="opp-row"></div>
-      <div class="cb-mid">
+      <button type="button" class="cb-last" id="last-move" onclick="openHistory()" aria-label="Historique des coups"></button>
+      <div class="cb-mid" id="cb-mid">
         <div class="table-row" id="table-row"></div>
-        <button class="cb-alt hidden" id="capture-choice-panel" onclick="cycleCapture()"></button>
-        <div class="cb-event" id="event-banner"></div>
+        <button class="cb-alt hidden" id="capture-choice-panel" onclick="event.stopPropagation();cycleCapture()"></button>
       </div>
       <div class="ui-turn" id="turn-pill"><span class="t">…</span><span class="s"></span></div>
       <div class="hand-row" id="hand-row"></div>
@@ -276,7 +320,7 @@
   <div class="ui-sheet-body" role="dialog" aria-label="Règles">
     <div class="ui-grab"></div>
     <div class="ui-sheet-title"><span>Comment jouer</span><span class="ar" lang="ar">شكبّة</span></div>
-    <div class="ui-step"><b>1</b><span>3 cartes en main, 4 sur la table. Joue une carte à ton tour.</span></div>
+    <div class="ui-step"><b>1</b><span>3 cartes en main, 4 sur la table. À ton tour, touche ta carte puis la table, ou <b>lance-la</b> sur la table. Le bandeau en haut montre le dernier coup ; touche-le pour revoir toute la manche.</span></div>
     <div class="ui-step"><b>2</b><span>Même valeur sur la table ? Tu la captures. Sinon une combinaison de même somme. Sans capture, ta carte reste posée.</span></div>
     <div class="ui-step"><b style="background:#f2c14e;color:#3a2c10">★</b><span>Vider la table d'un coup = <b>chkobba</b>, +1 point. Fin de manche : karta, dinari, haya (7♦) et bermila rapportent 1 point chacun.</span></div>
     <div class="ui-step"><b>👥</b><span>À 4 : tu joues avec la personne en face. Premier à 21 !</span></div>
@@ -284,6 +328,28 @@
   </div>
 </div>
 
+<div class="ui-sheet" id="hist-sheet" aria-hidden="true">
+  <div class="ui-sheet-scrim" onclick="closeSheet('hist-sheet')"></div>
+  <div class="ui-sheet-body" role="dialog" aria-label="Coups de la manche">
+    <div class="ui-grab"></div>
+    <div class="ui-sheet-title"><span>Coups de la manche</span><span class="ar" lang="ar">اللعب</span></div>
+    <div class="hist" id="hist-list"></div>
+    <button class="ui-btn" onclick="closeSheet('hist-sheet')">Fermer</button>
+  </div>
+</div>
+<div class="ui-sheet" id="snd-sheet" aria-hidden="true">
+  <div class="ui-sheet-scrim" onclick="closeSheet('snd-sheet')"></div>
+  <div class="ui-sheet-body" role="dialog" aria-label="Son">
+    <div class="ui-grab"></div>
+    <div class="ui-sheet-title"><span>Son</span><span class="ar" lang="ar">قهوة</span></div>
+    <label class="snd-row"><span>☕ Ambiance café<small>Brouhaha, verres de thé et oud à la radio</small></span><input type="checkbox" id="snd-amb" onchange="setSound('amb', this.checked)"></label>
+    <label class="snd-row"><span>🃏 Effets<small>Cartes jetées, darbouka, youyous pour la haya</small></span><input type="checkbox" id="snd-fx" onchange="setSound('fx', this.checked)"></label>
+    <button class="ui-btn" onclick="closeSheet('snd-sheet')">OK</button>
+  </div>
+</div>
+<div class="cb-fx" id="fx"></div>
+
+<script src="cafe-sound.js"></script>
 <script src="realtime.js"></script>
 <script src="leave-guard.js"></script>
 <script src="recent-games.js"></script>
@@ -397,6 +463,7 @@ function newHand(st){
   st.phase = 'playing';
   st.handResult = null;
   st.lastEvent = null;
+  st.moves = [];
   st.hand = (st.hand || 0) + 1;
 }
 function classifyPlay(table, rank){
@@ -419,6 +486,10 @@ function playCard(st, actor, handCardIndex, capturedIdx){
   if(!card) return false;
   const side = sideOf(st, actor);
   hand.splice(handCardIndex, 1);
+  // Every move of the hand is kept so all players can see which card was played and what it took.
+  st.moveSeq = (st.moveSeq || 0) + 1;
+  const move = { seq: st.moveSeq, by: actor, card, cap: (capturedIdx || []).map(i => st.table[i]).filter(Boolean) };
+  st.moves = (st.moves || []).concat([move]);
   if(capturedIdx && capturedIdx.length){
     const capturedCards = capturedIdx.map(i => st.table[i]).concat([card]);
     capturedIdx.slice().sort((a,b)=>b-a).forEach(i => st.table.splice(i,1));
@@ -426,6 +497,7 @@ function playCard(st, actor, handCardIndex, capturedIdx){
     st.lastCaptureSide = side;
     const isChkobba = st.table.length === 0;
     if(isChkobba) st.chkobbaCount[side] += 1;
+    move.chk = isChkobba;
     st.lastEvent = {type:'capture', by:actor, card, capturedCount:capturedCards.length, chkobba:isChkobba};
   } else {
     st.table.push(card);
@@ -591,8 +663,8 @@ function enterGame(){
 }
 function renderCurrent(){
   if(!state) return;
-  if(state.status==='finished'){ window.GYMLeaveGuard.disable(); renderEnd(); }
-  else if(state.status==='playing'){ window.GYMLeaveGuard.enable(); renderBoard(); }
+  if(state.status==='finished'){ window.GYMLeaveGuard.disable(); window.CafeSound.setActive(false); renderEnd(); }
+  else if(state.status==='playing'){ window.GYMLeaveGuard.enable(); window.CafeSound.setActive(true); renderBoard(); }
 }
 
 /* ---------- actions ---------- */
@@ -614,22 +686,86 @@ function selectionPlan(){
   if(cls.type==='direct' || cls.type==='single') return {card, options: [cls.idxs], idxs: cls.idxs};
   return {card, options: [], idxs: []};
 }
+function canPlay(){ return !busy && state && state.turn===me && state.phase==='playing' && state.status==='playing'; }
+// Tap a card of your hand, then tap the table (or tap the card again, or throw it onto the table).
 function playFromHand(handIdx){
-  if(busy || !state || state.turn!==me || state.phase!=='playing') return;
-  if(!state.hands[me][handIdx]) return;
-  selIdx = selIdx===handIdx ? null : handIdx;
+  if(dragJustEnded || !canPlay() || !state.hands[me][handIdx]) return;
+  if(selIdx===handIdx){ playSelected(null); return; }
+  selIdx = handIdx;
   selOpt = 0;
   if(window.GYMFeedback) window.GYMFeedback.vibrate(10);
   renderBoard();
 }
 function cycleCapture(){ selOpt++; renderBoard(); }
-function confirmPlay(){
+// tableIdx: the table card that was touched (picks the capture that contains it), or null.
+function playSelected(tableIdx, fromRect){
+  if(!canPlay()) return;
   const plan = selectionPlan();
-  if(!plan || busy) return;
+  if(!plan) return;
+  let idxs = plan.idxs;
+  if(tableIdx!==null && tableIdx!==undefined && !idxs.includes(tableIdx)){
+    const other = plan.options.find(o => o.includes(tableIdx));
+    if(other) idxs = other;
+  }
   const handIdx = selIdx;
+  const el = $('hand-row').querySelector('[data-hi="'+handIdx+'"]');
+  throwFrom = fromRect || (el ? el.getBoundingClientRect() : null);
   selIdx = null; selOpt = 0;
-  commitPlay(handIdx, plan.idxs);
+  if(window.CafeSound) window.CafeSound.throwCard();
+  commitPlay(handIdx, idxs);
 }
+$('cb-mid').addEventListener('click', e => {
+  if(selIdx===null || !canPlay()) return;
+  const card = e.target.closest('[data-ti]');
+  playSelected(card ? +card.dataset.ti : null);
+});
+
+// Drag a card from your hand and drop or flick it onto the table.
+let drag = null, dragJustEnded = false;
+$('hand-row').addEventListener('pointerdown', e => {
+  const el = e.target.closest('.c.can');
+  if(!el || !canPlay()) return;
+  drag = { idx: +el.dataset.hi, x0: e.clientX, y0: e.clientY, moved: false, pid: e.pointerId, pts: [] };
+});
+document.addEventListener('pointermove', e => {
+  if(!drag || e.pointerId!==drag.pid) return;
+  const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+  if(!drag.moved){
+    if(Math.hypot(dx, dy) < 10) return;
+    if(selIdx!==drag.idx){ selIdx = drag.idx; selOpt = 0; renderBoard(); }
+    drag.moved = true;
+    drag.el = $('hand-row').querySelector('[data-hi="'+drag.idx+'"]');
+    if(!drag.el){ drag = null; return; }
+    drag.el.classList.add('drag');
+  }
+  drag.el.style.transform = 'translate('+dx+'px,'+dy+'px) rotate('+(dx/14).toFixed(1)+'deg) scale(1.06)';
+  drag.pts.push({ t: e.timeStamp, x: e.clientX, y: e.clientY });
+  if(drag.pts.length > 6) drag.pts.shift();
+  const mid = $('cb-mid').getBoundingClientRect();
+  $('cb-mid').classList.toggle('over', e.clientY < mid.bottom + 20);
+  if(e.cancelable) e.preventDefault();
+}, { passive: false });
+function endDrag(e){
+  if(!drag || e.pointerId!==drag.pid) return;
+  const d = drag; drag = null;
+  if(!d.moved) return;
+  dragJustEnded = true; setTimeout(() => { dragJustEnded = false; }, 60);
+  const p = d.pts, first = p[0], last = p[p.length - 1];
+  const vy = p.length > 1 ? (last.y - first.y) / Math.max(1, last.t - first.t) : 0;
+  const mid = $('cb-mid').getBoundingClientRect();
+  const r = d.el.getBoundingClientRect();
+  if(e.type!=='pointercancel' && (e.clientY < mid.bottom + 20 || vy < -0.5)){
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const t = under && under.closest('[data-ti]');
+    playSelected(t ? +t.dataset.ti : null, r);
+  } else {
+    d.el.classList.remove('drag');
+    d.el.style.transform = '';
+    renderBoard();
+  }
+}
+document.addEventListener('pointerup', endDrag);
+document.addEventListener('pointercancel', endDrag);
 async function commitPlay(handIdx, capturedIdx){
   busy = true;
   let st = await loadState(code) || state;
@@ -647,8 +783,167 @@ async function nextHand(){
 }
 
 /* ---------- rendering ---------- */
+function cardKey(c){ return c.r+'-'+c.s; }
 function cardHtml(card, cls, attrs){
-  return '<button type="button" class="c '+(SUIT_CLASS[card.s]==='red'?'red ':'')+(cls||'')+'"'+(attrs||' disabled')+'>'+rankLabel(card.r)+'<span class="s">'+SUIT_SYMBOL[card.s]+'</span></button>';
+  return '<button type="button" class="c '+(SUIT_CLASS[card.s]==='red'?'red ':'')+(cls||'')+'" data-k="'+cardKey(card)+'"'+(attrs||' disabled')+'>'+rankLabel(card.r)+'<span class="s">'+SUIT_SYMBOL[card.s]+'</span></button>';
+}
+function miniCard(c){ return '<span class="mc'+(SUIT_CLASS[c.s]==='red'?' red':'')+'">'+rankLabel(c.r)+'<i>'+SUIT_SYMBOL[c.s]+'</i></span>'; }
+const isHaya = c => c && c.r===7 && c.s===0;
+function moveHtml(m, fresh){
+  const p = state.players[m.by];
+  const who = m.by===me ? 'Toi' : (p ? esc(p.name) : '?');
+  const haya = m.cap.length && (isHaya(m.card) || m.cap.some(isHaya));
+  const tags = (m.chk ? '<span class="tag">Chkobba !</span>' : '') + (haya ? '<span class="tag haya">Haya 7♦</span>' : '');
+  const what = m.cap.length
+    ? miniCard(m.card)+'<span class="ar">→</span><span class="mcs">'+m.cap.map(miniCard).join('')+'</span>'
+    : miniCard(m.card)+'<span class="who">posée</span>';
+  return '<div class="lm'+(fresh?' new':'')+'"><span class="who">'+(p?pAvatar(p)+' ':'')+who+'</span>'+what+tags+'</div>';
+}
+function renderLastMoves(){
+  const moves = state.moves || [];
+  const shown = moves.slice(-(state.maxPlayers - 1));
+  $('last-move').innerHTML = shown.map((m, i) => moveHtml(m, i===shown.length-1)).join('');
+  const lastRow = $('last-move').lastElementChild;
+  if(lastRow && moves.length > shown.length) lastRow.insertAdjacentHTML('beforeend', '<span class="more">'+moves.length+' coups ›</span>');
+}
+function openSheet(id){ const s = $(id); s.classList.add('open'); s.setAttribute('aria-hidden','false'); if(id==='snd-sheet'){ const p = window.CafeSound.prefs(); $('snd-amb').checked = p.amb; $('snd-fx').checked = p.fx; } }
+function closeSheet(id){ const s = $(id); s.classList.remove('open'); s.setAttribute('aria-hidden','true'); }
+function openHistory(){
+  const moves = (state && state.moves) || [];
+  $('hist-list').innerHTML = moves.length ? moves.slice().reverse().map(m => moveHtml(m, true)).join('') : '<div class="hist-empty">Aucun coup joué dans cette manche.</div>';
+  openSheet('hist-sheet');
+}
+function setSound(key, on){ window.CafeSound.set(key, on); updateSoundBtn(); }
+function updateSoundBtn(){ const p = window.CafeSound.prefs(); $('snd-btn').textContent = (p.amb || p.fx) ? '🔊' : '🔇'; }
+
+/* ---------- move animation ---------- */
+let seenSeq = null, throwFrom = null, landing = null;
+const REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Before the board is redrawn: where the played card comes from and where the taken cards are.
+function snapshotMove(m){
+  const tr = $('table-row');
+  const caps = m.cap.map(c => { const el = tr.querySelector('[data-k="'+cardKey(c)+'"]'); return el ? { c, r: el.getBoundingClientRect() } : null; }).filter(Boolean);
+  let from = null;
+  if(m.by===me){
+    if(throwFrom) from = throwFrom;
+    else { const el = $('hand-row').querySelector('[data-k="'+cardKey(m.card)+'"]'); if(el) from = el.getBoundingClientRect(); }
+  } else {
+    const o = document.querySelector('#opp-'+m.by+' .fanb');
+    if(o) from = o.getBoundingClientRect();
+  }
+  throwFrom = null;
+  return { m, from, caps };
+}
+function flyCard(c, back, r){
+  const el = document.createElement('div');
+  el.className = 'c' + (back ? ' back' : (SUIT_CLASS[c.s]==='red' ? ' red' : ''));
+  if(!back) el.innerHTML = rankLabel(c.r)+'<span class="s">'+SUIT_SYMBOL[c.s]+'</span>';
+  el.style.left = r.left+'px'; el.style.top = r.top+'px'; el.style.width = r.width+'px'; el.style.height = r.height+'px';
+  el.style.fontSize = Math.round(r.width * 0.38)+'px';
+  $('fx').appendChild(el);
+  return el;
+}
+function runMoveAnim(a){
+  const m = a.m;
+  const tr = $('table-row');
+  const after = () => celebrate(m);
+  const sample = tr.querySelector('.c') || { getBoundingClientRect: () => ({ width: 68, height: 96 }) };
+  const sz = sample.getBoundingClientRect();
+  const W = sz.width || 68, H = sz.height || 96;
+  let target, placed = null;
+  if(m.cap.length){
+    if(!a.caps.length){ after(); return; }
+    const r0 = a.caps[0].r;
+    target = { left: r0.left + 10, top: r0.top + 8, width: W, height: H };
+  } else {
+    placed = tr.querySelector('[data-k="'+cardKey(m.card)+'"]');
+    if(!placed){ after(); return; }
+    target = placed.getBoundingClientRect();
+  }
+  if(!a.from || REDUCED){
+    if(m.cap.length) { if(window.CafeSound) window.CafeSound.land(); }
+    after(); return;
+  }
+  // Keep the placed card hidden until the thrown one lands on it.
+  if(placed){ landing = { k: cardKey(m.card), until: Date.now() + 1200 }; placed.classList.add('ghost'); }
+  const caps = a.caps.map(x => flyCard(x.c, false, x.r));
+  const fly = flyCard(m.card, m.by!==me, target);
+  const fx = a.from.left + a.from.width/2 - (target.left + W/2), fy = a.from.top + a.from.height/2 - (target.top + H/2);
+  const s0 = Math.max(0.4, Math.min(1.5, a.from.width / W));
+  const spin = (m.seq % 2 ? 1 : -1) * (14 + (m.seq * 7) % 16), endRot = (m.seq % 3 - 1) * 4;
+  const dur = m.by===me ? 380 : 520;
+  if(m.by!==me && window.CafeSound) window.CafeSound.throwCard();
+  fly.animate([
+    { transform: 'translate('+fx+'px,'+fy+'px) rotate('+(-spin)+'deg) scale('+s0+')' },
+    { transform: 'translate('+(fx*0.35)+'px,'+(fy*0.35 - 34)+'px) rotate('+(spin*0.6)+'deg) scale(1.14)', offset: 0.6 },
+    { transform: 'translate(0,0) rotate('+endRot+'deg) scale(1)' }
+  ], { duration: dur, easing: 'cubic-bezier(.3,.7,.35,1)', fill: 'forwards' });
+  if(m.by!==me) setTimeout(() => { fly.className = 'c' + (SUIT_CLASS[m.card.s]==='red' ? ' red' : ''); fly.innerHTML = rankLabel(m.card.r)+'<span class="s">'+SUIT_SYMBOL[m.card.s]+'</span>'; }, dur * 0.45);
+  setTimeout(() => {
+    if(window.CafeSound) window.CafeSound.land(isHaya(m.card));
+    tr.animate([{ transform: 'none' }, { transform: 'translateY(3px) scale(.995)' }, { transform: 'none' }], { duration: 140 });
+    if(window.GYMFeedback) window.GYMFeedback.vibrate(15);
+    if(!m.cap.length){
+      landing = null;
+      const real = $('table-row').querySelector('[data-k="'+cardKey(m.card)+'"]');
+      if(real) real.classList.remove('ghost');
+      fly.remove();
+      after();
+      return;
+    }
+    after();
+    // Then the trick slides to whoever took it.
+    setTimeout(() => {
+      let dest;
+      if(m.by===me || (state.maxPlayers===4 && sideOf(state, m.by)===mySide() && !document.querySelector('#opp-'+m.by))) dest = $('hand-row').getBoundingClientRect();
+      else { const o = document.querySelector('#opp-'+m.by); dest = o ? o.getBoundingClientRect() : { left: innerWidth/2, top: -80, width: 0, height: 0 }; }
+      if(window.CafeSound) window.CafeSound.sweep();
+      [fly].concat(caps).forEach((el, i) => {
+        const r = el.getBoundingClientRect();
+        const dx = dest.left + dest.width/2 - (r.left + r.width/2), dy = dest.top + dest.height/2 - (r.top + r.height/2);
+        const cur = getComputedStyle(el).transform;
+        el.animate([
+          { transform: cur === 'none' ? 'none' : cur, opacity: 1 },
+          { transform: 'translate('+dx+'px,'+dy+'px) scale(.45) rotate('+(i*9 - 10)+'deg)', opacity: 0 }
+        ], { duration: 460, delay: i * 35, easing: 'cubic-bezier(.5,0,.75,.4)', fill: 'forwards' }).onfinish = () => el.remove();
+      });
+    }, 520);
+  }, dur);
+}
+function celebrate(m){
+  if(!m.cap.length) return;
+  const p = state.players[m.by];
+  const who = m.by===me ? 'Pour toi !' : 'Pour ' + (p ? p.name : '…');
+  if(isHaya(m.card) || m.cap.some(isHaya)){
+    if(window.CafeSound) window.CafeSound.haya();
+    if(window.GYMFeedback){ window.GYMFeedback.vibrate([60,40,60,40,60,40,200]); window.GYMFeedback.confetti(90); }
+    pop('الحية', 'Haya 7♦ · ' + who, false, 2200);
+    if(!REDUCED){
+      $('screen-game').animate([
+        { transform: 'none' }, { transform: 'translate(-9px,2px) rotate(-1deg)' }, { transform: 'translate(8px,-2px) rotate(1deg)' },
+        { transform: 'translate(-6px,1px) rotate(-.6deg)' }, { transform: 'translate(5px,0) rotate(.4deg)' }, { transform: 'translate(-2px,0)' }, { transform: 'none' }
+      ], { duration: 650, easing: 'ease-out' });
+      const flash = document.createElement('div'); flash.className = 'cb-flash'; document.body.appendChild(flash);
+      flash.animate([{ opacity: 0 }, { opacity: 1, offset: 0.15 }, { opacity: 0 }], { duration: 1400 }).onfinish = () => flash.remove();
+    }
+  } else if(m.chk){
+    if(window.CafeSound) window.CafeSound.chkobba();
+    if(window.GYMFeedback) window.GYMFeedback.vibrate([40,40,40,40,120]);
+    pop('شكبّة', 'Chkobba ! ' + who, true, 1600);
+  }
+}
+function pop(ar, sub, small, ms){
+  const el = document.createElement('div');
+  el.className = 'cb-pop' + (small ? ' small' : '');
+  el.innerHTML = '<b lang="ar">'+ar+'</b><span>'+esc(sub)+'</span>';
+  document.body.appendChild(el);
+  el.animate([
+    { transform: 'translate(-50%,-50%) scale(.3)', opacity: 0 },
+    { transform: 'translate(-50%,-50%) scale(1.15)', opacity: 1, offset: 0.18 },
+    { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.3 },
+    { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.82 },
+    { transform: 'translate(-50%,-60%) scale(.95)', opacity: 0 }
+  ], { duration: ms, easing: 'ease-out', fill: 'forwards' }).onfinish = () => el.remove();
 }
 function cardTxt(c){ return rankLabel(c.r)+SUIT_SYMBOL[c.s]; }
 function sideLabel(s){
@@ -675,6 +970,14 @@ function renderBoard(){
   const side = mySide(), oppSide = 1 - side;
   const myTurn = state.turn === me && state.phase==='playing';
   if(!myTurn){ selIdx = null; selOpt = 0; }
+  if(drag && drag.moved) return;   // never redraw under a finger
+  // A new move since the last render is animated (not on first load).
+  const moves = state.moves || [], lastMove = moves[moves.length - 1];
+  const seq = state.moveSeq || 0;
+  let anim = null;
+  try{ if(seenSeq!==null && seq > seenSeq && lastMove && lastMove.seq===seq) anim = snapshotMove(lastMove); }catch(e){}
+  seenSeq = seq;
+  if(anim && state.phase!=='playing'){ const m = anim.m; anim = null; setTimeout(() => celebrate(m), 50); }
   $('scoreboard-row').innerHTML = '<span class="w">'+sideLabel(side)+'</span><span class="n me">'+state.totals[side]+'</span><span class="t">/ '+TARGET_SCORE+'</span><span class="n">'+state.totals[oppSide]+'</span><span class="w">'+sideLabel(oppSide)+'</span>';
 
   const handEnd = state.phase==='hand_end';
@@ -704,16 +1007,20 @@ function renderBoard(){
     if(idx===me || !p) return '';
     const n = state.hands[idx] ? state.hands[idx].length : 0;
     const partner = state.maxPlayers===4 && sideOf(state, idx)===side;
-    const played = ev && ev.by===idx ? ' · a joué '+cardTxt(ev.card) : '';
-    return '<div class="opp'+(state.turn===idx?' turn':'')+(state.maxPlayers===4?' small':'')+'"><div class="fanb">'+'<span class="c back"></span>'.repeat(n)+'</div>'+
-      '<div class="lbl">'+pAvatar(p)+' '+esc(p.name)+(partner?' 🤝':'')+'<br>'+n+' carte'+(n>1?'s':'')+played+'</div></div>';
+    return '<div class="opp'+(state.turn===idx?' turn':'')+(state.maxPlayers===4?' small':'')+'" id="opp-'+idx+'"><div class="fanb">'+'<span class="c back"></span>'.repeat(n)+'</div>'+
+      '<div class="lbl">'+pAvatar(p)+' '+esc(p.name)+(partner?' 🤝':'')+'<br>'+n+' carte'+(n>1?'s':'')+'</div></div>';
   }).join('');
 
   const plan = myTurn ? selectionPlan() : null;
   const hits = plan ? plan.idxs : [];
   const tr = $('table-row');
   tr.classList.toggle('dim', !!plan && hits.length>0);
-  tr.innerHTML = state.table.map((c, i) => cardHtml(c, hits.includes(i) ? 'hit' : '')).join('') || '<div class="table-empty">Table vide</div>';
+  $('cb-mid').classList.toggle('armed', !!plan);
+  if(landing && Date.now() > landing.until) landing = null;
+  tr.innerHTML = state.table.map((c, i) => cardHtml(c, (hits.includes(i) ? 'hit' : '') + (landing && landing.k===cardKey(c) ? ' ghost' : ''), plan ? ' data-ti="'+i+'"' : null)).join('')
+    + (plan && !hits.length ? '<div class="table-drop">Poser ici</div>' : '')
+    || '<div class="table-empty">Table vide</div>';
+  renderLastMoves();
   const alt = $('capture-choice-panel');
   if(plan && plan.options.length > 1){
     const next = plan.options[(selOpt+1) % plan.options.length];
@@ -727,8 +1034,8 @@ function renderBoard(){
   if(myTurn){
     t = 'À toi !';
     if(!plan) s = 'Touche une carte de ta main';
-    else if(plan.idxs.length) s = cardTxt(plan.card)+' capture '+plan.idxs.map(i=>cardTxt(state.table[i])).join(' + ')+(plan.idxs.length===state.table.length?' · chkobba !':'');
-    else s = cardTxt(plan.card)+' sera posé sur la table';
+    else if(plan.idxs.length) s = cardTxt(plan.card)+' prend '+plan.idxs.map(i=>cardTxt(state.table[i])).join(' + ')+(plan.idxs.length===state.table.length?' · chkobba !':'')+' · touche la table';
+    else s = 'Touche la table pour poser le '+cardTxt(plan.card);
   } else {
     const tp = state.players[state.turn];
     t = 'Au tour de ' + (tp ? tp.name : '…');
@@ -738,25 +1045,9 @@ function renderBoard(){
   pill.querySelector('.s').textContent = s;
 
   const myHand = state.hands[me] || [];
-  $('hand-row').innerHTML = myHand.map((c, i) => cardHtml(c, myTurn ? ('can'+(selIdx===i?' sel':(selIdx!==null?' off':''))) : '', myTurn ? ' onclick="playFromHand('+i+')"' : null)).join('') || '<span class="muted">Ta main est vide</span>';
-  $('cb-action').innerHTML = plan ? '<button class="ui-btn" id="btn-confirm" onclick="confirmPlay()">Jouer le '+cardTxt(plan.card)+'</button>'
-    : (myTurn ? '' : '<div class="cb-wait-hint pulse">⏳ Patiente…</div>');
-
-  const banner = $('event-banner');
-  if(!ev){ banner.textContent=""; banner.className="cb-event"; lastFeedbackEvent = null; }
-  else {
-    const byName = state.players[ev.by] ? (ev.by===me ? 'Tu as' : state.players[ev.by].name+' a') : '?';
-    const evKey = ev.type+'-'+ev.by+'-'+ev.card.r+'-'+ev.card.s+'-'+(ev.capturedCount||0);
-    if(ev.type==='capture'){
-      banner.className = "cb-event" + (ev.chkobba ? " chkobba" : "");
-      banner.textContent = ev.chkobba ? '🎉 Chkobba ! '+byName+' vidé la table' : byName+' capturé '+ev.capturedCount+' cartes avec '+cardTxt(ev.card);
-      if(evKey !== lastFeedbackEvent){ lastFeedbackEvent = evKey; if(window.GYMFeedback) window.GYMFeedback.vibrate(ev.chkobba ? [40,40,40,40,120] : 30); }
-    } else {
-      banner.className = "cb-event";
-      banner.textContent = byName+' posé '+cardTxt(ev.card);
-      lastFeedbackEvent = evKey;
-    }
-  }
+  $('hand-row').innerHTML = myHand.map((c, i) => cardHtml(c, myTurn ? ('can'+(selIdx===i?' sel':(selIdx!==null?' off':''))) : '', myTurn ? ' data-hi="'+i+'" onclick="playFromHand('+i+')"' : ' data-hi="'+i+'" disabled')).join('') || '<span class="muted">Ta main est vide</span>';
+  $('cb-action').innerHTML = myTurn ? '' : '<div class="cb-wait-hint pulse">⏳ Patiente…</div>';
+  if(anim){ const a = anim; requestAnimationFrame(() => { try{ runMoveAnim(a); }catch(e){} }); }
 }
 async function renderEnd(){
   if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
@@ -814,6 +1105,7 @@ function fast(action){
   };
 }
 commitPlay = fast(commitPlay);
+updateSoundBtn();
 </script>
 <script src="install-tutorial.js" defer></script>
 </body>
