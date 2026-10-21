@@ -217,8 +217,14 @@
   .card-pop small{display:block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
   .card-pop.chance{background:#fff3d6;color:#6a4b00}
   .card-pop.fam{background:#e3f4ea;color:#14532d}
-  .log{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--dim);padding:0 4px}
-  .log div:first-child{color:var(--fg);font-weight:500}
+  /* journal: every event of the game, scrollable, newest on top */
+  .log{position:relative;background:#fff;border-radius:16px;box-shadow:0 2px 0 var(--line);overflow:hidden}
+  .log .h{display:flex;justify-content:space-between;padding:9px 12px 4px;font-size:12px;font-weight:700;color:var(--dim)}
+  .log .list{max-height:150px;overflow-y:auto;overscroll-behavior:contain;padding:0 12px 14px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--fg)}
+  .log .list div{padding-bottom:5px;border-bottom:1px solid #eef2f6;line-height:1.3}
+  .log .list div:last-child{border-bottom:none}
+  .log .list div:first-child{font-weight:600}
+  .log::after{content:"";position:absolute;left:0;right:0;bottom:0;height:22px;background:linear-gradient(rgba(255,255,255,0),#fff);pointer-events:none}
 
   /* sheets */
   .ui-sheet-body{max-height:86vh;overflow-y:auto;color:var(--fg)}
@@ -351,7 +357,7 @@
     <div class="players" id="players"></div>
     <div class="tbox hidden" id="trade-box"></div>
     <div class="panel" id="panel"></div>
-    <div class="log" id="log"></div>
+    <div class="log" id="log"><div class="h"><span>📜 Journal</span><span id="log-n"></span></div><div class="list" id="log-list"></div></div>
   </div>
 
   <div id="screen-end" class="ui-screen has-dock hidden">
@@ -528,7 +534,7 @@ const ownable = i => ['prop','tr','util'].includes(SQ[i].t);
 const groupIdx = g => SQ.map((s, i) => i).filter(i => SQ[i].g === g);
 const alive = st => st.players.map((p, i) => i).filter(i => !st.out[i]);
 const ownerOf = (st, i) => st.props[i] ? st.props[i].o : null;
-function log(st, msg){ st.log.unshift(msg); if(st.log.length > 40) st.log.pop(); }
+function log(st, msg){ st.log.unshift(msg); if(st.log.length > 100) st.log.pop(); }
 function ownsGroup(st, p, g){ return groupIdx(g).every(i => st.props[i] && st.props[i].o === p); }
 function groupHasHouses(st, g){ return groupIdx(g).some(i => st.props[i] && st.props[i].h > 0); }
 function rentOf(st, i, dice){
@@ -1149,7 +1155,7 @@ function render(st){
     $('info').innerHTML = infoFor(cur, cur.pos[cur.turn]);
     $('info').onclick = () => showSquare(cur.pos[cur.turn]);
     renderPanel(cur);
-    $('log').innerHTML = cur.log.slice(0, 4).map(l => '<div>'+esc(l)+'</div>').join('');
+    renderLog(cur);
   };
   clearTimeout(panelTimer);
   const wait = busyUntil - Date.now();
@@ -1160,6 +1166,15 @@ function render(st){
 }
 // While a replay is running, tokens keep their animated squares.
 function walkingTo(st){ return busyUntil > Date.now(); }
+// Only redraw the journal when it changed, so reading older lines isn't interrupted.
+let shownLog = '';
+function renderLog(st){
+  const key = st.log.length + '|' + (st.log[0] || '');
+  if(key === shownLog) return;
+  shownLog = key;
+  $('log-list').innerHTML = st.log.map(l => '<div>' + esc(l) + '</div>').join('');
+  $('log-n').textContent = st.log.length + ' événement' + (st.log.length > 1 ? 's' : '');
+}
 function toggleSound(){ if(!window.CafeSound) return; const on = !window.CafeSound.prefs().fx; window.CafeSound.set('fx', on); updateSoundBtn(); }
 function updateSoundBtn(){ const b = $('snd-btn'); if(b && window.CafeSound) b.textContent = window.CafeSound.prefs().fx ? '🔊' : '🔇'; }
 function infoFor(st, i){
