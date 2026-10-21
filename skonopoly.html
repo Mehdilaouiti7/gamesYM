@@ -105,6 +105,36 @@
   .card-fly .front small{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cb);margin-bottom:6px}
   canvas.fireworks{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:90}
   .snd-top{font-size:17px}
+  /* trade offers, visible to everyone */
+  .tbox{background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 0 0 2px #ffd166,0 4px 0 var(--line);display:flex;flex-direction:column;gap:8px}
+  .tbox > .ui-btn{flex:none}
+  .thd{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#7a5a00}
+  .thd span{margin-left:auto;font-weight:600;color:var(--dim);text-align:right}
+  .tcols{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center}
+  .tcol{min-width:0}
+  .tcol b{display:block;font-size:13px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tsw{font-size:20px;color:#0a4f9c}
+  .tchip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:#f2f7fc;font-size:12.5px;font-weight:600;margin:2px 2px 0 0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tchip i{width:9px;height:9px;border-radius:3px;background:var(--g);flex:none}
+  .tchip.money{background:#e7f7ee;color:#157341;font-family:'Space Mono',monospace}
+  .tchip.none{color:var(--dim);font-weight:500}
+  .treact{display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap}
+  .treact:empty{display:none}
+  .treact small{font-size:12px;color:var(--dim)}
+  .treact button{position:relative;min-width:42px;height:36px;padding:0 8px;border-radius:12px;background:#f2f7fc;font-size:18px}
+  .treact button.on{background:#ffe9a8;box-shadow:inset 0 0 0 2px #ffd166}
+  .treact button:disabled{opacity:1}
+  .treact button i{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:999px;background:#0a4f9c;color:#fff;font:700 11px/18px 'Fredoka',sans-serif;font-style:normal}
+  .trades-btn{position:absolute;left:10px;bottom:10px;z-index:5;padding:8px 12px;border-radius:999px;background:#fff;color:#0a4f9c;font-size:13px;font-weight:700;box-shadow:0 3px 10px rgba(60,45,20,.2)}
+  .trades-btn i{display:inline-block;margin-left:4px;padding:0 6px;border-radius:999px;background:#0a4f9c;color:#fff;font-style:normal;font-size:11px}
+  .ttoast{position:absolute;left:10px;right:10px;top:52px;z-index:8;border-radius:14px;padding:10px 12px;font-size:14px;font-weight:600;color:#fff;background:#14304f;box-shadow:0 8px 20px rgba(0,0,0,.25);text-align:center}
+  .ttoast.ok{background:#1f9d55} .ttoast.ko{background:#c0392b}
+  .thist{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto}
+  .thit{border-radius:14px;padding:10px 12px;background:#f5f9fd;font-size:13px}
+  .thit .top{display:flex;align-items:center;gap:6px;font-weight:700;margin-bottom:6px;flex-wrap:wrap}
+  .thit .top span{margin-left:auto;font-size:11px;padding:2px 8px;border-radius:999px}
+  .thit .top .ok{background:#d9f5e4;color:#157341} .thit .top .ko{background:#ffe0e3;color:#b8001a} .thit .top .wait{background:#fff3cf;color:#7a5a00}
+  .thit .tr-r{margin-top:6px;font-size:16px}
   .pot{display:flex;flex-direction:column;align-items:center;padding:1.4cqw 3cqw;border-radius:2.4cqw;background:#fff;box-shadow:0 .6cqw 0 #e3d6b8;font:700 4.2cqw 'Space Mono',monospace;color:#7a4a26;line-height:1.1}
   .pot small{font:600 2.2cqw 'Fredoka',sans-serif;color:#a27c52;letter-spacing:.02em}
   .pot-pill{position:absolute;left:10px;top:10px;z-index:5;padding:6px 11px;border-radius:999px;background:#fff;color:#7a4a26;font:700 13px 'Space Mono',monospace;box-shadow:0 3px 10px rgba(60,45,20,.2)}
@@ -316,9 +346,10 @@
       <button class="ui-round snd-top" id="snd-btn" onclick="toggleSound()" aria-label="Son">🔊</button>
       <button class="ui-round" data-rules aria-label="Règles">?</button>
     </div>
-    <div class="board-wrap" id="board-wrap"><div class="stage"><div class="board" id="board"></div></div><button class="view-btn" id="view-btn" onclick="toggleOverview()">Voir tout le plateau</button><div class="pot-pill" id="pot-pill"></div></div>
+    <div class="board-wrap" id="board-wrap"><div class="stage"><div class="board" id="board"></div></div><button class="view-btn" id="view-btn" onclick="toggleOverview()">Voir tout le plateau</button><div class="pot-pill" id="pot-pill"></div><button class="trades-btn hidden" id="trades-btn" onclick="openTrades()"></button></div>
     <div class="here-strip" id="info"></div>
     <div class="players" id="players"></div>
+    <div class="tbox hidden" id="trade-box"></div>
     <div class="panel" id="panel"></div>
     <div class="log" id="log"></div>
   </div>
@@ -625,7 +656,7 @@ function bankrupt(st, p, to){
   st.jailCards[p] = [];
   st.money[p] = 0; st.out[p] = true; st.outOrder.push(p);
   if(st.debt && st.debt.p === p) st.debt = null;
-  if(st.trade && (st.trade.from === p || st.trade.to === p)) st.trade = null;
+  if(st.trade && (st.trade.from === p || st.trade.to === p)){ tradeDone(st, 'void'); st.trade = null; }
   const left = alive(st);
   if(left.length === 1){ st.status = 'finished'; st.winner = left[0]; st.phase = 'over'; log(st, '🏆 ' + nm(st, left[0]) + ' gagne Skonopoly !'); return; }
   if(st.turn === p) nextTurn(st);
@@ -761,7 +792,10 @@ function aTradeSend(t){
     if(!myTurn(st) || !['roll', 'end'].includes(st.phase) || st.trade) return false;
     const tr = { from: R.me, to: t.to, give: t.give, get: t.get };
     if(!tradeValid(st, tr)) return false;
+    st.trades = st.trades || [];
+    tr.id = st.trades.length + 1; tr.reacts = {};
     st.trade = tr;
+    st.trades.push({ id: tr.id, from: tr.from, to: tr.to, give: tr.give, get: tr.get, status: 'wait' });
     log(st, '🤝 ' + nm(st, R.me) + ' propose un échange à ' + nm(st, t.to) + '.');
   });
 }
@@ -770,13 +804,29 @@ function aTradeAnswer(accept){
     const t = st.trade;
     if(!t || (t.to !== R.me && t.from !== R.me)) return false;
     if(accept && t.to === R.me){
-      if(!tradeValid(st, t)){ st.trade = null; log(st, "L'échange n'est plus possible."); return; }
+      if(!tradeValid(st, t)){ tradeDone(st, 'void'); st.trade = null; log(st, "L'échange n'est plus possible."); return; }
       t.give.props.forEach(i => { st.props[i].o = t.to; });
       t.get.props.forEach(i => { st.props[i].o = t.from; });
       st.money[t.from] += t.get.m - t.give.m; st.money[t.to] += t.give.m - t.get.m;
       log(st, '🤝 ' + nm(st, t.to) + ' accepte l’échange avec ' + nm(st, t.from) + ' !');
-    } else log(st, t.to === R.me ? nm(st, t.to) + ' refuse l’échange.' : nm(st, t.from) + ' annule son offre.');
+      tradeDone(st, 'ok');
+    } else { log(st, t.to === R.me ? nm(st, t.to) + ' refuse l’échange.' : nm(st, t.from) + ' annule son offre.'); tradeDone(st, t.to === R.me ? 'ko' : 'cancel'); }
     st.trade = null;
+  });
+}
+// Record how the pending offer ended in the game's trade history.
+function tradeDone(st, status){
+  const t = st.trade; if(!t || !st.trades) return;
+  const h = st.trades.find(x => x.id === t.id);
+  if(h){ h.status = status; h.reacts = t.reacts || {}; }
+}
+// Other players can react to an offer.
+function aReact(emo){
+  R.act(st => {
+    const t = st.trade, me = R.me;
+    if(!t || me === t.from || me === t.to || st.out[me]) return false;
+    t.reacts = t.reacts || {};
+    if(t.reacts[me] === emo) delete t.reacts[me]; else t.reacts[me] = emo;
   });
 }
 
@@ -1091,6 +1141,8 @@ function render(st){
   placeTokens(st);
   renderPlayers(st);
   renderPot(st);
+  renderTradeBox(st);
+  tradeResults(st);
   const later = () => {
     const cur = R.state; if(!cur || cur.status !== 'playing') return;
     homeCamera();
@@ -1136,8 +1188,7 @@ function renderPanel(st){
   const trade = '<button class="ui-btn alt small" onclick="openTrade()"'+(st.trade || alive(st).length < 2 ? ' disabled' : '')+'>🤝 Échanger</button>';
   let html = '';
   if(st.trade && st.trade.to === me){
-    const tr = st.trade;
-    html += '<div class="offer">🤝 <b>'+esc(nm(st, tr.from))+'</b> te propose :<br>'+offerText(st, tr, true)+'</div><div class="row"><button class="ui-btn red" onclick="aTradeAnswer(false)">Refuser</button><button class="ui-btn go" onclick="aTradeAnswer(true)">Accepter</button></div>';
+    html += '<div class="msg"><b>' + esc(nm(st, st.trade.from)) + '</b> te propose cet échange.</div><div class="row"><button class="ui-btn red" onclick="aTradeAnswer(false)">Refuser</button><button class="ui-btn go" onclick="aTradeAnswer(true)">Accepter</button></div>';
     p.innerHTML = html; return;
   }
   if(st.out[me]){ p.innerHTML = '<div class="wait-msg">Tu as fait faillite. Tu peux suivre la fin de la partie.</div>'; return; }
@@ -1146,12 +1197,10 @@ function renderPanel(st){
     if(st.phase === 'buy') w = '<b>' + esc(nm(st, t)) + '</b> réfléchit à acheter ' + esc(SQ[st.pos[t]].n) + '…';
     if(st.phase === 'debt') w = '<b>' + esc(nm(st, t)) + '</b> doit trouver ' + DT(st.debt.amount) + '…';
     html += cardBox(st) + '<div class="msg pulse">' + w + '</div>';
-    if(st.trade && st.trade.from === me) html += '<div class="offer">Ton offre à <b>'+esc(nm(st, st.trade.to))+'</b> attend sa réponse.</div><button class="ui-btn alt small" onclick="aTradeAnswer(false)">Annuler mon offre</button>';
     html += '<div class="row">' + manage + '</div>';
     p.innerHTML = html; return;
   }
   html += cardBox(st);
-  if(st.trade && st.trade.from === me) html += '<div class="offer">Ton offre à <b>'+esc(nm(st, st.trade.to))+'</b> attend sa réponse. <a href="#" onclick="aTradeAnswer(false);return false">Annuler</a></div>';
   if(st.phase === 'roll'){
     if(st.jail[me]){
       html += '<div class="msg">⛓️ Tu es à <b>Mornaguia</b> (essai ' + st.jail[me] + '/3). Fais un double, ou paie pour sortir.</div>';
@@ -1172,6 +1221,58 @@ function renderPanel(st){
   } else html += '<div class="msg pulse">…</div>';
   p.innerHTML = html;
 }
+const REACTS = ['👍', '😂', '😮', '👎'];
+function giveChips(a){
+  const chips = a.props.map(i => '<span class="tchip" style="--g:' + (SQ[i].g ? GROUPS[SQ[i].g].c : '#9ab') + '"><i></i>' + esc(SQ[i].n) + '</span>');
+  if(a.m) chips.push('<span class="tchip money">+' + DT(a.m) + '</span>');
+  return chips.join('') || '<span class="tchip none">rien</span>';
+}
+function tradeCols(st, t){
+  const who = i => av(st.players[i]) + ' ' + (i === R.me ? 'Toi' : esc(nm(st, i)));
+  return '<div class="tcols"><div class="tcol"><b>' + who(t.from) + ' donne</b>' + giveChips(t.give) + '</div><div class="tsw">⇄</div><div class="tcol"><b>' + who(t.to) + ' donne</b>' + giveChips(t.get) + '</div></div>';
+}
+// The offer in progress, shown to every player.
+function renderTradeBox(st){
+  const box = $('trade-box'), t = st.trade, me = R.me;
+  if(!t){ box.innerHTML = ''; box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+  const reacts = t.reacts || {};
+  const counts = REACTS.map(e => Object.values(reacts).filter(x => x === e).length);
+  const status = t.to === me ? '👉 À toi de répondre' : '⏳ ' + esc(nm(st, t.to)) + ' réfléchit…';
+  let html = '<div class="thd">🤝 Proposition d\'échange <span>' + status + '</span></div>' + tradeCols(st, t);
+  const spectator = me !== t.from && me !== t.to && !st.out[me];
+  html += '<div class="treact">' + (spectator ? '<small>Ton avis :</small>' : (Object.keys(reacts).length ? '<small>Avis :</small>' : '')) +
+    REACTS.map((e, k) => (spectator || counts[k]) ? '<button' + (reacts[me] === e ? ' class="on"' : '') + (spectator ? ' onclick="aReact(\'' + e + '\')"' : ' disabled') + '>' + e + (counts[k] ? '<i>' + counts[k] + '</i>' : '') + '</button>' : '').join('') + '</div>';
+  if(t.from === me) html += '<button class="ui-btn alt small" onclick="aTradeAnswer(false)">Annuler mon offre</button>';
+  box.innerHTML = html;
+}
+// Trades that just ended: a short result banner for everyone.
+let seenTrades = null;
+function tradeResults(st){
+  const list = st.trades || [];
+  if(seenTrades){
+    list.forEach(h => {
+      const before = seenTrades[h.id];
+      if(h.status !== 'wait' && before === 'wait'){
+        const txt = h.status === 'ok' ? '✅ ' + nm(st, h.to) + ' accepte l’échange avec ' + nm(st, h.from) + ' !'
+          : h.status === 'ko' ? '❌ ' + nm(st, h.to) + ' refuse l’offre de ' + nm(st, h.from) : '↩️ L’offre de ' + nm(st, h.from) + ' est annulée';
+        toast(txt, h.status);
+        if(h.status === 'ok') SND('cash');
+      }
+    });
+  }
+  seenTrades = {}; list.forEach(h => { seenTrades[h.id] = h.status; });
+  const btn = $('trades-btn');
+  btn.classList.toggle('hidden', !list.length);
+  btn.innerHTML = '🤝 Échanges <i>' + list.length + '</i>';
+}
+function toast(txt, kind){
+  const el = document.createElement('div');
+  el.className = 'ttoast ' + (kind || '');
+  el.textContent = txt;
+  $('board-wrap').appendChild(el);
+  el.animate([{ transform: 'translateY(-20px)', opacity: 0 }, { transform: 'none', opacity: 1, offset: 0.1 }, { transform: 'none', opacity: 1, offset: 0.85 }, { transform: 'translateY(-10px)', opacity: 0 }], { duration: 3500, easing: 'ease-out' }).onfinish = () => el.remove();
+}
 function offerText(st, t, forTarget){
   const list = a => a.props.map(i => SQ[i].n).concat(a.m ? [DT(a.m)] : []).join(', ') || 'rien';
   return forTarget ? 'Tu reçois : <b>' + esc(list(t.give)) + '</b><br>Tu donnes : <b>' + esc(list(t.get)) + '</b>'
@@ -1185,6 +1286,7 @@ function closeSheet(){ sheetKind = null; const s = $('sheet'); s.classList.remov
 function showSquare(i){ openSheet('square', i); }
 function showPlayer(i){ openSheet('player', i); }
 function openManage(){ openSheet('manage'); }
+function openTrades(){ openSheet('trades'); }
 function openTrade(){ tradeDraft = { to: null, give: { props: [], m: 0 }, get: { props: [], m: 0 } }; openSheet('trade'); }
 function renderSheet(){
   const st = R.state, b = $('sheet-body');
@@ -1231,6 +1333,15 @@ function renderSheet(){
     });
     html += '</div>';
     if(!st.out[me]) html += '<button class="ui-btn alt small" style="margin-top:12px;color:var(--flag)" onclick="aBankrupt()">Abandonner la partie</button>';
+  } else if(sheetKind === 'trades'){
+    const list = (st.trades || []).slice().reverse();
+    const lab = { wait: ['En attente', 'wait'], ok: ['Accepté', 'ok'], ko: ['Refusé', 'ko'], cancel: ['Annulé', 'ko'], void: ['Annulé', 'ko'] };
+    html += '<div class="ui-sheet-title">Échanges de la partie</div><div class="thist">';
+    html += list.length ? list.map(h => {
+      const r = Object.values(h.reacts || (st.trade && st.trade.id === h.id ? st.trade.reacts : {}) || {});
+      return '<div class="thit"><div class="top">' + av(st.players[h.from]) + ' ' + esc(nm(st, h.from)) + ' → ' + av(st.players[h.to]) + ' ' + esc(nm(st, h.to)) + '<span class="' + lab[h.status][1] + '">' + lab[h.status][0] + '</span></div>' + tradeCols(st, h) + (r.length ? '<div class="tr-r">' + r.join(' ') + '</div>' : '') + '</div>';
+    }).join('') : '<p class="mng-empty">Aucun échange pour l’instant.</p>';
+    html += '</div>';
   } else if(sheetKind === 'trade'){
     const me = R.me, d = tradeDraft;
     html += '<div class="ui-sheet-title">Proposer un échange</div><p class="muted">Avec qui ?</p><div class="trd-who">' +
