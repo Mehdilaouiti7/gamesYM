@@ -105,6 +105,42 @@
   .card-fly .front small{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cb);margin-bottom:6px}
   canvas.fireworks{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:90}
   .snd-top{font-size:17px}
+
+  /* ---------- 3D table: tilted board seen close-up, camera on the active pawn ---------- */
+  .board-wrap{aspect-ratio:1/.92;perspective:950px;perspective-origin:50% 0%;background:radial-gradient(120% 90% at 50% 100%,#efe6d2,#e3d6b8);box-shadow:inset 0 0 0 1px #e1d4b6,0 8px 24px rgba(60,45,20,.18);border-radius:18px}
+  .stage{position:absolute;inset:0;transform:rotateX(36deg);transform-origin:50% 45%}
+  .board{background:#e8e0cf;border:none;gap:1px;border-radius:14px;box-shadow:0 0 0 2px #d9cdb0,0 22px 34px rgba(60,45,20,.28);transition:transform .55s cubic-bezier(.3,.7,.3,1)}
+  .sq{background:#fffdf8}
+  .sq.b-top .band,.sq.b-bottom .band{height:11%}
+  .sq.b-left .band,.sq.b-right .band{width:11%}
+  .sq.b-top .nm{margin-top:11%} .sq.b-bottom .nm{margin-bottom:11%} .sq.b-left .nm{margin-left:11%} .sq.b-right .nm{margin-right:11%}
+  .sq .nm{font-size:1.45cqw;font-weight:600;letter-spacing:0;color:#33465c}
+  .sq .pr{font-size:1.25cqw;color:#8a97a8;margin-top:.2cqw}
+  .sq.special .nm{display:none}
+  .sq.corner{background:#fbf6ea}
+  .sq.corner .nm{display:block;font-size:1.6cqw;margin-top:.4cqw}
+  .sq .si{width:3.6cqw;height:3.6cqw;color:#0a4f9c}
+  .sq.corner .si{width:5.2cqw;height:5.2cqw;color:#c4532d}
+  .sq.owned{box-shadow:none;background:color-mix(in srgb, var(--own) 18%, #fffdf8)}
+  .sq.here{background:#fff4cf}
+  .sq .hs i{background:#1f9d55}
+  .center{background:#f5f1e8}
+  .center::before{background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.85),transparent 70%)}
+  .logo{transform:none;text-shadow:none;font-size:7.5cqw}
+  .tok{background:none;border:none;box-shadow:none;width:5.6cqw;height:5.6cqw;margin:-4.6cqw 0 0 -2.8cqw}
+  .tok .tk{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;background:#fff;border:.6cqw solid var(--c);font-size:3.1cqw;box-shadow:0 1cqw 1.2cqw rgba(0,0,0,.35);transform-origin:50% 100%;transform:scaleY(1.24);transition:transform .2s}
+  .tok.turn{transform:none}
+  .tok.turn .tk{transform:scaleY(1.24) scale(1.18)}
+  .tok.jailed::after{display:none}
+  .tok.jailed .tk::after{content:"";position:absolute;inset:-.6cqw;border-radius:50%;background:repeating-linear-gradient(90deg,transparent 0 .9cqw,#2b2b2b .9cqw 1.5cqw);box-shadow:inset 0 .6cqw 0 #2b2b2b,inset 0 -.6cqw 0 #2b2b2b}
+  @media (prefers-reduced-motion:no-preference){ .tok.jailed.closing .tk::after{animation:bars .5s cubic-bezier(.5,0,.8,.4) both} }
+  .view-btn{position:absolute;right:10px;bottom:10px;z-index:5;padding:8px 12px;border-radius:999px;background:#0a4f9c;color:#fff;font-size:13px;font-weight:600;box-shadow:0 4px 10px rgba(10,40,80,.25)}
+  .here-strip{display:flex;align-items:stretch;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 0 var(--line);cursor:pointer}
+  .here-strip .hd{display:flex;align-items:center;gap:6px;background:var(--g,var(--blue));color:#fff;font-weight:700;font-size:14px;padding:8px 12px;white-space:nowrap}
+  .here-strip .hd.light{color:var(--ink)}
+  .here-strip .hd .si{width:18px;height:18px}
+  .here-strip .bd{display:flex;align-items:center;padding:8px 12px;font-size:13px;color:var(--dim);min-width:0}
+  .here-strip .bd b{color:var(--fg);margin:0 3px}
   .info{width:100%;max-width:62cqw;background:#fff;border-radius:2.5cqw;overflow:hidden;box-shadow:0 1cqw 3cqw rgba(10,79,156,.15);text-align:center;cursor:pointer}
   .info .hd{background:var(--g,var(--blue));color:#fff;font-weight:700;font-size:3.4cqw;padding:1.4cqw 2cqw;line-height:1.15}
   .info .hd.light{color:var(--ink)}
@@ -277,7 +313,8 @@
       <button class="ui-round snd-top" id="snd-btn" onclick="toggleSound()" aria-label="Son">🔊</button>
       <button class="ui-round" data-rules aria-label="Règles">?</button>
     </div>
-    <div class="board-wrap"><div class="board" id="board"></div></div>
+    <div class="board-wrap" id="board-wrap"><div class="stage"><div class="board" id="board"></div></div><button class="view-btn" id="view-btn" onclick="toggleOverview()">Voir tout le plateau</button></div>
+    <div class="here-strip" id="info"></div>
     <div class="players" id="players"></div>
     <div class="panel" id="panel"></div>
     <div class="log" id="log"></div>
@@ -385,6 +422,32 @@ const SQ = [
   {t:'prop', g:'dblue', n:'Sidi Bou Saïd', s:'Sidi Bou', p:400, r:[50,200,600,1400,1700,2000]}
 ];
 const TRANSPORTS = [5, 15, 25, 35], UTILS = [12, 28];
+// Line icons, one style for the whole board (instead of emoji).
+const ICON = {
+  go:'<path d="M4 12h14M13 6l6 6-6 6"/>',
+  jail:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 4v16M15 4v16"/>',
+  park:'<path d="M5 9h11v4a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10.5h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3.5c0 1.2.9 1.4.9 2.6M12 3.5c0 1.2.9 1.4.9 2.6"/><path d="M4 21h14"/>',
+  gojail:'<path d="M7 18v-5a5 5 0 0 1 10 0v5"/><path d="M5 18h14v3H5z"/><path d="M12 3v2M4.6 6.6l1.4 1.4M19.4 6.6 18 8"/>',
+  chance:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .8-1 1.5v.7"/><path d="M12 17.3v.2"/>',
+  fam:'<path d="M4 11 12 4l8 7v9H4z"/><path d="M12 17.2s-3-1.8-3-3.7a1.6 1.6 0 0 1 3-.8 1.6 1.6 0 0 1 3 .8c0 1.9-3 3.7-3 3.7z"/>',
+  tax:'<ellipse cx="12" cy="7" rx="6" ry="2.5"/><path d="M6 7v5c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V7"/><path d="M6 12v5c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-5"/>',
+  ring:'<circle cx="9" cy="14.5" r="5"/><circle cx="15" cy="14.5" r="5"/><path d="M10 6l2-2.5L14 6l-2 2z"/>',
+  van:'<path d="M3 16V8a2 2 0 0 1 2-2h9l5 5v5H3z"/><path d="M14 6v5h5"/><circle cx="7.5" cy="17" r="1.8"/><circle cx="15.5" cy="17" r="1.8"/>',
+  tram:'<rect x="5" y="5" width="14" height="12" rx="2"/><path d="M5 11h14M9 21l1.5-4M15 21l-1.5-4M10 2.5h4M12 2.5V5"/>',
+  train:'<path d="M8 3h8a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3z"/><path d="M5 10h14M8.5 13.5h.1M15.5 13.5h.1M7 21l2-4M17 21l-2-4"/>',
+  plane:'<path d="M10.5 3.5c0-1 .7-1.5 1.5-1.5s1.5.5 1.5 1.5V9l7 4v2l-7-2v4.5l2 1.5v1.5L12 20l-3.5 1v-1.5l2-1.5V13l-7 2v-2l7-4z"/>',
+  bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  drop:'<path d="M12 3s-6 6.5-6 11a6 6 0 0 0 12 0c0-4.5-6-11-6-11z"/>'
+};
+function iconKey(i){
+  const s = SQ[i];
+  if(ICON[s.t]) return s.t;
+  if(s.t === 'tax') return i === 38 ? 'ring' : 'tax';
+  if(s.t === 'tr') return ['van', 'tram', 'train', 'plane'][TRANSPORTS.indexOf(i)];
+  if(s.t === 'util') return i === 12 ? 'bolt' : 'drop';
+  return null;
+}
+function svgIcon(i){ const k = iconKey(i); return k ? '<svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[k] + '</svg>' : ''; }
 const START_MONEY = 1500, GO_BONUS = 200, JAIL = 10, JAIL_FEE = 50;
 const COLORS = ['#e63946', '#1f9d55', '#f28c28', '#6a4c93', '#0a4f9c', '#d6479b'];
 
@@ -714,12 +777,12 @@ function buildBoard(){
     const [r, c] = cellPos(i), corner = i % 10 === 0;
     const side = r === 10 ? 'b-top' : c === 0 ? 'b-right' : r === 0 ? 'b-bottom' : 'b-left';
     const g = s.g ? GROUPS[s.g].c : '';
-    html += '<div class="sq '+(s.g ? side : '')+(corner ? ' corner' : '')+'" id="sq-'+i+'" style="grid-row:'+(r+1)+';grid-column:'+(c+1)+(g ? ';--g:'+g : '')+'" onclick="showSquare('+i+')">'+
+    html += '<div class="sq '+(s.g ? side : '')+(corner ? ' corner' : (s.g ? '' : ' special'))+'" id="sq-'+i+'" style="grid-row:'+(r+1)+';grid-column:'+(c+1)+(g ? ';--g:'+g : '')+'" onclick="showSquare('+i+')">'+
       (s.g ? '<div class="band"><span class="hs" id="hs-'+i+'"></span></div>' : '')+
-      (s.i ? '<span class="ic">'+s.i+'</span>' : '')+
+      svgIcon(i)+
       '<span class="nm">'+esc(s.s)+'</span>'+(s.p ? '<span class="pr" id="pr-'+i+'">'+s.p+'</span>' : '')+'</div>';
   });
-  html += '<div class="center"><div class="logo">Skonopoly<small lang="ar">سكونوبولي</small></div><div class="dice" id="dice">'+[0,1].map(k => '<div class="cube'+(k ? ' red' : '')+'" id="cube'+k+'">'+[1,2,3,4,5,6].map(v => '<div class="face f'+v+'">'+[0,1,2,3,4,5,6,7,8].map(x => '<i class="'+(PIPS[v].includes(x) ? 'on' : '')+'"></i>').join('')+'</div>').join('')+'</div>').join('')+'</div><div class="info" id="info"></div></div>';
+  html += '<div class="center"><div class="logo">Skonopoly<small lang="ar">سكونوبولي</small></div><div class="dice" id="dice">'+[0,1].map(k => '<div class="cube'+(k ? ' red' : '')+'" id="cube'+k+'">'+[1,2,3,4,5,6].map(v => '<div class="face f'+v+'">'+[0,1,2,3,4,5,6,7,8].map(x => '<i class="'+(PIPS[v].includes(x) ? 'on' : '')+'"></i>').join('')+'</div>').join('')+'</div>').join('')+'</div></div>';
   html += '<div class="tokens" id="tokens"></div>';
   $('board').innerHTML = html;
 }
@@ -741,7 +804,7 @@ function placeTokens(st){
   const byCell = {};
   st.players.forEach((p, i) => { if(st.out[i] && !dying[i]) return; const c = shown[i]; (byCell[c] = byCell[c] || []).push(i); });
   const layer = $('tokens');
-  if(layer.children.length !== st.players.length) layer.innerHTML = st.players.map((p, i) => '<div class="tok" id="tok-'+i+'" style="--c:'+COLORS[i % COLORS.length]+'">'+av(p)+'</div>').join('');
+  if(layer.children.length !== st.players.length) layer.innerHTML = st.players.map((p, i) => '<div class="tok" id="tok-'+i+'" style="--c:'+COLORS[i % COLORS.length]+'"><span class="tk">'+av(p)+'</span></div>').join('');
   st.players.forEach((p, i) => {
     const el = layer.children[i], c = shown[i], list = byCell[c] || [i], k = list.indexOf(i), n = list.length;
     const [r, col] = cellPos(c);
@@ -754,14 +817,24 @@ function placeTokens(st){
     el.classList.toggle('closing', !!jailClosing[i]);
   });
 }
+let overview = false;
+// null = the whole tilted table; a square = close-up on it.
 function camera(cell){
-  const b = $('board');
-  if(cell === null || RM){ b.style.transform = ''; return; }
-  const [r, c] = cellPos(cell), W = b.offsetWidth, z = 1.8;
+  const b = $('board'), W = b.offsetWidth;
+  if(cell === null){ const z = 0.8; b.style.transform = 'translate(' + (W * (1 - z) / 2) + 'px,' + (W * (1 - z) / 2 - W * 0.04) + 'px) scale(' + z + ')'; return; }
+  const [r, c] = cellPos(cell), z = 1.75, m = W * 0.2;
+  // Keep the pawn near the middle; a bit of table may show past the board's edge.
   const x = (c + 0.5) / 11 * W, y = (r + 0.5) / 11 * W;
-  const tx = Math.min(0, Math.max(W - z * W, W / 2 - z * x)), ty = Math.min(0, Math.max(W - z * W, W / 2 - z * y));
+  const tx = Math.min(m, Math.max(W - z * W - m, W / 2 - z * x)), ty = Math.min(m, Math.max(W - z * W - m, W * 0.55 - z * y));
   b.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + z + ')';
 }
+// Where the camera rests: the whole table, or the pawn of the player whose turn it is.
+function homeCamera(){
+  const st = R.state; if(!st || !st.pos) return;
+  camera(overview ? null : (shown ? shown[st.turn] : st.pos[st.turn]));
+  $('view-btn').textContent = overview ? 'Revenir au pion' : 'Voir tout le plateau';
+}
+function toggleOverview(){ overview = !overview; homeCamera(); }
 function setDice(st){ [0, 1].forEach(k => { $('cube' + k).style.transform = faceTf(st.dice[k]); }); }
 function rollDice(st){
   const W = $('board').offsetWidth;
@@ -781,7 +854,7 @@ function rollDice(st){
 }
 function rectOf(el){ const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height }; }
 function chipRect(i){ const el = $('pl-' + i); return el ? rectOf(el) : null; }
-function bankRect(){ return rectOf($('info') || $('board')); }
+function bankRect(){ return rectOf($('board-wrap')); }
 function fxEl(cls, html, x, y){ const el = document.createElement('div'); el.className = cls; el.innerHTML = html; el.style.left = x + 'px'; el.style.top = y + 'px'; $('fx').appendChild(el); return el; }
 function floatText(txt, at, neg){
   const el = fxEl('float' + (neg ? ' neg' : ''), esc(txt), at.x, at.y);
@@ -902,13 +975,14 @@ function playPath(st, path, t){
         setTimeout(() => {
           if(police) SND('siren');
           const tok = $('tok-' + e.p); if(tok) tok.classList.add('jump');
-          shown[e.p] = e.to; placeTokens(R.state);
+          shown[e.p] = e.to; placeTokens(R.state); camera(e.to);
           if(tok){ tok.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-5cqw) scale(1.4)', offset: 0.5 }, { transform: 'translateY(0) scale(1)' }], { duration: 450 }); setTimeout(() => tok.classList.remove('jump'), 500); }
         }, t);
         t += police ? 700 : 550;
         return;
       }
       setTimeout(() => camera(e.from), t);
+      t += RM ? 0 : 450;
       for(let k = 1; k <= steps; k++){
         setTimeout(() => {
           const cell = (e.from + k) % 40;
@@ -920,8 +994,7 @@ function playPath(st, path, t){
         }, t + 250 + k * STEP);
       }
       t += 250 + steps * STEP + 350;
-      setTimeout(() => camera(null), t - 150);
-      t += 250;
+      t += 100;
     } else if(e.k === 'card'){
       setTimeout(() => cardFx(st, e), t);
       t += 2300;
@@ -973,7 +1046,7 @@ function render(st){
   if(a){
     // 1. dice, 2. the action's path, 3. consequences
     const newRoll = st.rollSeq !== a.rollSeq;
-    if(newRoll && !RM){ rollDice(st); t = 1050; } else setDice(st);
+    if(newRoll && !RM){ camera(null); setTimeout(() => rollDice(st), 350); t = 1400; } else setDice(st);
     if(st.pathId && st.pathId !== a.pathId && st.path && !RM) t = playPath(st, st.path, t);
     else if(!walkingTo(st)) { shown = st.pos.slice(); }
     Object.keys(st.props).forEach(i => { if(!a.props[i] && !RM){ pendingOwn[i] = true; setTimeout(() => deedFx(st, +i), t); } });
@@ -987,6 +1060,7 @@ function render(st){
   renderPlayers(st);
   const later = () => {
     const cur = R.state; if(!cur || cur.status !== 'playing') return;
+    homeCamera();
     $('info').innerHTML = infoFor(cur, cur.pos[cur.turn]);
     $('info').onclick = () => showSquare(cur.pos[cur.turn]);
     renderPanel(cur);
@@ -1016,7 +1090,7 @@ function infoFor(st, i){
   else if(s.t === 'park') body = 'Repos : rien ne se passe';
   else if(s.t === 'gojail') body = 'Direction Mornaguia';
   else body = 'Pioche une carte';
-  return '<div class="hd'+(g && g.light ? ' light' : '')+'" style="--g:'+(g ? g.c : 'var(--blue)')+'">'+(s.i ? s.i + ' ' : '')+esc(s.n)+'</div><div class="bd">'+body+'</div>';
+  return '<div class="hd'+(g && g.light ? ' light' : '')+'" style="--g:'+(g ? g.c : 'var(--blue)')+'">'+svgIcon(i)+esc(s.n)+'</div><div class="bd"><span>'+body+'</span></div>';
 }
 function cardBox(st){
   if(!st.card) return '';
