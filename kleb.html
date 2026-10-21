@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Games Room · Kleb</title>
+<meta name="theme-color" content="#1c1440">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Games Room">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Righteous&family=Marhey:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gym-ui.css">
+<style>
+  /* ---------- Kleb — « Salle d'arcade » : nuit indigo, néons corail et menthe ---------- */
+  :root{
+    --night:#1c1440; --night-2:#2a1f5c; --coral:#ff5d73; --mint:#2ee6b6; --sun:#ffd166; --paper:#fff8ec;
+    --bg:radial-gradient(520px 360px at 85% -5%,rgba(255,93,115,.28),transparent 70%),radial-gradient(460px 360px at 0% 105%,rgba(46,230,182,.2),transparent 70%),#1c1440; --bg-solid:#1c1440;
+    --fg:#f4efff; --dim:#b3a8d9; --surface:rgba(255,255,255,.07); --surface-2:#2a1f5c; --soft:rgba(255,255,255,.08); --line:rgba(179,168,217,.35);
+    --accent:#ff5d73; --accent-fg:#fff; --accent-sh:#b8304a;
+    --sel:#2ee6b6; --sel-fg:#1c1440; --ok:#2ee6b6; --ok-fg:#1c1440; --wait-bg:rgba(255,255,255,.07); --danger:#ffb3be;
+    --display:'Righteous',sans-serif; --display-weight:400;
+    --seg-on:#f4efff; --seg-on-fg:#1c1440;
+    --code-bg:#2a1f5c; --code-fg:#2ee6b6; --code-sh:#120c2b; --code-font:'Righteous',sans-serif;
+    --scrim:rgba(10,6,28,.65); --sheet:#fff8ec;
+    --end-bg:var(--bg); --end-solid:#1c1440; --end-fg:#f4efff; --end-soft:rgba(255,255,255,.09);
+    --end-btn-bg:#2ee6b6; --end-btn-fg:#1c1440; --end-btn-sh:#169a78;
+  }
+  .ui-hero-title{font-size:56px;line-height:1;color:var(--fg);text-shadow:0 0 18px rgba(255,93,115,.7),0 0 2px #fff}
+  .ui-hero-art{flex-direction:column;gap:8px}
+  .ui-hero-art .ar{font-family:'Marhey',sans-serif;font-size:24px;color:var(--mint);text-shadow:0 0 12px rgba(46,230,182,.6)}
+  .hero-cards{display:flex}
+  .hero-cards .kc{transform:rotate(-10deg)}
+  .hero-cards .kc + .kc{margin-left:-14px;transform:rotate(8deg) translateY(-4px)}
+  .ui-field input:focus{border-color:var(--mint)}
+  .avatar-opt.sel{background:var(--mint);box-shadow:0 0 0 3px var(--night),0 0 0 5px var(--mint)}
+  .ui-sheet-body{color:#1c1440}
+  .ui-sheet-title{color:#1c1440}
+  .ui-step > b:first-child{background:var(--coral);color:#fff}
+  .ui-sheet .ui-btn{background:#1c1440;color:#fff;box-shadow:none}
+
+  /* cards: big value on top, the other value small and upside down */
+  .kc{--k:var(--c5);position:relative;flex:none;width:52px;height:76px;border-radius:9px;background:var(--paper);box-shadow:inset 0 0 0 3px var(--k),0 4px 10px rgba(0,0,0,.35);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:6px 0 5px;font-family:'Righteous',sans-serif;color:var(--k);user-select:none;-webkit-user-select:none}
+  .kc .a{font-size:30px;line-height:1}
+  .kc .b{font-size:14px;line-height:1;transform:rotate(180deg);opacity:.55;color:#6b6290}
+  .kc.small{width:34px;height:50px;border-radius:7px;padding:3px 0;box-shadow:inset 0 0 0 2px var(--k),0 3px 6px rgba(0,0,0,.3)}
+  .kc.small .a{font-size:19px}
+  .kc.small .b{font-size:10px}
+  .kc.back{background:repeating-linear-gradient(45deg,#ff5d73 0 6px,#e0485f 6px 12px);box-shadow:inset 0 0 0 3px #fff8ec,0 3px 6px rgba(0,0,0,.3)}
+  .v1{--k:#e63946} .v2{--k:#f4801f} .v3{--k:#d4a20a} .v4{--k:#2a9d4b} .v5{--k:#0fa3a3} .v6{--k:#1d78d6} .v7{--k:#5a4fcf} .v8{--k:#9b3fc4} .v9{--k:#d6339b} .v10{--k:#3b2f2f}
+
+  #screen-game{min-height:calc(100dvh - env(safe-area-inset-top));display:flex;flex-direction:column;gap:10px;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  .ui-top-mid{font-family:'Righteous',sans-serif;font-size:18px;color:var(--mint);text-shadow:0 0 10px rgba(46,230,182,.5)}
+  .ui-top-mid small{font-family:'Fredoka',sans-serif;font-size:12px;color:var(--dim);margin-left:6px;text-shadow:none}
+
+  /* the table: one seat per player */
+  .seats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .seat{position:relative;background:var(--surface);border-radius:16px;padding:9px 10px;display:flex;flex-direction:column;gap:6px;min-height:118px;transition:box-shadow .2s, background .2s}
+  .seat.turn{box-shadow:0 0 0 2px var(--mint),0 0 18px rgba(46,230,182,.35)}
+  .seat.me{background:rgba(255,93,115,.1)}
+  .seat.done{opacity:.6}
+  .seat .who{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;min-width:0}
+  .seat .who .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .seat .who .hand{font-family:'Space Mono',monospace;font-size:11px;color:var(--dim);white-space:nowrap}
+  .letters{display:flex;gap:2px}
+  .letters span{width:15px;height:17px;border-radius:4px;background:rgba(255,255,255,.08);color:transparent;font:400 11px/17px 'Righteous',sans-serif;text-align:center}
+  .letters span.on{background:var(--sun);color:#1c1440;box-shadow:0 0 8px rgba(255,209,102,.6)}
+  .pile{display:flex;align-items:center;min-height:52px;gap:0}
+  .pile .kc + .kc{margin-left:-20px}
+  .pile .empty{font-size:12px;color:var(--dim);border:1.5px dashed var(--line);border-radius:8px;padding:14px 10px;width:100%;text-align:center}
+  .pile .cnt{margin-left:8px;font:700 13px 'Space Mono',monospace;color:var(--fg)}
+  .seat .acts{display:flex;gap:6px}
+  .seat .acts button{flex:1;height:32px;border-radius:10px;font-size:12px;font-weight:700;background:var(--mint);color:#1c1440}
+  .seat .acts button.pick{background:rgba(255,255,255,.12);color:var(--fg)}
+  .seat .badge{position:absolute;top:8px;right:8px;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--sun);color:#1c1440}
+  @media (prefers-reduced-motion:no-preference){
+    .pile.pop .kc{animation:land .38s cubic-bezier(.2,1.4,.4,1) both}
+    .pile.pop .kc:nth-child(2){animation-delay:.05s} .pile.pop .kc:nth-child(3){animation-delay:.1s} .pile.pop .kc:nth-child(4){animation-delay:.15s}
+    .seat.hit{animation:hit .5s}
+    .hand-row.flip .kc{animation:flip .5s ease-in-out both}
+  }
+  @keyframes land{from{transform:translateY(-26px) rotate(-14deg) scale(1.2);opacity:0}to{transform:none;opacity:1}}
+  @keyframes hit{0%,100%{transform:none}20%{transform:translateX(-6px) rotate(-1deg)}40%{transform:translateX(6px) rotate(1deg)}60%{transform:translateX(-3px)}}
+  @keyframes flip{0%{transform:rotateY(0)}50%{transform:rotateY(90deg)}100%{transform:rotateY(0)}}
+
+  .status{text-align:center;font-size:14px;color:var(--dim);min-height:1.3em}
+  .status b{color:var(--fg)}
+  .status.mine{color:var(--mint);font-weight:600}
+  /* my hand */
+  .my{background:rgba(0,0,0,.22);border-radius:20px;padding:12px 10px;display:flex;flex-direction:column;gap:10px}
+  .my-head{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--dim);padding:0 4px}
+  .hand-row{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;perspective:600px;min-height:80px}
+  .hand-row .kc{cursor:pointer;transition:transform .15s, box-shadow .15s}
+  .hand-row .kc.sel{transform:translateY(-12px);box-shadow:inset 0 0 0 3px var(--k),0 0 0 3px var(--mint),0 10px 18px rgba(0,0,0,.4)}
+  .hand-row .kc.off{opacity:.45}
+  .hand-row.locked .kc{cursor:default}
+  .my-acts{display:flex;gap:8px}
+  .my-acts .ui-btn{flex:1;min-width:0;height:54px;font-size:16px}
+  .my-acts .ui-btn.alt{background:rgba(255,255,255,.1);color:var(--fg);box-shadow:0 4px 0 rgba(0,0,0,.35)}
+  .hint{font-size:12px;color:var(--dim);text-align:center;min-height:1.2em}
+  .log{font-size:12px;color:var(--dim);text-align:center}
+
+  /* round end */
+  .round-end{background:var(--paper);color:#1c1440;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px;text-align:center}
+  .round-end h3{font-family:'Righteous',sans-serif;font-weight:400;font-size:26px}
+  .round-end .row{display:flex;align-items:center;gap:8px;justify-content:center;font-size:15px}
+  .round-end .letters span{background:#e9e3f7}
+  .round-end .letters span.on{background:var(--coral);color:#fff;box-shadow:none}
+  .round-end .ui-btn{background:#1c1440;color:#fff;box-shadow:0 4px 0 #0c0820;flex:none}
+  .kl-end{display:flex;flex-direction:column;align-items:center;gap:12px;padding:34px 4px 0;text-align:center}
+  .kl-end h2{font-family:'Righteous',sans-serif;font-weight:400;font-size:36px;line-height:1.1;text-shadow:0 0 16px rgba(255,93,115,.6)}
+  .kl-end .word{display:flex;gap:6px}
+  .kl-end .word span{width:46px;height:54px;border-radius:10px;background:var(--sun);color:#1c1440;font:400 32px/54px 'Righteous',sans-serif;box-shadow:0 0 16px rgba(255,209,102,.6)}
+</style>
+</head>
+<body data-screen="create">
+<div class="frame">
+  <div id="screen-create" class="ui-screen has-dock">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
+    </div>
+    <div class="ui-hero">
+      <div class="ui-hero-art"><span class="hero-cards"><span class="kc v7"><span class="a">7</span><span class="b">2</span></span><span class="kc v3"><span class="a">3</span><span class="b">9</span></span></span><span class="ar" lang="ar">قلب</span></div>
+      <h1 class="ui-hero-title">KLEB</h1>
+      <div class="ui-hero-sub">Chaque carte a deux faces. Vide ta main le premier.</div>
+    </div>
+    <div class="ui-seg" role="tablist"><button type="button" class="on" aria-selected="true">Créer</button><button type="button" onclick="GYMRoom.show('join')">Rejoindre</button></div>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="create-name" maxlength="12" placeholder="Ex. Sami" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
+      <div class="avatar-row" id="create-avatar-row"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="error" id="create-err"></div>
+      <button class="ui-btn" id="btn-create">Créer la partie</button>
+    </div>
+  </div>
+
+  <div id="screen-join" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <a class="ui-round" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div class="ui-top-mid"></div>
+      <button class="ui-pill" data-rules>📜 Règles</button>
+    </div>
+    <div class="ui-hero">
+      <div class="ui-hero-art"><span class="hero-cards"><span class="kc v7"><span class="a">7</span><span class="b">2</span></span><span class="kc v3"><span class="a">3</span><span class="b">9</span></span></span><span class="ar" lang="ar">قلب</span></div>
+      <h1 class="ui-hero-title">KLEB</h1>
+      <div class="ui-hero-sub">Chaque carte a deux faces. Vide ta main le premier.</div>
+    </div>
+    <div class="ui-seg" role="tablist"><button type="button" onclick="GYMRoom.show('create')">Créer</button><button type="button" class="on" aria-selected="true">Rejoindre</button></div>
+    <label class="ui-field">
+      <span class="ui-label">Code de la partie</span>
+      <input type="text" id="join-code" class="code-input" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    </label>
+    <label class="ui-field">
+      <span class="ui-label">Ton prénom</span>
+      <input type="text" id="join-name" maxlength="12" placeholder="Ex. Ines" autocomplete="given-name">
+    </label>
+    <div class="ui-field">
+      <div class="ui-label">Ton avatar</div>
+      <div class="avatar-row" id="join-avatar-row"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="error" id="join-err"></div>
+      <button class="ui-btn" id="btn-join">Rejoindre</button>
+    </div>
+  </div>
+
+  <div id="screen-wait" class="ui-screen has-dock hidden">
+    <div class="ui-top">
+      <button class="ui-round" onclick="GYMRoom.leave('Quitter la salle d\'attente ?')" aria-label="Quitter">✕</button>
+      <div class="ui-top-mid">Salle d'attente</div>
+      <button class="ui-round" onclick="GYMRoom.share()" aria-label="Partager">📤</button>
+    </div>
+    <div class="ui-wait" style="gap:14px;padding-top:10px">
+      <button class="ui-code" id="wait-code"></button>
+      <div class="ui-code-hint" id="wait-hint">Touche le code pour copier le lien</div>
+      <div class="ui-row-head"><span>Joueurs</span><span id="wait-count"></span></div>
+      <div class="ui-chips" id="wait-players"></div>
+      <p class="muted" style="text-align:center">Le premier à écrire <b>K·L·E·B</b> gagne.</p>
+    </div>
+    <div class="ui-dock">
+      <button class="ui-btn hidden" id="btn-start">Lancer la partie</button>
+      <div class="muted pulse hidden" id="wait-note" style="text-align:center;padding:14px 0"></div>
+    </div>
+  </div>
+
+  <div id="screen-game" class="hidden">
+    <div class="ui-top">
+      <button class="ui-round" onclick="GYMRoom.leave()" aria-label="Quitter">✕</button>
+      <div class="ui-top-mid" id="top-mid">KLEB</div>
+      <button class="ui-round" data-rules aria-label="Règles">?</button>
+    </div>
+    <div class="seats" id="seats"></div>
+    <div class="status" id="status"></div>
+    <div id="bottom"></div>
+    <div class="log" id="log"></div>
+  </div>
+
+  <div id="screen-end" class="ui-screen has-dock hidden">
+    <div class="kl-end">
+      <div class="word" id="end-word"></div>
+      <h2 id="end-title">…</h2>
+      <p id="end-sub" class="muted"></p>
+      <div class="ui-rank" id="end-rank" style="width:100%"></div>
+    </div>
+    <div class="ui-dock">
+      <div class="ui-dock-row">
+        <a class="ui-sq" href="index.html" aria-label="Accueil" style="text-decoration:none">🏠</a>
+        <button class="ui-btn" onclick="location.href='kleb.html'">🔁 Nouvelle partie</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ui-sheet" id="rules-sheet" aria-hidden="true">
+  <div class="ui-sheet-scrim" data-rules-close></div>
+  <div class="ui-sheet-body" role="dialog" aria-label="Règles">
+    <div class="ui-grab"></div>
+    <div class="ui-sheet-title">Comment jouer</div>
+    <div class="ui-step"><b>1</b><span>Chaque carte a <b>deux nombres</b> : le grand en haut compte, le petit à l'envers est caché sous la carte. Tu ne peux pas retourner une carte toi-même.</span></div>
+    <div class="ui-step"><b>2</b><span>À ton tour, tes cartes posées devant toi partent à la défausse. Puis fais <b>une</b> action :</span></div>
+    <div class="ui-step"><b>▶</b><span><b>Jouer</b> une ou plusieurs cartes de même valeur devant toi. Si un joueur a <b>autant</b> de cartes devant lui, les tiennes doivent être <b>plus fortes</b> : il les retourne et les reprend en main.</span></div>
+    <div class="ui-step"><b>＋</b><span><b>Ajouter</b> une carte de même valeur au tas d'un joueur. Si un autre tas a alors autant de cartes, plus faibles, il est repris.</span></div>
+    <div class="ui-step"><b>✋</b><span><b>Ramasser</b> le tas d'un joueur : les cartes sont retournées et vont dans ta main.</span></div>
+    <div class="ui-step"><b>🔄</b><span><b>Tout retourner</b> : chaque carte de ta main montre son autre nombre.</span></div>
+    <div class="ui-step"><b>★</b><span>Main vide en premier : <b>2 lettres</b>. Deuxième : <b>1 lettre</b>, et la manche s'arrête. Le premier à écrire <b>K·L·E·B</b> gagne.</span></div>
+    <button class="ui-btn" data-rules-close>Compris</button>
+  </div>
+</div>
+
+<script src="realtime.js"></script>
+<script src="leave-guard.js"></script>
+<script src="recent-games.js"></script>
+<script src="feedback.js"></script>
+<script src="connection-banner.js"></script>
+<script src="avatar-picker.js"></script>
+<script src="game-link.js"></script>
+<script src="gym-ui.js"></script>
+<script src="gym-room.js"></script>
+<script>
+const R = GYMRoom, $ = id => document.getElementById(id), esc = R.esc, av = R.av;
+const WORD = 'KLEB';
+const nm = (st, i) => st.players[i].name;
+const flip = c => ({ a: c.b, b: c.a });
+const cardHtml = (c, cls, attrs) => '<span class="kc v'+c.a+(cls ? ' '+cls : '')+'"'+(attrs || '')+'><span class="a">'+c.a+'</span><span class="b">'+c.b+'</span></span>';
+function log(st, msg){ st.log.unshift(msg); if(st.log.length > 20) st.log.pop(); }
+
+/* ---------- rules ---------- */
+// 40 cards: every pair of different values 1–10, except the five pairs that add up to 11.
+function deck(){
+  const d = [];
+  for(let a = 1; a <= 10; a++) for(let b = a + 1; b <= 10; b++) if(a + b !== 11) d.push(Math.random() < 0.5 ? { a, b } : { a: b, b: a });
+  return R.shuffle(d);
+}
+function deal(st){
+  const n = st.players.length, size = n <= 3 ? 10 : 8, d = deck();
+  st.hands = st.players.map(() => d.splice(0, size));
+  st.piles = st.players.map(() => null);
+  st.done = [];
+  st.dealer = ((st.dealer === undefined ? -1 : st.dealer) + 1) % n;
+  st.turn = (st.dealer + 1) % n;
+  st.round = (st.round || 0) + 1;
+  st.phase = 'play';
+  st.last = null;
+  st.seq = (st.seq || 0) + 1;
+  log(st, 'Manche ' + st.round + ' : ' + nm(st, st.turn) + ' commence.');
+}
+function setup(st){ st.letters = st.players.map(() => 0); st.log = []; deal(st); }
+const active = (st, i) => !st.done.includes(i);
+// Piles with as many cards as `k`, other than the given players: they must be lower, and get taken back.
+function rivals(st, k, except){ return st.piles.map((p, j) => j).filter(j => !except.includes(j) && st.piles[j] && st.piles[j].length === k); }
+function canBeat(st, v, k, except){ return rivals(st, k, except).every(j => st.piles[j][0].a < v); }
+function takeBack(st, j, by){
+  const pile = st.piles[j]; st.piles[j] = null;
+  if(active(st, j)) st.hands[j] = st.hands[j].concat(pile.map(flip));
+  log(st, '↩️ ' + nm(st, j) + (active(st, j) ? ' reprend ses ' : ' perd ses ') + pile.length + ' carte' + (pile.length > 1 ? 's' : '') + ' (battu' + (by !== undefined ? ' par ' + nm(st, by) : '') + ').');
+}
+function startTurn(st){
+  const p = st.turn;
+  if(st.piles[p]) st.piles[p] = null;   // your own pile goes to the discard at the start of your turn
+}
+function nextTurn(st){
+  const n = st.players.length;
+  for(let k = 1; k <= n; k++){ const c = (st.turn + k) % n; if(active(st, c)){ st.turn = c; break; } }
+  startTurn(st);
+}
+function checkOut(st, p){
+  if(st.hands[p].length) return;
+  st.done.push(p);
+  const gain = st.done.length === 1 ? 2 : 1;
+  st.letters[p] = Math.min(4, st.letters[p] + gain);
+  log(st, '🎉 ' + nm(st, p) + ' vide sa main : +' + gain + ' lettre' + (gain > 1 ? 's' : '') + ' !');
+  const left = st.players.map((x, i) => i).filter(i => active(st, i));
+  if(st.letters[p] >= 4){ st.status = 'finished'; st.winner = p; st.phase = 'over'; return; }
+  if(st.done.length >= 2 || left.length <= 1) st.phase = 'roundEnd';
+}
+function finishAction(st, p){
+  st.seq = (st.seq || 0) + 1;
+  checkOut(st, p);
+  if(st.phase === 'play') nextTurn(st);
+}
+
+/* ---------- actions ---------- */
+let sel = [];
+const mine = st => st.status === 'playing' && st.phase === 'play' && st.turn === R.me && active(st, R.me);
+function aPlay(){
+  const idx = sel.slice(); sel = [];
+  R.act(st => {
+    const p = R.me; if(!mine(st)) return false;
+    const cards = idx.map(i => st.hands[p][i]);
+    if(!cards.length || cards.some(c => !c) || cards.some(c => c.a !== cards[0].a)) return false;
+    const v = cards[0].a, k = cards.length;
+    if(!canBeat(st, v, k, [p])) return false;
+    const beaten = rivals(st, k, [p]);
+    st.hands[p] = st.hands[p].filter((c, i) => !idx.includes(i));
+    st.piles[p] = cards;
+    st.last = { t: 'play', p, v, k };
+    log(st, '▶ ' + nm(st, p) + ' joue ' + (k > 1 ? k + ' × ' : 'un ') + v + '.');
+    beaten.forEach(j => takeBack(st, j, p));
+    finishAction(st, p);
+  });
+}
+function aAdd(target){
+  const idx = sel.slice(); sel = [];
+  R.act(st => {
+    const p = R.me; if(!mine(st) || idx.length !== 1 || target === p) return false;
+    const c = st.hands[p][idx[0]], pile = st.piles[target];
+    if(!c || !pile || pile[0].a !== c.a) return false;
+    const k = pile.length + 1;
+    if(!canBeat(st, c.a, k, [target])) return false;
+    const beaten = rivals(st, k, [target]);
+    st.hands[p].splice(idx[0], 1);
+    st.piles[target] = pile.concat([c]);
+    st.last = { t: 'add', p, target, v: c.a };
+    log(st, '＋ ' + nm(st, p) + ' ajoute un ' + c.a + ' au tas de ' + nm(st, target) + '.');
+    beaten.forEach(j => takeBack(st, j, p));
+    finishAction(st, p);
+  });
+}
+function aPick(target){
+  sel = [];
+  R.act(st => {
+    const p = R.me; if(!mine(st) || target === p || !st.piles[target]) return false;
+    const pile = st.piles[target]; st.piles[target] = null;
+    st.hands[p] = st.hands[p].concat(pile.map(flip));
+    st.last = { t: 'pick', p, target };
+    log(st, '✋ ' + nm(st, p) + ' ramasse les ' + pile.length + ' carte' + (pile.length > 1 ? 's' : '') + ' de ' + nm(st, target) + '.');
+    finishAction(st, p);
+  });
+}
+function aRevolve(){
+  sel = [];
+  R.act(st => {
+    const p = R.me; if(!mine(st)) return false;
+    st.hands[p] = st.hands[p].map(flip);
+    st.last = { t: 'flip', p };
+    log(st, '🔄 ' + nm(st, p) + ' retourne toute sa main.');
+    finishAction(st, p);
+  });
+}
+function aNextRound(){ R.act(st => { if(st.status !== 'playing' || st.phase !== 'roundEnd') return false; deal(st); }); }
+
+/* ---------- rendering ---------- */
+// The hand is shown sorted by value; `order` maps shown position → index in the saved hand.
+let order = [], lastSeq = null, lastFlipKey = null;
+function toggle(pos){
+  const st = R.state; if(!mine(st)) return;
+  const i = order[pos], c = st.hands[R.me][i];
+  const k = sel.indexOf(i);
+  if(k >= 0) sel.splice(k, 1);
+  else { if(sel.length && st.hands[R.me][sel[0]].a !== c.a) sel = []; sel.push(i); }
+  if(window.GYMFeedback) window.GYMFeedback.vibrate(8);
+  render(st);
+}
+function lettersHtml(n){ return '<span class="letters">' + WORD.split('').map((l, k) => '<span class="'+(k < n ? 'on' : '')+'">'+l+'</span>').join('') + '</span>'; }
+function render(st){
+  if(st.status === 'finished'){ renderEnd(st); return; }
+  const me = R.me, my = st.hands[me] || [];
+  sel = sel.filter(i => my[i]);
+  if(sel.length && sel.some(i => my[i].a !== my[sel[0]].a)) sel = [];
+  if(!mine(st)) sel = [];
+  const fresh = lastSeq !== null && st.seq !== lastSeq;
+  const v = sel.length ? my[sel[0]].a : null, k = sel.length;
+  $('top-mid').innerHTML = 'KLEB<small>manche ' + st.round + '</small>';
+  // seats (me last)
+  const seatOrder = st.players.map((p, i) => i).filter(i => i !== me).concat([me]);
+  $('seats').innerHTML = seatOrder.map(i => {
+    const pile = st.piles[i], isMe = i === me;
+    let acts = '';
+    if(mine(st) && !isMe && pile){
+      const addOk = k === 1 && pile[0].a === v && canBeat(st, v, pile.length + 1, [i]);
+      acts = '<div class="acts">' + (addOk ? '<button onclick="aAdd('+i+')">＋ Ajouter ton '+v+'</button>' : '') + '<button class="pick" onclick="aPick('+i+')">✋ Ramasser</button></div>';
+    }
+    const pop = fresh && st.last && ((st.last.p === i && st.last.t === 'play') || (st.last.t === 'add' && st.last.target === i));
+    const rank = st.done.indexOf(i);
+    return '<div class="seat'+(st.turn === i && st.phase === 'play' ? ' turn' : '')+(isMe ? ' me' : '')+(rank >= 0 ? ' done' : '')+'" id="seat-'+i+'">'+
+      (rank >= 0 ? '<span class="badge">'+(rank === 0 ? '1er ✓' : '2e ✓')+'</span>' : '')+
+      '<div class="who">'+av(st.players[i])+'<span class="nm">'+esc(isMe ? 'Toi' : nm(st, i))+'</span><span class="hand">'+(isMe ? '' : '🂠 '+st.hands[i].length)+'</span></div>'+
+      lettersHtml(st.letters[i])+
+      '<div class="pile'+(pop ? ' pop' : '')+'">'+(pile ? pile.map(c => cardHtml(c, 'small')).join('')+'<span class="cnt">×'+pile.length+'</span>' : '<span class="empty">'+(st.turn === i ? (isMe ? 'à ton tour' : 'à son tour') : 'rien devant')+'</span>')+'</div>'+
+      acts+'</div>';
+  }).join('');
+  // status
+  const s = $('status');
+  if(st.phase === 'play'){
+    s.className = 'status' + (mine(st) ? ' mine' : '');
+    s.innerHTML = mine(st) ? 'À toi ! Joue, ajoute, ramasse ou retourne.' : (active(st, me) ? 'Au tour de <b>' + esc(nm(st, st.turn)) + '</b>…' : 'Ta main est vide, bravo ! Au tour de <b>' + esc(nm(st, st.turn)) + '</b>…');
+  } else s.textContent = '';
+  // bottom: my hand + actions, or the round summary
+  if(st.phase === 'roundEnd'){
+    $('bottom').innerHTML = '<div class="round-end"><h3>Fin de la manche ' + st.round + '</h3>' +
+      st.done.map((i, r) => '<div class="row">'+av(st.players[i])+' <b>'+esc(nm(st, i))+'</b> +'+(r === 0 ? 2 : 1)+' '+lettersHtml(st.letters[i])+'</div>').join('') +
+      '<button class="ui-btn" onclick="aNextRound()">Manche suivante ›</button></div>';
+  } else {
+    order = my.map((c, i) => i).sort((x, y) => my[x].a - my[y].a || my[x].b - my[y].b);
+    const flipKey = st.last && st.last.t === 'flip' && st.last.p === me ? st.seq : null;
+    const doFlip = fresh && flipKey && flipKey !== lastFlipKey;
+    if(flipKey) lastFlipKey = flipKey;
+    let hint = '';
+    if(mine(st) && k){
+      hint = canBeat(st, v, k, [me]) ? (rivals(st, k, [me]).length ? 'Ça bat ' + rivals(st, k, [me]).map(j => nm(st, j)).join(', ') + ' !' : '') : 'Trop faible : un tas de ' + k + ' carte' + (k > 1 ? 's' : '') + ' est plus fort.';
+    } else if(mine(st)) hint = 'Touche des cartes de même valeur pour les jouer.';
+    const canPlay = mine(st) && k && canBeat(st, v, k, [me]);
+    $('bottom').innerHTML = '<div class="my"><div class="my-head"><span>Ta main · ' + my.length + ' carte' + (my.length > 1 ? 's' : '') + '</span>' + lettersHtml(st.letters[me]) + '</div>' +
+      '<div class="hand-row'+(mine(st) ? '' : ' locked')+(doFlip ? ' flip' : '')+'">' + (order.map((i, pos) => cardHtml(my[i], sel.includes(i) ? 'sel' : (k && my[i].a !== v ? 'off' : ''), ' onclick="toggle('+pos+')"')).join('') || '<span class="muted">Main vide</span>') + '</div>' +
+      '<div class="hint">' + esc(hint) + '</div>' +
+      (mine(st) ? '<div class="my-acts"><button class="ui-btn alt" onclick="aRevolve()">🔄 Tout retourner</button><button class="ui-btn" onclick="aPlay()"'+(canPlay ? '' : ' disabled')+'>' + (k ? '▶ Jouer ' + (k > 1 ? k + ' × ' : 'le ') + v : '▶ Jouer') + '</button></div>' : '') + '</div>';
+  }
+  $('log').innerHTML = esc(st.log[0] || '');
+  if(fresh && st.last && st.last.t === 'play'){
+    st.players.forEach((p, j) => { if(j !== st.last.p && !st.piles[j] && st.log.slice(0, 4).some(l => l.startsWith('↩️ ' + nm(st, j)))){ const el = $('seat-' + j); if(el) el.classList.add('hit'); } });
+  }
+  if(fresh && st.turn === me && st.phase === 'play' && window.GYMFeedback) window.GYMFeedback.vibrate(25);
+  lastSeq = st.seq;
+}
+function renderEnd(st){
+  const w = st.winner;
+  const order = st.players.map((p, i) => i).sort((a, b) => st.letters[b] - st.letters[a]);
+  $('end-word').innerHTML = WORD.split('').map(l => '<span>'+l+'</span>').join('');
+  $('end-title').textContent = w === R.me ? 'Tu as écrit KLEB !' : nm(st, w) + ' a écrit KLEB !';
+  $('end-sub').textContent = 'Partie gagnée en ' + st.round + ' manche' + (st.round > 1 ? 's' : '') + '.';
+  $('end-rank').innerHTML = order.map((i, pos) => '<div><span class="pos">'+(pos + 1)+'</span><span class="av">'+av(st.players[i])+'</span><span class="nm">'+esc(nm(st, i))+(i === R.me ? ' (toi)' : '')+'</span><span class="pts">'+WORD.slice(0, st.letters[i])+'</span></div>').join('');
+  if(w === R.me && window.GYMFeedback && !renderEnd.done){ renderEnd.done = true; window.GYMFeedback.win(); }
+}
+
+R.init({
+  key: 'kl', table: 'kl_games', title: 'Kleb', page: 'kleb.html', min: 2, max: 5,
+  start: setup,
+  render
+});
+</script>
+<script src="install-tutorial.js" defer></script>
+</body>
+</html>
