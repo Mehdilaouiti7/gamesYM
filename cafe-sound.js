@@ -134,6 +134,62 @@ window.CafeSound = (function(){
     youyou(t + 1.15, 1.7, 0.07, 1180);
   }
 
+  /* ---------- board-game effects (Skonopoly) ---------- */
+  // Dice clatter: one click per bounce (times in seconds from now).
+  function dice(hits){
+    if(!fxOk()) return;
+    const t = ctx.currentTime;
+    (hits || [0.3, 0.46, 0.58, 0.66]).forEach((h, k) => {
+      const v = 1 - k * 0.18;
+      noise(t + h, 0.04, { type: 'bandpass', freq: 3200 + rnd() * 1500, q: 2, gain: 0.5 * v });
+      tone(t + h, 900 + rnd() * 500, 0.05, { gain: 0.12 * v });
+      noise(t + h + 0.025, 0.03, { type: 'bandpass', freq: 2500, q: 2, gain: 0.25 * v });
+    });
+  }
+  function tick(){ if(!fxOk()) return; const t = ctx.currentTime; noise(t, 0.035, { type: 'bandpass', freq: 1700, q: 3, gain: 0.35 }); tone(t, 520, 0.05, { freqTo: 380, gain: 0.12 }); }
+  function cash(){
+    if(!fxOk()) return;
+    const t = ctx.currentTime;
+    noise(t, 0.05, { type: 'highpass', freq: 2000, gain: 0.25 }); noise(t + 0.06, 0.05, { type: 'bandpass', freq: 1500, q: 2, gain: 0.25 });
+    [2093, 2637, 3136].forEach((f, i) => tone(t + 0.12, f, 0.9 - i * 0.2, { gain: 0.16 / (i + 1), attack: 0.002 }));
+    [1568, 2093].forEach((f, i) => tone(t + 0.3, f, 0.7, { gain: 0.1 / (i + 1), attack: 0.002 }));
+  }
+  function coins(n){
+    if(!fxOk()) return;
+    const t = ctx.currentTime;
+    for(let k = 0; k < (n || 5); k++){ const f = 3000 + rnd() * 2500; tone(t + k * 0.07 + rnd() * 0.03, f, 0.18, { gain: 0.07, attack: 0.001 }); tone(t + k * 0.07 + 0.01, f * 1.48, 0.12, { gain: 0.03, attack: 0.001 }); }
+  }
+  function pop(){ if(!fxOk()) return; const t = ctx.currentTime; tone(t, 420, 0.16, { freqTo: 900, glide: 0.08, gain: 0.25 }); noise(t, 0.03, { type: 'bandpass', freq: 1200, q: 2, gain: 0.2 }); }
+  function siren(){
+    if(!fxOk()) return;
+    const t = ctx.currentTime, osc = ctx.createOscillator(); osc.type = 'square';
+    for(let k = 0; k < 6; k++) osc.frequency.setValueAtTime(k % 2 ? 660 : 880, t + k * 0.3);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.09, t + 0.05);
+    g.gain.setValueAtTime(0.09, t + 1.6); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.85);
+    osc.connect(lp); lp.connect(g); g.connect(fxBus); osc.start(t); osc.stop(t + 1.9);
+  }
+  function clank(){
+    if(!fxOk()) return;
+    const t = ctx.currentTime;
+    noise(t, 0.25, { type: 'lowpass', freq: 900, gain: 0.5 });
+    [173, 241, 389, 612].forEach((f, i) => tone(t, f, 0.9 - i * 0.15, { gain: 0.18 / (i + 1), attack: 0.002 }));
+    noise(t + 0.18, 0.12, { type: 'bandpass', freq: 3000, q: 4, gain: 0.2 });
+  }
+  function sad(){
+    if(!fxOk()) return;
+    const t = ctx.currentTime;
+    [[392, 0], [370, 0.4], [349, 0.8], [330, 1.2]].forEach(([f, d], k) => tone(t + d, f, k === 3 ? 1.1 : 0.38, { type: 'sawtooth', freqTo: k === 3 ? f * 0.82 : f * 0.98, gain: 0.08 }));
+  }
+  function boom(t, v){ noise(t, 1.2, { type: 'lowpass', freq: 220, gain: 0.7 * v, attack: 0.005 }); tone(t, 90, 0.5, { freqTo: 40, gain: 0.4 * v }); for(let k = 0; k < 14; k++) noise(t + 0.25 + rnd() * 0.7, 0.02, { type: 'highpass', freq: 4000, gain: 0.12 * v }); }
+  function fireworks(){
+    if(!fxOk()) return;
+    const t = ctx.currentTime;
+    for(let k = 0; k < 7; k++) boom(t + 0.2 + k * 0.55 + rnd() * 0.2, 0.6 + rnd() * 0.4);
+    applause(t + 0.4, 3.5, 0.28);
+    youyou(t + 0.6, 2.0, 0.1, 1050); youyou(t + 0.9, 1.8, 0.07, 1180); youyou(t + 2.6, 1.6, 0.08, 1100);
+  }
+
   /* ---------- café ambiance ---------- */
   // Plucked-string (oud) notes by Karplus-Strong, rendered once per pitch.
   const pluckCache = {};
@@ -270,6 +326,7 @@ window.CafeSound = (function(){
     set(key, val){ prefs[key] = !!val; savePrefs(); if(val) unlock(); syncAmb(); },
     // The ambiance only plays while a game is on screen.
     setActive(on){ active = !!on; if(ctx) syncAmb(); },
-    throwCard, land, sweep, chkobba, haya
+    throwCard, land, sweep, chkobba, haya,
+    dice, tick, cash, coins, pop, siren, clank, sad, fireworks
   };
 })();
