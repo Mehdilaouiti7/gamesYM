@@ -219,8 +219,7 @@
   .card-pop.fam{background:#e3f4ea;color:#14532d}
   /* journal: every event of the game, scrollable, newest on top */
   .log{position:relative;background:#fff;border-radius:16px;box-shadow:0 2px 0 var(--line);overflow:hidden}
-  .log .h{display:flex;justify-content:space-between;padding:9px 12px 4px;font-size:12px;font-weight:700;color:var(--dim)}
-  .log .list{max-height:150px;overflow-y:auto;overscroll-behavior:contain;padding:0 12px 14px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--fg)}
+  .log .list{max-height:150px;overflow-y:auto;overscroll-behavior:contain;padding:10px 12px 14px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--fg)}
   .log .list div{padding-bottom:5px;border-bottom:1px solid #eef2f6;line-height:1.3}
   .log .list div:last-child{border-bottom:none}
   .log .list div:first-child{font-weight:600}
@@ -357,7 +356,7 @@
     <div class="players" id="players"></div>
     <div class="tbox hidden" id="trade-box"></div>
     <div class="panel" id="panel"></div>
-    <div class="log" id="log"><div class="h"><span>📜 Journal</span><span id="log-n"></span></div><div class="list" id="log-list"></div></div>
+    <div class="log" id="log"><div class="list" id="log-list"></div></div>
   </div>
 
   <div id="screen-end" class="ui-screen has-dock hidden">
@@ -618,7 +617,7 @@ function drawCard(st, p, deck, dice){
   else if(c.jail) toJail(st, p);
   else if(c.collect){
     alive(st).forEach(o => { if(o === p) return; const amt = Math.min(c.collect, st.money[o]); st.money[o] -= amt; st.money[p] += amt; });
-  } else if(c.pot){ takePot(st, p);
+  } else if(c.pot){ takePot(st, p, true);
   } else if(c.repairs){
     let cost = 0;
     myProps(st, p).forEach(i => { const h = st.props[i].h; cost += h === 5 ? c.repairs[1] : h * c.repairs[0]; });
@@ -626,9 +625,9 @@ function drawCard(st, p, deck, dice){
   }
 }
 // Fines paid to the bank wait in the Café pot; whoever stops on the Café (or draws the Jackpot card) takes it all.
-function takePot(st, p){
+function takePot(st, p, byCard){
   const pot = st.pot || 0;
-  if(!pot){ log(st, '☕ ' + nm(st, p) + ' prend un thé au Café : la cagnotte est vide.'); return; }
+  if(!pot){ log(st, byCard ? '☕ La cagnotte du Café est vide : pas de chance !' : '☕ ' + nm(st, p) + ' prend un thé au Café : la cagnotte est vide.'); return; }
   st.money[p] += pot; st.pot = 0;
   log(st, '☕ ' + nm(st, p) + ' remporte la cagnotte du Café : +' + DT(pot) + ' !');
 }
@@ -1173,7 +1172,6 @@ function renderLog(st){
   if(key === shownLog) return;
   shownLog = key;
   $('log-list').innerHTML = st.log.map(l => '<div>' + esc(l) + '</div>').join('');
-  $('log-n').textContent = st.log.length + ' événement' + (st.log.length > 1 ? 's' : '');
 }
 function toggleSound(){ if(!window.CafeSound) return; const on = !window.CafeSound.prefs().fx; window.CafeSound.set('fx', on); updateSoundBtn(); }
 function updateSoundBtn(){ const b = $('snd-btn'); if(b && window.CafeSound) b.textContent = window.CafeSound.prefs().fx ? '🔊' : '🔇'; }
