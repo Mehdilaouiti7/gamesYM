@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Games Room · Kleb</title>
+<title>Games Room · EKLB</title>
 <meta name="theme-color" content="#1c1440">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,7 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Righteous&family=Marhey:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="gym-ui.css">
 <style>
-  /* ---------- Kleb — « Salle d'arcade » : nuit indigo, néons corail et menthe ---------- */
+  /* ---------- EKLB — « Salle d'arcade » : nuit indigo, néons corail et menthe ---------- */
   :root{
     --night:#1c1440; --night-2:#2a1f5c; --coral:#ff5d73; --mint:#2ee6b6; --sun:#ffd166; --paper:#fff8ec;
     --bg:radial-gradient(520px 360px at 85% -5%,rgba(255,93,115,.28),transparent 70%),radial-gradient(460px 360px at 0% 105%,rgba(46,230,182,.2),transparent 70%),#1c1440; --bg-solid:#1c1440;
@@ -125,8 +125,8 @@
       <button class="ui-pill" data-rules>📜 Règles</button>
     </div>
     <div class="ui-hero">
-      <div class="ui-hero-art"><span class="hero-cards"><span class="kc v7"><span class="a">7</span><span class="b">2</span></span><span class="kc v3"><span class="a">3</span><span class="b">9</span></span></span><span class="ar" lang="ar">قلب</span></div>
-      <h1 class="ui-hero-title">KLEB</h1>
+      <div class="ui-hero-art"><span class="hero-cards"><span class="kc v7"><span class="a">7</span><span class="b">2</span></span><span class="kc v3"><span class="a">3</span><span class="b">9</span></span></span><span class="ar" lang="ar">اقلب</span></div>
+      <h1 class="ui-hero-title">EKLB</h1>
       <div class="ui-hero-sub">Chaque carte a deux faces. Vide ta main le premier.</div>
     </div>
     <div class="ui-seg" role="tablist"><button type="button" class="on" aria-selected="true">Créer</button><button type="button" onclick="GYMRoom.show('join')">Rejoindre</button></div>
@@ -151,8 +151,8 @@
       <button class="ui-pill" data-rules>📜 Règles</button>
     </div>
     <div class="ui-hero">
-      <div class="ui-hero-art"><span class="hero-cards"><span class="kc v7"><span class="a">7</span><span class="b">2</span></span><span class="kc v3"><span class="a">3</span><span class="b">9</span></span></span><span class="ar" lang="ar">قلب</span></div>
-      <h1 class="ui-hero-title">KLEB</h1>
+      <div class="ui-hero-art"><span class="hero-cards"><span class="kc v7"><span class="a">7</span><span class="b">2</span></span><span class="kc v3"><span class="a">3</span><span class="b">9</span></span></span><span class="ar" lang="ar">اقلب</span></div>
+      <h1 class="ui-hero-title">EKLB</h1>
       <div class="ui-hero-sub">Chaque carte a deux faces. Vide ta main le premier.</div>
     </div>
     <div class="ui-seg" role="tablist"><button type="button" onclick="GYMRoom.show('create')">Créer</button><button type="button" class="on" aria-selected="true">Rejoindre</button></div>
@@ -185,7 +185,7 @@
       <div class="ui-code-hint" id="wait-hint">Touche le code pour copier le lien</div>
       <div class="ui-row-head"><span>Joueurs</span><span id="wait-count"></span></div>
       <div class="ui-chips" id="wait-players"></div>
-      <p class="muted" style="text-align:center">Le premier à écrire <b>K·L·E·B</b> gagne.</p>
+      <p class="muted" style="text-align:center">Le premier à écrire <b>E·K·L·B</b> gagne.</p>
     </div>
     <div class="ui-dock">
       <button class="ui-btn hidden" id="btn-start">Lancer la partie</button>
@@ -196,7 +196,7 @@
   <div id="screen-game" class="hidden">
     <div class="ui-top">
       <button class="ui-round" onclick="GYMRoom.leave()" aria-label="Quitter">✕</button>
-      <div class="ui-top-mid" id="top-mid">KLEB</div>
+      <div class="ui-top-mid" id="top-mid">EKLB</div>
       <button class="ui-round" data-rules aria-label="Règles">?</button>
     </div>
     <div class="seats" id="seats"></div>
@@ -215,7 +215,7 @@
     <div class="ui-dock">
       <div class="ui-dock-row">
         <a class="ui-sq" href="index.html" aria-label="Accueil" style="text-decoration:none">🏠</a>
-        <button class="ui-btn" onclick="location.href='kleb.html'">🔁 Nouvelle partie</button>
+        <button class="ui-btn" onclick="location.href='eklb.html'">🔁 Nouvelle partie</button>
       </div>
     </div>
   </div>
@@ -232,7 +232,7 @@
     <div class="ui-step"><b>＋</b><span><b>Ajouter</b> une carte de même valeur au tas d'un joueur. Si un autre tas a alors autant de cartes, plus faibles, il est repris.</span></div>
     <div class="ui-step"><b>✋</b><span><b>Ramasser</b> le tas d'un joueur : les cartes sont retournées et vont dans ta main.</span></div>
     <div class="ui-step"><b>🔄</b><span><b>Tout retourner</b> : chaque carte de ta main montre son autre nombre.</span></div>
-    <div class="ui-step"><b>★</b><span>Main vide en premier : <b>2 lettres</b>. Deuxième : <b>1 lettre</b>, et la manche s'arrête. Le premier à écrire <b>K·L·E·B</b> gagne.</span></div>
+    <div class="ui-step"><b>★</b><span>Main vide en premier : <b>2 lettres</b>. Deuxième : <b>1 lettre</b>, et la manche s'arrête. Le premier à écrire <b>E·K·L·B</b> gagne.</span></div>
     <button class="ui-btn" data-rules-close>Compris</button>
   </div>
 </div>
@@ -248,7 +248,7 @@
 <script src="gym-room.js"></script>
 <script>
 const R = GYMRoom, $ = id => document.getElementById(id), esc = R.esc, av = R.av;
-const WORD = 'KLEB';
+const WORD = 'EKLB';
 const nm = (st, i) => st.players[i].name;
 const flip = c => ({ a: c.b, b: c.a });
 const cardHtml = (c, cls, attrs) => '<span class="kc v'+c.a+(cls ? ' '+cls : '')+'"'+(attrs || '')+'><span class="a">'+c.a+'</span><span class="b">'+c.b+'</span></span>';
@@ -390,7 +390,7 @@ function render(st){
   if(!mine(st)) sel = [];
   const fresh = lastSeq !== null && st.seq !== lastSeq;
   const v = sel.length ? my[sel[0]].a : null, k = sel.length;
-  $('top-mid').innerHTML = 'KLEB<small>manche ' + st.round + '</small>';
+  $('top-mid').innerHTML = 'EKLB<small>manche ' + st.round + '</small>';
   // seats (me last)
   const seatOrder = st.players.map((p, i) => i).filter(i => i !== me).concat([me]);
   $('seats').innerHTML = seatOrder.map(i => {
@@ -446,14 +446,14 @@ function renderEnd(st){
   const w = st.winner;
   const order = st.players.map((p, i) => i).sort((a, b) => st.letters[b] - st.letters[a]);
   $('end-word').innerHTML = WORD.split('').map(l => '<span>'+l+'</span>').join('');
-  $('end-title').textContent = w === R.me ? 'Tu as écrit KLEB !' : nm(st, w) + ' a écrit KLEB !';
+  $('end-title').textContent = w === R.me ? 'Tu as écrit EKLB !' : nm(st, w) + ' a écrit EKLB !';
   $('end-sub').textContent = 'Partie gagnée en ' + st.round + ' manche' + (st.round > 1 ? 's' : '') + '.';
   $('end-rank').innerHTML = order.map((i, pos) => '<div><span class="pos">'+(pos + 1)+'</span><span class="av">'+av(st.players[i])+'</span><span class="nm">'+esc(nm(st, i))+(i === R.me ? ' (toi)' : '')+'</span><span class="pts">'+WORD.slice(0, st.letters[i])+'</span></div>').join('');
   if(w === R.me && window.GYMFeedback && !renderEnd.done){ renderEnd.done = true; window.GYMFeedback.win(); }
 }
 
 R.init({
-  key: 'kl', table: 'kl_games', title: 'Kleb', page: 'kleb.html', min: 2, max: 5,
+  key: 'kl', table: 'kl_games', title: 'EKLB', page: 'eklb.html', min: 2, max: 5,
   start: setup,
   render
 });
