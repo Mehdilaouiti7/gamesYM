@@ -107,6 +107,9 @@
   .panel .row{display:flex;gap:8px}
   .panel .row > .ui-btn{flex:1;min-width:0}
   .ui-btn{height:54px;font-size:17px}
+  /* In the column panel, .ui-btn's flex:1 squashed the main buttons: they keep their full height. */
+  .panel > .ui-btn{flex:none;height:62px;font-size:20px}
+  .panel .row > .ui-btn{flex:1 1 0}
   .ui-btn.go{background:#1f9d55;box-shadow:0 5px 0 #157341}
   .ui-btn.red{background:var(--flag);box-shadow:0 5px 0 #9e0010}
   .ui-btn.alt{box-shadow:0 5px 0 var(--line);background:var(--sky);color:var(--blue)}
