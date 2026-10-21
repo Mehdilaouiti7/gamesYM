@@ -51,7 +51,12 @@ window.GYMUI = (function(){
   function renderCode(el, code, hintEl){
     if(typeof el==='string') el = $(el);
     if(!el) return;
-    el.innerHTML = String(code||'····').split('').map(function(c){ return '<span>'+c+'</span>'; }).join('');
+    // Redraw only when the code changes, so the letters' pop-in animation doesn't replay on every refresh.
+    const txt = String(code||'····');
+    if(el.dataset.code !== txt){
+      el.dataset.code = txt;
+      el.innerHTML = txt.split('').map(function(c){ return '<span>'+c+'</span>'; }).join('');
+    }
     el.onclick = function(){ copyLink(code, hintEl); };
     el.setAttribute('aria-label', 'Code '+code+' — toucher pour copier le lien');
   }
