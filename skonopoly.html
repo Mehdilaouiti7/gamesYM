@@ -189,7 +189,7 @@
   .sq.corner .pi-go{width:10cqw;height:9cqw}
   #sq-0:has(.pi-go) .nm{display:none}
   .sq.corner .si{width:5.2cqw;height:5.2cqw;color:#c0392b}
-  .sq.chance-sq .si{color:#e6007e}
+  .sq.chance-sq .si{color:#ee82b2}
   .sq.fam-sq .si{color:#9a5b16}
   .sq.owned{box-shadow:none;background:color-mix(in srgb, var(--own) 22%, #cfe5c3)}
   .sq.here{background:#e9f5c9}
@@ -201,12 +201,10 @@
   .center .pot,.center .dice{z-index:1}
   /* card piles on the table, like the real board: Sandouk (pink) top-left, Chance (blue) bottom-right */
   .deck{position:absolute;width:19cqw;height:12.5cqw;border-radius:1.4cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:'Amiri',serif;font-weight:700;transform:rotate(-45deg);box-shadow:.5cqw .5cqw 0 rgba(0,0,0,.18);z-index:1}
-  .deck::before,.deck::after{content:"";position:absolute;inset:0;border-radius:inherit;background:inherit;z-index:-1}
-  .deck::before{transform:translate(.6cqw,.6cqw);filter:brightness(.88)} .deck::after{transform:translate(1.2cqw,1.2cqw);filter:brightness(.76)}
-  .deck b{font-size:3.6cqw;line-height:1.1;text-align:center}
+  .deck b{font-size:3.6cqw;line-height:1.25;text-align:center;display:block}
   .deck small{font:600 1.5cqw 'Fredoka',sans-serif;opacity:.95}
-  .deck.fam{left:7cqw;top:15cqw;background:#e6007e;box-shadow:inset 0 0 0 .5cqw #fff}
-  .deck.chance{right:7cqw;bottom:15cqw;background:#2fa3e6;box-shadow:inset 0 0 0 .5cqw #fff}
+  .deck.fam{left:7cqw;top:15cqw;background:#ee82b2;box-shadow:inset 0 0 0 .5cqw #fff,.6cqw .6cqw 0 #d86d9d,1.2cqw 1.2cqw 0 #c25a89,1.6cqw 1.6cqw 1cqw rgba(0,0,0,.15)}
+  .deck.chance{right:7cqw;bottom:15cqw;background:#5fb8ea;box-shadow:inset 0 0 0 .5cqw #fff,.6cqw .6cqw 0 #4ba3d6,1.2cqw 1.2cqw 0 #3a8fc2,1.6cqw 1.6cqw 1cqw rgba(0,0,0,.15)}
   .deck.chance b{font-size:5cqw}
   .tok{background:none;border:none;box-shadow:none;width:5.6cqw;height:5.6cqw;margin:-4.6cqw 0 0 -2.8cqw}
   .tok .tk{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;background:#fff;border:.6cqw solid var(--c);font-size:3.1cqw;box-shadow:0 1cqw 1.2cqw rgba(0,0,0,.35);transform-origin:50% 100%;transform:scaleY(1.24);transition:transform .2s}
@@ -1107,7 +1105,7 @@ function openCard(st, e, j, resume, still){
   const pile = $('deck-' + e.deck), from = pile ? rectOf(pile) : at, mine = e.p === R.me;
   const foot = mine ? '<button class="ok" onclick="closeCard()">Fermer</button>' : '<div class="rd">' + esc(st.players[e.p].name) + ' lit la carte…</div>';
   const el = fxEl('card-fly held', '<div class="in"><div class="side back"><span lang="ar">' + (ch ? 'حظ ?' : 'الصندوق البلدي') + '</span></div><div class="side front"' + (LANG === 'ar' ? ' lang="ar"' : '') + '>' + (mine ? '<button class="x" onclick="closeCard()" aria-label="Fermer">✕</button>' : '') + '<small>' + deckName(e.deck) + '</small>' + esc(cardText(c)) + foot + '</div></div>', at.x, at.y);
-  el.style.setProperty('--cb', ch ? '#2fa3e6' : '#e6007e'); el.style.setProperty('--cb2', ch ? '#1f8fd0' : '#c8006d');
+  el.style.setProperty('--cb', ch ? '#5fb8ea' : '#ee82b2'); el.style.setProperty('--cb2', ch ? '#4aa6dc' : '#e06aa0');
   const dx = from.x - at.x, dy = from.y - at.y, away = 'translate(' + dx + 'px,' + dy + 'px) rotate(-45deg) scale(.26)';
   cardHold = { el, j, pid: st.pathId, resume, away };
   if(still || RM){ el.firstChild.style.transform = 'rotateY(180deg)'; return; }
