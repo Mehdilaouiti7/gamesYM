@@ -177,6 +177,12 @@
   .sq.corner{background:#cfe5c3}
   .sq.corner .nm{display:block;font-size:1.6cqw;margin-top:.4cqw}
   .sq .si{width:3.6cqw;height:3.6cqw;color:#1f2a22}
+  .sq .pi{width:4cqw;height:3.8cqw;object-fit:contain;margin:.1cqw 0;flex:none;pointer-events:none;-webkit-user-select:none;user-select:none}
+  .sq.corner .pi{width:5.4cqw;height:4.6cqw}
+  .sq.corner .nm{font-size:1.3cqw!important;line-height:1.1;margin-top:.2cqw!important;max-height:none}
+  .sq .pi-go-arrow{width:8cqw;height:2.8cqw}
+  .sq.corner .pi-go{width:10cqw;height:9cqw}
+  #sq-0:has(.pi-go) .nm{display:none}
   .sq.corner .si{width:5.2cqw;height:5.2cqw;color:#c0392b}
   .sq.chance-sq .si{color:#e6007e}
   .sq.fam-sq .si{color:#9a5b16}
@@ -546,6 +552,17 @@ function iconKey(i){
   if(s.t === 'util') return i === 12 ? 'bolt' : 'drop';
   return null;
 }
+// Illustrated icons for the board's special squares (img/sko).
+function picKey(i){
+  const s = SQ[i];
+  if(i === 0) return LANG === 'ar' ? 'go' : 'go-arrow';
+  if(s.t === 'chance') return i === 7 ? 'chance-pink' : 'chance-blue';
+  if(s.t === 'tr') return 'train';
+  if(i === 12) return 'steg';
+  if(i === 28) return 'sonede';
+  return { jail: 'jail', gojail: 'gojail', park: 'park', fam: 'fam', tax: i === 38 ? 'ring' : null }[s.t] || null;
+}
+function picIcon(i){ const k = picKey(i); return k ? '<img class="pi pi-'+k+'" src="img/sko/'+k+'.webp" alt="" draggable="false">' : ''; }
 function svgIcon(i){ const k = iconKey(i); return k ? '<svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[k] + '</svg>' : ''; }
 const START_MONEY = 150000, GO_BONUS = 20000, JAIL = 10, JAIL_FEE = 5000;
 const COLORS = ['#e63946', '#1f9d55', '#f28c28', '#6a4c93', '#0a4f9c', '#d6479b'];
@@ -911,7 +928,7 @@ function buildBoard(){
     const g = s.g ? GROUPS[s.g].c : '';
     html += '<div class="sq '+(s.g ? side : '')+(corner ? ' corner' : (s.g ? '' : ' special'))+(s.t === 'chance' ? ' chance-sq' : '')+(s.t === 'fam' ? ' fam-sq' : '')+'" id="sq-'+i+'" style="grid-row:'+(r+1)+';grid-column:'+(c+1)+(g ? ';--g:'+g : '')+'" onclick="showSquare('+i+')">'+
       (s.g ? '<div class="band"><span class="hs" id="hs-'+i+'"></span></div>' : '')+
-      svgIcon(i)+
+      (picIcon(i) || svgIcon(i))+
       '<span class="nm'+(sqName(i).length > 15 ? ' long' : '')+(sqName(i).length > 26 ? ' xlong' : '')+'"'+(LANG === 'ar' ? ' lang="ar"' : '')+'>'+esc(sqName(i))+'</span>'+((s.p || s.a) ? '<span class="pr" id="pr-'+i+'">'+DTb(s.p || s.a)+'</span>' : '')+'</div>';
   });
   html += '<div class="center"><div class="logo" lang="ar">سكونوبولي<small>SKONOPOLY</small></div><div class="deck fam" id="deck-fam"><b lang="ar">الصندوق<br>البلدي</b></div><div class="deck chance" id="deck-chance"><b lang="ar">حظ ?</b><small>CHANCE</small></div><div class="pot" id="pot-center"></div><div class="dice" id="dice">'+[0,1].map(k => '<div class="cube'+(k ? ' red' : '')+'" id="cube'+k+'">'+[1,2,3,4,5,6].map(v => '<div class="face f'+v+'">'+[0,1,2,3,4,5,6,7,8].map(x => '<i class="'+(PIPS[v].includes(x) ? 'on' : '')+'"></i>').join('')+'</div>').join('')+'</div>').join('')+'</div></div>';
