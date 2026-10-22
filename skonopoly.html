@@ -294,7 +294,7 @@
     <div class="ui-hero">
       <div class="ui-hero-art"><span class="hero-door">🏠</span><span class="ar" lang="ar">سكونوبولي</span></div>
       <h1 class="ui-hero-title">Skonopoly</h1>
-      <div class="ui-hero-sub">Achète Tunis, de l'avenue du 9 Avril à l'avenue Habib Bourguiba</div>
+      <div class="ui-hero-sub">Achète Tunis, de la rue du 9 Avril à l'avenue Habib Bourguiba</div>
     </div>
     <div class="ui-seg" role="tablist"><button type="button" class="on" aria-selected="true">Créer</button><button type="button" onclick="GYMRoom.show('join')">Rejoindre</button></div>
     <label class="ui-field">
@@ -320,7 +320,7 @@
     <div class="ui-hero">
       <div class="ui-hero-art"><span class="hero-door">🏠</span><span class="ar" lang="ar">سكونوبولي</span></div>
       <h1 class="ui-hero-title">Skonopoly</h1>
-      <div class="ui-hero-sub">Achète Tunis, de l'avenue du 9 Avril à l'avenue Habib Bourguiba</div>
+      <div class="ui-hero-sub">Achète Tunis, de la rue du 9 Avril à l'avenue Habib Bourguiba</div>
     </div>
     <div class="ui-seg" role="tablist"><button type="button" onclick="GYMRoom.show('create')">Créer</button><button type="button" class="on" aria-selected="true">Rejoindre</button></div>
     <label class="ui-field">
@@ -452,7 +452,7 @@ const GROUPS = {
 };
 const SQ = [
   {t:'go', n:'Départ', ar:'انطلاق', s:'Départ', sa:'انطلاق'},
-  {t:'prop', g:'brown', n:'Avenue du 9 Avril 1938', ar:'شارع 9 أفريل 1938', s:'9 Avril', sa:'9 أفريل', p:5000, r:[200,1000,3000,9000,16000,25000]},
+  {t:'prop', g:'brown', n:'Rue du 9 Avril 1938', ar:'نهج 9 أفريل 1938', s:'9 Avril', sa:'9 أفريل', p:5000, r:[200,1000,3000,9000,16000,25000]},
   {t:'fam', n:'Sandouk Baladi', ar:'الصندوق البلدي', s:'Sandouk', sa:'الصندوق'},
   {t:'prop', g:'brown', n:'Rue Amilcar', ar:'نهج أميلكار', s:'Amilcar', sa:'أميلكار', p:6000, r:[400,2000,6000,18000,32000,45000]},
   {t:'tax', n:'Impôt sur le revenu', ar:'أداء على المداخيل', s:'Impôts', sa:'أداء', a:20000},
@@ -467,9 +467,9 @@ const SQ = [
   {t:'prop', g:'pink', n:'Avenue Hédi Chaker', ar:'شارع الهادي شاكر', s:'Hédi Chaker', sa:'الهادي شاكر', p:14000, r:[1000,5000,15000,45000,62500,75000]},
   {t:'prop', g:'pink', n:'Rue Ibn Khaldoun', ar:'نهج ابن خلدون', s:'Ibn Khaldoun', sa:'ابن خلدون', p:16000, r:[1200,6000,18000,50000,70000,90000]},
   {t:'tr', n:'Gare de Sousse', ar:'محطة سوسة', s:'Gare Sousse', sa:'محطة سوسة', p:20000},
-  {t:'prop', g:'orange', n:'Avenue Ahmed Tlili', ar:'شارع أحمد التليلي', s:'Ahmed Tlili', sa:'أحمد التليلي', p:18000, r:[1400,7000,20000,55000,75000,95000]},
+  {t:'prop', g:'orange', n:'Rue Ahmed Tlili', ar:'نهج أحمد التليلي', s:'Ahmed Tlili', sa:'أحمد التليلي', p:18000, r:[1400,7000,20000,55000,75000,95000]},
   {t:'fam', n:'Sandouk Baladi', ar:'الصندوق البلدي', s:'Sandouk', sa:'الصندوق'},
-  {t:'prop', g:'orange', n:'Avenue Ali Belhouane', ar:'شارع علي بلهوان', s:'Belhouane', sa:'علي بلهوان', p:18000, r:[1400,7000,20000,55000,75000,95000]},
+  {t:'prop', g:'orange', n:'Avenue Ali Belhouane', ar:'شارع علي بلحوان', s:'Belhouane', sa:'علي بلحوان', p:18000, r:[1400,7000,20000,55000,75000,95000]},
   {t:'prop', g:'orange', n:"Place d'Afrique", ar:'ساحة إفريقيا', s:'Pl. Afrique', sa:'ساحة إفريقيا', p:20000, r:[1600,8000,22000,60000,80000,100000]},
   {t:'park', n:'Parking gratuit', ar:'موقف مجاني', s:'Parking', sa:'موقف مجاني'},
   {t:'prop', g:'red', n:'Place Jugurtha', ar:'ساحة يوغرطة', s:'Jugurtha', sa:'يوغرطة', p:22000, r:[1800,9000,25000,70000,87500,105000]},
@@ -477,15 +477,15 @@ const SQ = [
   {t:'prop', g:'red', n:'Avenue de Carthage', ar:'شارع قرطاج', s:'Carthage', sa:'قرطاج', p:22000, r:[1800,9000,25000,70000,87500,105000]},
   {t:'prop', g:'red', n:'Avenue Farhat Hached', ar:'شارع فرحات حشاد', s:'Farhat Hached', sa:'فرحات حشاد', p:24000, r:[2000,10000,30000,75000,92500,110000]},
   {t:'tr', n:'Gare de Sfax', ar:'محطة صفاقس', s:'Gare Sfax', sa:'محطة صفاقس', p:20000},
-  {t:'prop', g:'yellow', n:'Avenue Bab Bnet', ar:'شارع باب بنات', s:'Bab Bnet', sa:'باب بنات', p:26000, r:[2200,11000,33000,80000,97500,115000]},
+  {t:'prop', g:'yellow', n:'Boulevard Bab Bnet', ar:'جادة باب بنات', s:'Bab Bnet', sa:'باب بنات', p:26000, r:[2200,11000,33000,80000,97500,115000]},
   {t:'prop', g:'yellow', n:'Place Mohamed Ali', ar:'ساحة محمد علي', s:'Mohamed Ali', sa:'محمد علي', p:26000, r:[2200,11000,33000,80000,97500,115000]},
-  {t:'util', n:'SONEDE · eau', ar:'الصوناد · الماء', s:'SONEDE', sa:'الصوناد', p:15000},
+  {t:'util', n:'SONEDE · eau', ar:'الشركة الوطنية لاستغلال وتوزيع المياه (الصوناد)', s:'SONEDE', sa:'الصوناد', p:15000},
   {t:'prop', g:'yellow', n:'Rue Bab Souika', ar:'نهج باب سويقة', s:'Bab Souika', sa:'باب سويقة', p:28000, r:[2400,12000,36000,85000,102500,120000]},
   {t:'gojail', n:'Va en prison', ar:'إلى السجن', s:'En prison', sa:'إلى السجن'},
   {t:'prop', g:'green', n:'Avenue de la Liberté', ar:'شارع الحرية', s:'Liberté', sa:'الحرية', p:30000, r:[2600,13000,39000,90000,110000,127500]},
   {t:'prop', g:'green', n:'Rue de Palestine', ar:'نهج فلسطين', s:'Palestine', sa:'فلسطين', p:30000, r:[2600,13000,39000,90000,110000,127500]},
   {t:'fam', n:'Sandouk Baladi', ar:'الصندوق البلدي', s:'Sandouk', sa:'الصندوق'},
-  {t:'prop', g:'green', n:'Avenue du 20 Mars', ar:'شارع 20 مارس', s:'20 Mars', sa:'20 مارس', p:32000, r:[2800,15000,45000,100000,120000,140000]},
+  {t:'prop', g:'green', n:'Boulevard du 20 Mars', ar:'جادة 20 مارس', s:'20 Mars', sa:'20 مارس', p:32000, r:[2800,15000,45000,100000,120000,140000]},
   {t:'tr', n:'Gare de Gabès', ar:'محطة قابس', s:'Gare Gabès', sa:'محطة قابس', p:20000},
   {t:'chance', n:'Chance', ar:'حظ', s:'Chance', sa:'حظ'},
   {t:'prop', g:'dblue', n:'Avenue Kheireddine Pacha', ar:'شارع خير الدين باشا', s:'Kheireddine', sa:'خير الدين', p:35000, r:[3500,17500,50000,110000,130000,150000]},
@@ -526,7 +526,7 @@ const MEKTOUB = [
   {t:"Avance jusqu'à la case Départ. Reçois 20.000 DT.", ar:'تقدّم إلى خانة الانطلاق وخذ 20.000 د.', move:0},
   {t:"Avance jusqu'à l'avenue Farhat Hached.", ar:'تقدّم إلى شارع فرحات حشاد.', move:24},
   {t:"Promenade sur l'avenue Habib Bourguiba : vas-y directement.", ar:'نزهة في شارع الحبيب بورقيبة: اذهب إليه مباشرة.', move:39},
-  {t:"Rendez-vous avenue Ahmed Tlili : avance jusque-là.", ar:'موعد في شارع أحمد التليلي: تقدّم إليه.', move:16},
+  {t:"Rendez-vous rue Ahmed Tlili : avance jusque-là.", ar:'موعد في نهج أحمد التليلي: تقدّم إليه.', move:16},
   {t:"Prends le train : va à la gare la plus proche.", ar:'اركب القطار: اذهب إلى أقرب محطة.', near:'tr'},
   {t:"Embouteillage : recule de 3 cases.", ar:'زحمة مرور: ارجع 3 خانات إلى الوراء.', back:3},
   {t:"Contrôle de police sans papiers : direction la prison !", ar:'مراقبة أمنية بدون أوراق: إلى السجن!', jail:true},
