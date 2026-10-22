@@ -101,10 +101,12 @@
   .card-fly .in{position:absolute;inset:0;transform-style:preserve-3d}
   .card-fly .side{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;text-align:center;box-shadow:0 16px 36px rgba(0,0,0,.35)}
   .card-fly .back{background:repeating-linear-gradient(45deg,var(--cb) 0 10px,var(--cb2) 10px 20px);color:#fff;font-family:'Titan One',sans-serif;font-size:22px;border:4px solid #fff}
+  .card-fly .back span{font-family:'Marhey',sans-serif;font-size:26px}
   .card-fly .front{transform:rotateY(180deg);background:#fffdf6;border:3px solid var(--cb);color:var(--ink);font-size:14px;line-height:1.35}
   .card-fly .front small{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cb);margin-bottom:6px}
   canvas.fireworks{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:90}
   .snd-top{font-size:17px}
+  .lang-top{font-family:'Marhey',sans-serif;font-size:17px;font-weight:700}
   /* trade offers, visible to everyone */
   .tbox{background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 0 0 2px #ffd166,0 4px 0 var(--line);display:flex;flex-direction:column;gap:8px}
   .tbox > .ui-btn{flex:none}
@@ -142,24 +144,38 @@
   /* ---------- 3D table: tilted board seen close-up, camera on the active pawn ---------- */
   .board-wrap{aspect-ratio:1/.92;perspective:950px;perspective-origin:50% 0%;background:radial-gradient(120% 90% at 50% 100%,#efe6d2,#e3d6b8);box-shadow:inset 0 0 0 1px #e1d4b6,0 8px 24px rgba(60,45,20,.18);border-radius:18px}
   .stage{position:absolute;inset:0;transform:rotateX(36deg);transform-origin:50% 45%}
-  .board{background:#e8e0cf;border:none;gap:1px;border-radius:14px;box-shadow:0 0 0 2px #d9cdb0,0 22px 34px rgba(60,45,20,.28);transition:transform .55s cubic-bezier(.3,.7,.3,1)}
-  .sq{background:#fffdf8}
+  .board{background:#26302a;border:none;gap:1px;border-radius:14px;box-shadow:0 0 0 2px #26302a,0 22px 34px rgba(30,50,30,.32);transition:transform .55s cubic-bezier(.3,.7,.3,1)}
+  .sq{background:#cfe5c3}
   .sq.b-top .band,.sq.b-bottom .band{height:11%}
   .sq.b-left .band,.sq.b-right .band{width:11%}
   .sq.b-top .nm{margin-top:11%} .sq.b-bottom .nm{margin-bottom:11%} .sq.b-left .nm{margin-left:11%} .sq.b-right .nm{margin-right:11%}
-  .sq .nm{font-size:1.45cqw;font-weight:600;letter-spacing:0;color:#33465c}
-  .sq .pr{font-size:1.25cqw;color:#8a97a8;margin-top:.2cqw}
+  .sq .nm{font-size:1.45cqw;font-weight:600;letter-spacing:0;color:#1f2a22}
+  .sq .nm{white-space:normal;word-break:keep-all;overflow-wrap:normal;text-align:center;line-height:1.05;max-height:2.2em}
+  .sq .nm[lang=ar]{font-family:'Marhey',sans-serif;font-size:1.4cqw;font-weight:700;line-height:1.15;max-height:2.4em}
+  .sq .pr{font-size:1.2cqw;color:#3f5544;margin-top:.2cqw;font-family:'Space Mono',monospace;font-weight:700}
   .sq.special .nm{display:none}
-  .sq.corner{background:#fbf6ea}
+  .sq.corner{background:#cfe5c3}
   .sq.corner .nm{display:block;font-size:1.6cqw;margin-top:.4cqw}
-  .sq .si{width:3.6cqw;height:3.6cqw;color:#0a4f9c}
-  .sq.corner .si{width:5.2cqw;height:5.2cqw;color:#c4532d}
-  .sq.owned{box-shadow:none;background:color-mix(in srgb, var(--own) 18%, #fffdf8)}
-  .sq.here{background:#fff4cf}
+  .sq .si{width:3.6cqw;height:3.6cqw;color:#1f2a22}
+  .sq.corner .si{width:5.2cqw;height:5.2cqw;color:#c0392b}
+  .sq.chance-sq .si{color:#e6007e}
+  .sq.owned{box-shadow:none;background:color-mix(in srgb, var(--own) 22%, #cfe5c3)}
+  .sq.here{background:#e9f5c9}
   .sq .hs i{background:#1f9d55}
-  .center{background:#f5f1e8}
-  .center::before{background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.85),transparent 70%)}
-  .logo{transform:none;text-shadow:none;font-size:7.5cqw}
+  .center{background:#cfe5c3}
+  .center::before{background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.35),transparent 70%)}
+  .logo{position:absolute!important;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-45deg);font-family:'Marhey',sans-serif;font-size:11cqw;color:rgba(20,30,22,.82);text-shadow:none;white-space:nowrap;line-height:1;pointer-events:none}
+  .logo small{font-family:'Titan One',sans-serif;font-size:3cqw;color:rgba(20,30,22,.55);letter-spacing:.08em}
+  .center .pot,.center .dice{z-index:1}
+  /* card piles on the table, like the real board: Sandouk (pink) top-left, Chance (blue) bottom-right */
+  .deck{position:absolute;width:19cqw;height:12.5cqw;border-radius:1.4cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:'Marhey',sans-serif;transform:rotate(-45deg);box-shadow:.5cqw .5cqw 0 rgba(0,0,0,.18);z-index:1}
+  .deck::before,.deck::after{content:"";position:absolute;inset:0;border-radius:inherit;background:inherit;z-index:-1}
+  .deck::before{transform:translate(.6cqw,.6cqw);filter:brightness(.88)} .deck::after{transform:translate(1.2cqw,1.2cqw);filter:brightness(.76)}
+  .deck b{font-size:3.6cqw;line-height:1.1;text-align:center}
+  .deck small{font:600 1.5cqw 'Fredoka',sans-serif;opacity:.95}
+  .deck.fam{left:7cqw;top:15cqw;background:#e6007e;box-shadow:inset 0 0 0 .5cqw #fff}
+  .deck.chance{right:7cqw;bottom:15cqw;background:#2fa3e6;box-shadow:inset 0 0 0 .5cqw #fff}
+  .deck.chance b{font-size:5cqw}
   .tok{background:none;border:none;box-shadow:none;width:5.6cqw;height:5.6cqw;margin:-4.6cqw 0 0 -2.8cqw}
   .tok .tk{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;background:#fff;border:.6cqw solid var(--c);font-size:3.1cqw;box-shadow:0 1cqw 1.2cqw rgba(0,0,0,.35);transform-origin:50% 100%;transform:scaleY(1.24);transition:transform .2s}
   .tok.turn{transform:none}
@@ -278,7 +294,7 @@
     <div class="ui-hero">
       <div class="ui-hero-art"><span class="hero-door">🏠</span><span class="ar" lang="ar">سكونوبولي</span></div>
       <h1 class="ui-hero-title">Skonopoly</h1>
-      <div class="ui-hero-sub">Achète la Tunisie, de Kasserine à Sidi Bou Saïd</div>
+      <div class="ui-hero-sub">Achète Tunis, de la rue du 9 Avril à l'avenue Habib Bourguiba</div>
     </div>
     <div class="ui-seg" role="tablist"><button type="button" class="on" aria-selected="true">Créer</button><button type="button" onclick="GYMRoom.show('join')">Rejoindre</button></div>
     <label class="ui-field">
@@ -304,7 +320,7 @@
     <div class="ui-hero">
       <div class="ui-hero-art"><span class="hero-door">🏠</span><span class="ar" lang="ar">سكونوبولي</span></div>
       <h1 class="ui-hero-title">Skonopoly</h1>
-      <div class="ui-hero-sub">Achète la Tunisie, de Kasserine à Sidi Bou Saïd</div>
+      <div class="ui-hero-sub">Achète Tunis, de la rue du 9 Avril à l'avenue Habib Bourguiba</div>
     </div>
     <div class="ui-seg" role="tablist"><button type="button" onclick="GYMRoom.show('create')">Créer</button><button type="button" class="on" aria-selected="true">Rejoindre</button></div>
     <label class="ui-field">
@@ -336,7 +352,7 @@
       <div class="ui-code-hint" id="wait-hint">Touche le code pour copier le lien</div>
       <div class="ui-row-head"><span>Joueurs</span><span id="wait-count"></span></div>
       <div class="ui-chips" id="wait-players"></div>
-      <p class="muted" style="text-align:center">Chacun commence avec <b>1 500 DT</b>. Le dernier qui n'a pas fait faillite gagne.</p>
+      <p class="muted" style="text-align:center">Chacun commence avec <b>150.000 DT</b>. Le dernier qui n'a pas fait faillite gagne.</p>
     </div>
     <div class="ui-dock">
       <button class="ui-btn hidden" id="btn-start">Lancer la partie</button>
@@ -348,6 +364,7 @@
     <div class="ui-top">
       <button class="ui-round" onclick="GYMRoom.leave()" aria-label="Quitter">✕</button>
       <div class="ui-top-mid">Skonopoly</div>
+      <button class="ui-round lang-top" id="lang-btn" onclick="setLang(LANG === 'ar' ? 'fr' : 'ar')" aria-label="Langue">ع</button>
       <button class="ui-round snd-top" id="snd-btn" onclick="toggleSound()" aria-label="Son">🔊</button>
       <button class="ui-round" data-rules aria-label="Règles">?</button>
     </div>
@@ -381,11 +398,11 @@
   <div class="ui-sheet-body" role="dialog" aria-label="Règles">
     <div class="ui-grab"></div>
     <div class="ui-sheet-title">Les règles</div>
-    <div class="ui-step"><b>1</b><span>Chacun commence avec <b>1 500 DT</b>. Lance les dés et avance. À chaque passage par <b>Bab Bhar</b> (Départ), reçois 200 DT.</span></div>
+    <div class="ui-step"><b>1</b><span>Chacun commence avec <b>150.000 DT</b>. Lance les dés et avance. À chaque passage par la case <b>Départ</b>, reçois 20.000 DT.</span></div>
     <div class="ui-step"><b>2</b><span>Tu tombes sur une ville, un transport ou la STEG / SONEDE libre ? Tu peux l'acheter. Chez un autre joueur, tu paies le loyer.</span></div>
     <div class="ui-step"><b>3</b><span>Toutes les villes d'une couleur ? Le loyer double, et tu peux construire des <b>maisons</b> puis un <b>hôtel</b> (de façon égale dans la couleur) depuis <b>Mes biens</b>.</span></div>
-    <div class="ui-step"><b>☕</b><span>Les impôts, amendes et pénalités payés à la banque vont dans la <b>cagnotte du Café</b>, au milieu de la table. Celui qui s'arrête sur le <b>Café</b>, ou pioche la carte Jackpot, remporte tout.</span></div>
-    <div class="ui-step"><b>4</b><span>Un double ? Tu rejoues. Trois doubles de suite, ou la case Police : direction <b>Mornaguia</b>. Pour sortir : un double, 50 DT, ou une carte de sortie.</span></div>
+    <div class="ui-step"><b>🅿️</b><span>Les impôts, amendes et pénalités payés à la banque vont dans la <b>cagnotte</b>, au milieu de la table. Celui qui s'arrête sur le <b>Parking gratuit</b>, ou pioche la carte Jackpot, remporte tout.</span></div>
+    <div class="ui-step"><b>4</b><span>Un double ? Tu rejoues. Trois doubles de suite, ou la case « Va en prison » : direction la <b>prison</b>. Pour sortir : un double, 5.000 DT, ou une carte de sortie.</span></div>
     <div class="ui-step"><b>5</b><span>Pas assez d'argent ? Vends des maisons ou <b>hypothèque</b> des biens. Sinon c'est la <b>faillite</b> : tu es éliminé. Le dernier joueur en jeu gagne.</span></div>
     <div class="ui-step"><b>🤝</b><span>À ton tour, tu peux proposer un <b>échange</b> (biens et argent) à un autre joueur.</span></div>
     <button class="ui-btn" data-rules-close>Compris</button>
@@ -412,61 +429,75 @@
 <script src="gym-room.js"></script>
 <script>
 const R = GYMRoom, $ = id => document.getElementById(id), esc = R.esc, av = R.av;
+// Language of this phone: French or Arabic (board, cards and buttons).
+var LANG = (function(){ try{ return localStorage.getItem('sko-lang') === 'ar' ? 'ar' : 'fr'; }catch(e){ return 'fr'; } })();
+const L = (fr, ar) => LANG === 'ar' ? ar : fr;
+const sqName = i => L(SQ[i].n, SQ[i].ar);
+const sqShort = i => L(SQ[i].s, SQ[i].sa);
+const cardText = c => L(c.t, c.ar);
+const deckName = d => d === 'chance' ? L('Chance', 'حظ') : L('Sandouk Baladi', 'الصندوق البلدي');
+function setLang(l){
+  LANG = l; try{ localStorage.setItem('sko-lang', l); }catch(e){}
+  if($('board').children.length){ $('board').innerHTML = ''; shownPot = null; shownLog = ''; }
+  if(R.state && R.state.status === 'playing'){ shown = null; prev = null; render(R.state); }
+  updateLangBtn();
+}
+function updateLangBtn(){ const b = $('lang-btn'); if(b) b.textContent = LANG === 'ar' ? 'FR' : 'ع'; }
 
 /* ---------- the board ---------- */
 const GROUPS = {
-  brown:{c:'#8b5a2b', h:50, n:'Marron'}, lblue:{c:'#7cc8f0', h:50, n:'Bleu ciel', light:true}, pink:{c:'#d6479b', h:100, n:'Rose'},
-  orange:{c:'#f28c28', h:100, n:'Orange'}, red:{c:'#e70013', h:150, n:'Rouge'}, yellow:{c:'#f5c400', h:150, n:'Jaune', light:true},
-  green:{c:'#1f9d55', h:200, n:'Vert'}, dblue:{c:'#0a3d91', h:200, n:'Bleu'}
+  brown:{c:'#1c2a6b', h:5000, n:'Bleu nuit', ar:'أزرق داكن'}, lblue:{c:'#4fb7e8', h:5000, n:'Bleu ciel', ar:'أزرق فاتح', light:true}, pink:{c:'#6a2c91', h:10000, n:'Violet', ar:'بنفسجي'},
+  orange:{c:'#f08a24', h:10000, n:'Orange', ar:'برتقالي'}, red:{c:'#e2231a', h:15000, n:'Rouge', ar:'أحمر'}, yellow:{c:'#f6c700', h:15000, n:'Jaune', ar:'أصفر', light:true},
+  green:{c:'#0f6b3b', h:20000, n:'Vert', ar:'أخضر'}, dblue:{c:'#1f63d6', h:20000, n:'Bleu', ar:'أزرق'}
 };
 const SQ = [
-  {t:'go', n:'Départ · Bab Bhar', s:'Départ', i:'➜'},
-  {t:'prop', g:'brown', n:'Kasserine', s:'Kasserine', p:60, r:[2,10,30,90,160,250]},
-  {t:'fam', n:'Famille', s:'Famille', i:'👪'},
-  {t:'prop', g:'brown', n:'Gafsa', s:'Gafsa', p:60, r:[4,20,60,180,320,450]},
-  {t:'tax', n:'Impôts', s:'Impôts', i:'💸', a:200},
-  {t:'tr', n:'Louage', s:'Louage', i:'🚐', p:200},
-  {t:'prop', g:'lblue', n:'Kairouan', s:'Kairouan', p:100, r:[6,30,90,270,400,550]},
-  {t:'chance', n:'Mektoub', s:'Mektoub', i:'🔮'},
-  {t:'prop', g:'lblue', n:'Béja', s:'Béja', p:100, r:[6,30,90,270,400,550]},
-  {t:'prop', g:'lblue', n:'Jendouba', s:'Jendouba', p:120, r:[8,40,100,300,450,600]},
-  {t:'jail', n:'Prison de Mornaguia', s:'Mornaguia', i:'⛓️'},
-  {t:'prop', g:'pink', n:'Bizerte', s:'Bizerte', p:140, r:[10,50,150,450,625,750]},
-  {t:'util', n:'STEG · électricité', s:'STEG', i:'💡', p:150},
-  {t:'prop', g:'pink', n:'Nabeul', s:'Nabeul', p:140, r:[10,50,150,450,625,750]},
-  {t:'prop', g:'pink', n:'Hammamet', s:'Hammamet', p:160, r:[12,60,180,500,700,900]},
-  {t:'tr', n:'Métro léger', s:'Métro', i:'🚋', p:200},
-  {t:'prop', g:'orange', n:'Monastir', s:'Monastir', p:180, r:[14,70,200,550,750,950]},
-  {t:'fam', n:'Famille', s:'Famille', i:'👪'},
-  {t:'prop', g:'orange', n:'Mahdia', s:'Mahdia', p:180, r:[14,70,200,550,750,950]},
-  {t:'prop', g:'orange', n:'Sousse', s:'Sousse', p:200, r:[16,80,220,600,800,1000]},
-  {t:'park', n:'Café · pause thé', s:'Café', i:'☕'},
-  {t:'prop', g:'red', n:'Sfax', s:'Sfax', p:220, r:[18,90,250,700,875,1050]},
-  {t:'chance', n:'Mektoub', s:'Mektoub', i:'🔮'},
-  {t:'prop', g:'red', n:'Gabès', s:'Gabès', p:220, r:[18,90,250,700,875,1050]},
-  {t:'prop', g:'red', n:'Djerba', s:'Djerba', p:240, r:[20,100,300,750,925,1100]},
-  {t:'tr', n:'TGM', s:'TGM', i:'🚆', p:200},
-  {t:'prop', g:'yellow', n:'Tabarka', s:'Tabarka', p:260, r:[22,110,330,800,975,1150]},
-  {t:'prop', g:'yellow', n:'Tozeur', s:'Tozeur', p:260, r:[22,110,330,800,975,1150]},
-  {t:'util', n:'SONEDE · eau', s:'SONEDE', i:'🚰', p:150},
-  {t:'prop', g:'yellow', n:'Le Kram', s:'Le Kram', p:280, r:[24,120,360,850,1025,1200]},
-  {t:'gojail', n:'Police ! Direction Mornaguia', s:'Police', i:'👮'},
-  {t:'prop', g:'green', n:'La Marsa', s:'La Marsa', p:300, r:[26,130,390,900,1100,1275]},
-  {t:'prop', g:'green', n:'Carthage', s:'Carthage', p:300, r:[26,130,390,900,1100,1275]},
-  {t:'fam', n:'Famille', s:'Famille', i:'👪'},
-  {t:'prop', g:'green', n:'Les Berges du Lac', s:'Le Lac', p:320, r:[28,150,450,1000,1200,1400]},
-  {t:'tr', n:'Aéroport Tunis-Carthage', s:'Aéroport', i:'✈️', p:200},
-  {t:'chance', n:'Mektoub', s:'Mektoub', i:'🔮'},
-  {t:'prop', g:'dblue', n:'Gammarth', s:'Gammarth', p:350, r:[35,175,500,1100,1300,1500]},
-  {t:'tax', n:'Mariage du cousin', s:'Mariage', i:'💍', a:100},
-  {t:'prop', g:'dblue', n:'Sidi Bou Saïd', s:'Sidi Bou', p:400, r:[50,200,600,1400,1700,2000]}
+  {t:'go', n:'Départ', ar:'انطلاق', s:'Départ', sa:'انطلاق'},
+  {t:'prop', g:'brown', n:'Rue du 9 Avril 1938', ar:'نهج 9 أفريل 1938', s:'9 Avril', sa:'9 أفريل', p:5000, r:[200,1000,3000,9000,16000,25000]},
+  {t:'fam', n:'Sandouk Baladi', ar:'الصندوق البلدي', s:'Sandouk', sa:'الصندوق'},
+  {t:'prop', g:'brown', n:'Rue Amilcar', ar:'نهج أميلكار', s:'Amilcar', sa:'أميلكار', p:6000, r:[400,2000,6000,18000,32000,45000]},
+  {t:'tax', n:'Impôt sur le revenu', ar:'أداء على المداخيل', s:'Impôts', sa:'أداء', a:20000},
+  {t:'tr', n:'Gare de Tunis', ar:'محطة تونس', s:'Gare Tunis', sa:'محطة تونس', p:20000},
+  {t:'prop', g:'lblue', n:'Rue Antar', ar:'نهج عنتر', s:'Antar', sa:'عنتر', p:10000, r:[600,3000,9000,27000,40000,55000]},
+  {t:'chance', n:'Chance', ar:'حظ', s:'Chance', sa:'حظ'},
+  {t:'prop', g:'lblue', n:'Rue Annaba', ar:'نهج عنابة', s:'Annaba', sa:'عنابة', p:10000, r:[600,3000,9000,27000,40000,55000]},
+  {t:'prop', g:'lblue', n:'Avenue de la République', ar:'شارع الجمهورية', s:'République', sa:'الجمهورية', p:12000, r:[800,4000,10000,30000,45000,60000]},
+  {t:'jail', n:'Prison · simple visite', ar:'السجن · زيارة', s:'Prison', sa:'السجن'},
+  {t:'prop', g:'pink', n:'Avenue Mohamed V', ar:'شارع محمد الخامس', s:'Mohamed V', sa:'محمد الخامس', p:14000, r:[1000,5000,15000,45000,62500,75000]},
+  {t:'util', n:'STEG · électricité', ar:'الستاغ · الكهرباء', s:'STEG', sa:'الستاغ', p:15000},
+  {t:'prop', g:'pink', n:'Avenue Hédi Chaker', ar:'شارع الهادي شاكر', s:'Hédi Chaker', sa:'الهادي شاكر', p:14000, r:[1000,5000,15000,45000,62500,75000]},
+  {t:'prop', g:'pink', n:'Rue Ibn Khaldoun', ar:'نهج ابن خلدون', s:'Ibn Khaldoun', sa:'ابن خلدون', p:16000, r:[1200,6000,18000,50000,70000,90000]},
+  {t:'tr', n:'Gare de Sousse', ar:'محطة سوسة', s:'Gare Sousse', sa:'محطة سوسة', p:20000},
+  {t:'prop', g:'orange', n:'Rue Ahmed Tlili', ar:'نهج أحمد التليلي', s:'Ahmed Tlili', sa:'أحمد التليلي', p:18000, r:[1400,7000,20000,55000,75000,95000]},
+  {t:'fam', n:'Sandouk Baladi', ar:'الصندوق البلدي', s:'Sandouk', sa:'الصندوق'},
+  {t:'prop', g:'orange', n:'Avenue Ali Belhouane', ar:'شارع علي بلحوان', s:'Belhouane', sa:'علي بلحوان', p:18000, r:[1400,7000,20000,55000,75000,95000]},
+  {t:'prop', g:'orange', n:"Place d'Afrique", ar:'ساحة إفريقيا', s:'Pl. Afrique', sa:'ساحة إفريقيا', p:20000, r:[1600,8000,22000,60000,80000,100000]},
+  {t:'park', n:'Parking gratuit', ar:'موقف مجاني', s:'Parking', sa:'موقف مجاني'},
+  {t:'prop', g:'red', n:'Place Jugurtha', ar:'ساحة يوغرطة', s:'Jugurtha', sa:'يوغرطة', p:22000, r:[1800,9000,25000,70000,87500,105000]},
+  {t:'chance', n:'Chance', ar:'حظ', s:'Chance', sa:'حظ'},
+  {t:'prop', g:'red', n:'Avenue de Carthage', ar:'شارع قرطاج', s:'Carthage', sa:'قرطاج', p:22000, r:[1800,9000,25000,70000,87500,105000]},
+  {t:'prop', g:'red', n:'Avenue Farhat Hached', ar:'شارع فرحات حشاد', s:'Farhat Hached', sa:'فرحات حشاد', p:24000, r:[2000,10000,30000,75000,92500,110000]},
+  {t:'tr', n:'Gare de Sfax', ar:'محطة صفاقس', s:'Gare Sfax', sa:'محطة صفاقس', p:20000},
+  {t:'prop', g:'yellow', n:'Boulevard Bab Bnet', ar:'جادة باب بنات', s:'Bab Bnet', sa:'باب بنات', p:26000, r:[2200,11000,33000,80000,97500,115000]},
+  {t:'prop', g:'yellow', n:'Place Mohamed Ali', ar:'ساحة محمد علي', s:'Mohamed Ali', sa:'محمد علي', p:26000, r:[2200,11000,33000,80000,97500,115000]},
+  {t:'util', n:'SONEDE · eau', ar:'الشركة الوطنية لاستغلال وتوزيع المياه (الصوناد)', s:'SONEDE', sa:'الصوناد', p:15000},
+  {t:'prop', g:'yellow', n:'Rue Bab Souika', ar:'نهج باب سويقة', s:'Bab Souika', sa:'باب سويقة', p:28000, r:[2400,12000,36000,85000,102500,120000]},
+  {t:'gojail', n:'Va en prison', ar:'إلى السجن', s:'En prison', sa:'إلى السجن'},
+  {t:'prop', g:'green', n:'Avenue de la Liberté', ar:'شارع الحرية', s:'Liberté', sa:'الحرية', p:30000, r:[2600,13000,39000,90000,110000,127500]},
+  {t:'prop', g:'green', n:'Rue de Palestine', ar:'نهج فلسطين', s:'Palestine', sa:'فلسطين', p:30000, r:[2600,13000,39000,90000,110000,127500]},
+  {t:'fam', n:'Sandouk Baladi', ar:'الصندوق البلدي', s:'Sandouk', sa:'الصندوق'},
+  {t:'prop', g:'green', n:'Boulevard du 20 Mars', ar:'جادة 20 مارس', s:'20 Mars', sa:'20 مارس', p:32000, r:[2800,15000,45000,100000,120000,140000]},
+  {t:'tr', n:'Gare de Gabès', ar:'محطة قابس', s:'Gare Gabès', sa:'محطة قابس', p:20000},
+  {t:'chance', n:'Chance', ar:'حظ', s:'Chance', sa:'حظ'},
+  {t:'prop', g:'dblue', n:'Avenue Kheireddine Pacha', ar:'شارع خير الدين باشا', s:'Kheireddine', sa:'خير الدين', p:35000, r:[3500,17500,50000,110000,130000,150000]},
+  {t:'tax', n:'Taxe de luxe', ar:'ضريبة الرفاهية', s:'Taxe luxe', sa:'ضريبة', a:10000},
+  {t:'prop', g:'dblue', n:'Avenue Habib Bourguiba', ar:'شارع الحبيب بورقيبة', s:'Bourguiba', sa:'الحبيب بورقيبة', p:40000, r:[5000,20000,60000,140000,170000,200000]}
 ];
 const TRANSPORTS = [5, 15, 25, 35], UTILS = [12, 28];
 // Line icons, one style for the whole board (instead of emoji).
 const ICON = {
-  go:'<path d="M4 12h14M13 6l6 6-6 6"/>',
+  go:'<path d="M20 12H6M11 6l-6 6 6 6"/>',
   jail:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 4v16M15 4v16"/>',
-  park:'<path d="M5 9h11v4a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10.5h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3.5c0 1.2.9 1.4.9 2.6M12 3.5c0 1.2.9 1.4.9 2.6"/><path d="M4 21h14"/>',
+  park:'<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M10 17V7h3.2a3 3 0 0 1 0 6H10"/>',
   gojail:'<path d="M7 18v-5a5 5 0 0 1 10 0v5"/><path d="M5 18h14v3H5z"/><path d="M12 3v2M4.6 6.6l1.4 1.4M19.4 6.6 18 8"/>',
   chance:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .8-1 1.5v.7"/><path d="M12 17.3v.2"/>',
   fam:'<path d="M4 11 12 4l8 7v9H4z"/><path d="M12 17.2s-3-1.8-3-3.7a1.6 1.6 0 0 1 3-.8 1.6 1.6 0 0 1 3 .8c0 1.9-3 3.7-3 3.7z"/>',
@@ -488,46 +519,46 @@ function iconKey(i){
   return null;
 }
 function svgIcon(i){ const k = iconKey(i); return k ? '<svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[k] + '</svg>' : ''; }
-const START_MONEY = 1500, GO_BONUS = 200, JAIL = 10, JAIL_FEE = 50;
+const START_MONEY = 150000, GO_BONUS = 20000, JAIL = 10, JAIL_FEE = 5000;
 const COLORS = ['#e63946', '#1f9d55', '#f28c28', '#6a4c93', '#0a4f9c', '#d6479b'];
 
 const MEKTOUB = [
-  {t:"Avance jusqu'à Bab Bhar (Départ). Reçois 200 DT.", move:0},
-  {t:"Week-end à Djerba ! Avance jusqu'à Djerba.", move:24},
-  {t:"Un thé aux pignons à Sidi Bou Saïd : vas-y directement.", move:39},
-  {t:"Fête du quartier à Monastir : avance jusqu'à Monastir.", move:16},
-  {t:"Prends le transport le plus proche.", near:'tr'},
-  {t:"Embouteillage sur la route de La Marsa : recule de 3 cases.", back:3},
-  {t:"Contrôle de police sans papiers : direction Mornaguia !", jail:true},
-  {t:"Ton oncle en France t'envoie des euros : reçois 150 DT.", money:150},
-  {t:"Tu gagnes au loto : reçois 100 DT.", money:100},
-  {t:"Stationnement en double file avenue Bourguiba : paie 15 DT.", money:-15},
-  {t:"Le juge est ton voisin : carte de sortie de Mornaguia. Garde-la.", card:true},
-  {t:"Travaux : paie 25 DT par maison et 100 DT par hôtel.", repairs:[25, 100]},
-  {t:"Ton café préféré te fait crédit : reçois 50 DT.", money:50},
-  {t:"Amende de la municipalité : paie 50 DT.", money:-50},
-  {t:"Jackpot ! Tu remportes toute la cagnotte du Café.", pot:true}
+  {t:"Avance jusqu'à la case Départ. Reçois 20.000 DT.", ar:'تقدّم إلى خانة الانطلاق وخذ 20.000 د.', move:0},
+  {t:"Avance jusqu'à l'avenue Farhat Hached.", ar:'تقدّم إلى شارع فرحات حشاد.', move:24},
+  {t:"Promenade sur l'avenue Habib Bourguiba : vas-y directement.", ar:'نزهة في شارع الحبيب بورقيبة: اذهب إليه مباشرة.', move:39},
+  {t:"Rendez-vous rue Ahmed Tlili : avance jusque-là.", ar:'موعد في نهج أحمد التليلي: تقدّم إليه.', move:16},
+  {t:"Prends le train : va à la gare la plus proche.", ar:'اركب القطار: اذهب إلى أقرب محطة.', near:'tr'},
+  {t:"Embouteillage : recule de 3 cases.", ar:'زحمة مرور: ارجع 3 خانات إلى الوراء.', back:3},
+  {t:"Contrôle de police sans papiers : direction la prison !", ar:'مراقبة أمنية بدون أوراق: إلى السجن!', jail:true},
+  {t:"Ton oncle en France t'envoie des euros : reçois 15.000 DT.", ar:'عمّك في فرنسا بعثلك فلوس: خذ 15.000 د.', money:15000},
+  {t:"Tu gagnes au loto : reçois 10.000 DT.", ar:'ربحت في اللوتو: خذ 10.000 د.', money:10000},
+  {t:"Stationnement en double file : paie 1.500 DT.", ar:'وقوف في الممنوع: ادفع 1.500 د.', money:-1500},
+  {t:"Le juge est ton voisin : carte de sortie de prison. Garde-la.", ar:'القاضي جارك: بطاقة خروج من السجن. احتفظ بها.', card:true},
+  {t:"Travaux : paie 2.500 DT par maison et 10.000 DT par hôtel.", ar:'أشغال: ادفع 2.500 د لكل منزل و10.000 د لكل نزل.', repairs:[2500, 10000]},
+  {t:"Ton café préféré te fait crédit : reçois 5.000 DT.", ar:'القهوة متاعك عملتلك كريدي: خذ 5.000 د.', money:5000},
+  {t:"Amende de la municipalité : paie 5.000 DT.", ar:'خطية من البلدية: ادفع 5.000 د.', money:-5000},
+  {t:"Jackpot ! Tu remportes toute la cagnotte du parking.", ar:'جاكبوت! تربح كل أموال الموقف المجاني.', pot:true}
 ];
 const FAMILLE = [
-  {t:"Mariage de ton cousin : chaque joueur te donne 20 DT.", collect:20},
-  {t:"Héritage de ta grand-mère : reçois 100 DT.", money:100},
-  {t:"Aïd ! Les oncles te donnent l'3idiya : reçois 50 DT.", money:50},
-  {t:"Facture STEG en retard : paie 100 DT.", money:-100},
-  {t:"Le médecin de famille : paie 50 DT.", money:-50},
-  {t:"Ta mère vend ses makroudh au souk : reçois 25 DT.", money:25},
-  {t:"Ramadan : tu invites toute la famille à la chorba. Paie 50 DT.", money:-50},
-  {t:"Remboursement de la sécu : reçois 20 DT.", money:20},
-  {t:"Ta tante connaît quelqu'un : carte de sortie de Mornaguia. Garde-la.", card:true},
-  {t:"Va directement à Mornaguia, sans passer par Départ.", jail:true},
-  {t:"Rénovation de la maison familiale : paie 40 DT par maison et 115 DT par hôtel.", repairs:[40, 115]},
-  {t:"Retourne à Bab Bhar (Départ). Reçois 200 DT.", move:0},
-  {t:"Prime de fin d'année : reçois 100 DT.", money:100},
-  {t:"Ton frère rembourse enfin sa dette : reçois 10 DT.", money:10}
+  {t:"Mariage de ton cousin : chaque joueur te donne 2.000 DT.", ar:'عرس ولد عمّك: كل لاعب يعطيك 2.000 د.', collect:2000},
+  {t:"Héritage de ta grand-mère : reçois 10.000 DT.", ar:'ورثة من جدّتك: خذ 10.000 د.', money:10000},
+  {t:"Aïd ! Les oncles te donnent l'3idiya : reçois 5.000 DT.", ar:'العيد! أعمامك عطاوك العيدية: خذ 5.000 د.', money:5000},
+  {t:"Facture STEG en retard : paie 10.000 DT.", ar:'فاتورة الستاغ متأخرة: ادفع 10.000 د.', money:-10000},
+  {t:"Le médecin de famille : paie 5.000 DT.", ar:'طبيب العائلة: ادفع 5.000 د.', money:-5000},
+  {t:"Ta mère vend ses makroudh au souk : reçois 2.500 DT.", ar:'أمّك باعت المقروض في السوق: خذ 2.500 د.', money:2500},
+  {t:"Ramadan : tu invites toute la famille à la chorba. Paie 5.000 DT.", ar:'رمضان: عزمت العائلة على الشربة. ادفع 5.000 د.', money:-5000},
+  {t:"Remboursement de la sécu : reçois 2.000 DT.", ar:'استرجاع مصاريف الكنام: خذ 2.000 د.', money:2000},
+  {t:"Ta tante connaît quelqu'un : carte de sortie de prison. Garde-la.", ar:'خالتك تعرف شكون: بطاقة خروج من السجن. احتفظ بها.', card:true},
+  {t:"Va directement en prison, sans passer par Départ.", ar:'اذهب إلى السجن مباشرة دون المرور بالانطلاق.', jail:true},
+  {t:"Rénovation de la maison familiale : paie 4.000 DT par maison et 11.500 DT par hôtel.", ar:'ترميم دار العائلة: ادفع 4.000 د لكل منزل و11.500 د لكل نزل.', repairs:[4000, 11500]},
+  {t:"Retourne à la case Départ. Reçois 20.000 DT.", ar:'ارجع إلى الانطلاق وخذ 20.000 د.', move:0},
+  {t:"Prime de fin d'année : reçois 10.000 DT.", ar:'منحة آخر العام: خذ 10.000 د.', money:10000},
+  {t:"Ton frère rembourse enfin sa dette : reçois 1.000 DT.", ar:'خوك رجّعلك الدين أخيرًا: خذ 1.000 د.', money:1000}
 ];
 const DECKS = { chance: MEKTOUB, fam: FAMILLE };
 
 /* ---------- helpers ---------- */
-const DT = n => n.toLocaleString('fr-FR') + ' DT';
+const DT = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (window.LANG === 'ar' ? ' د' : ' DT');
 const nm = (st, i) => st.players[i].name;
 const ownable = i => ['prop','tr','util'].includes(SQ[i].t);
 const groupIdx = g => SQ.map((s, i) => i).filter(i => SQ[i].g === g);
@@ -540,8 +571,8 @@ function rentOf(st, i, dice){
   const s = SQ[i], pr = st.props[i];
   if(!pr || pr.m) return 0;
   if(s.t === 'prop') return pr.h > 0 ? s.r[pr.h] : (ownsGroup(st, pr.o, s.g) ? s.r[0] * 2 : s.r[0]);
-  if(s.t === 'tr'){ const n = TRANSPORTS.filter(j => ownerOf(st, j) === pr.o).length; return 25 * Math.pow(2, n - 1); }
-  if(s.t === 'util'){ const n = UTILS.filter(j => ownerOf(st, j) === pr.o).length; return dice * (n === 2 ? 10 : 4); }
+  if(s.t === 'tr'){ const n = TRANSPORTS.filter(j => ownerOf(st, j) === pr.o).length; return 2500 * Math.pow(2, n - 1); }
+  if(s.t === 'util'){ const n = UTILS.filter(j => ownerOf(st, j) === pr.o).length; return dice * (n === 2 ? 1000 : 400); }
   return 0;
 }
 function myProps(st, p){ return Object.keys(st.props).map(Number).filter(i => st.props[i].o === p).sort((a, b) => a - b); }
@@ -573,7 +604,7 @@ function charge(st, p, to, amount, why, then){
 }
 function walk(st, p, to, passGo, jump){
   const from = st.pos[p];
-  if(passGo && to < from){ st.money[p] += GO_BONUS; log(st, nm(st, p) + ' passe par Bab Bhar : +' + GO_BONUS + ' DT.'); }
+  if(passGo && to < from){ st.money[p] += GO_BONUS; log(st, nm(st, p) + ' passe par la case Départ : +' + DT(GO_BONUS) + '.'); }
   st.pos[p] = to;
   st.move = { p, from, to, seq: ++st.moveSeq, jump: !!jump };
   // Everything that happens during one action, in order, so every phone can replay it.
@@ -599,7 +630,7 @@ function land(st, p, dice){
   }
   if(s.t === 'tax'){ log(st, nm(st, p) + ' paie ' + DT(s.a) + ' : ' + s.n + '.'); charge(st, p, -1, s.a, s.n); return; }
   if(s.t === 'chance' || s.t === 'fam'){ drawCard(st, p, s.t, dice); return; }
-  if(s.t === 'gojail'){ log(st, '👮 Police ! ' + nm(st, p) + ' part à Mornaguia.'); toJail(st, p, true); }
+  if(s.t === 'gojail'){ log(st, '👮 ' + nm(st, p) + ' va en prison !'); toJail(st, p, true); }
   if(s.t === 'park') takePot(st, p);
 }
 function drawCard(st, p, deck, dice){
@@ -610,7 +641,7 @@ function drawCard(st, p, deck, dice){
   if(st.path) st.path.push({ k: 'card', p, deck, idx });
   log(st, (deck === 'chance' ? '🔮 ' : '👪 ') + nm(st, p) + ' : ' + c.t);
   if(c.money > 0) st.money[p] += c.money;
-  else if(c.money < 0) charge(st, p, -1, -c.money, deck === 'chance' ? 'Mektoub' : 'Famille');
+  else if(c.money < 0) charge(st, p, -1, -c.money, deck === 'chance' ? 'Chance' : 'Sandouk Baladi');
   else if(c.move !== undefined){ walk(st, p, c.move, true); land(st, p, dice); }
   else if(c.near){ const at = st.pos[p], to = TRANSPORTS.find(t => t > at); walk(st, p, to === undefined ? TRANSPORTS[0] : to, true); land(st, p, dice); }
   else if(c.back){ walk(st, p, (st.pos[p] + 40 - c.back) % 40, false, true); land(st, p, dice); }
@@ -624,12 +655,12 @@ function drawCard(st, p, deck, dice){
     if(cost) charge(st, p, -1, cost, 'Travaux'); else log(st, 'Pas de maison : rien à payer.');
   }
 }
-// Fines paid to the bank wait in the Café pot; whoever stops on the Café (or draws the Jackpot card) takes it all.
+// Fines paid to the bank wait in the parking pot; whoever stops on Parking gratuit (or draws the Jackpot card) takes it all.
 function takePot(st, p, byCard){
   const pot = st.pot || 0;
-  if(!pot){ log(st, byCard ? '☕ La cagnotte du Café est vide : pas de chance !' : '☕ ' + nm(st, p) + ' prend un thé au Café : la cagnotte est vide.'); return; }
+  if(!pot){ log(st, byCard ? '🅿️ La cagnotte du parking est vide : pas de chance !' : '🅿️ ' + nm(st, p) + ' se gare au parking gratuit : la cagnotte est vide.'); return; }
   st.money[p] += pot; st.pot = 0;
-  log(st, '☕ ' + nm(st, p) + ' remporte la cagnotte du Café : +' + DT(pot) + ' !');
+  log(st, '🅿️ ' + nm(st, p) + ' remporte la cagnotte du parking : +' + DT(pot) + ' !');
 }
 function moveBy(st, p, steps){
   walk(st, p, (st.pos[p] + steps) % 40, true);
@@ -701,16 +732,16 @@ function aRoll(){
     st.dice = d; st.rollSeq++; st.card = null; st.again = false; st.phase = 'moving';
     newPath(st);
     if(st.jail[p] > 0){
-      if(dbl){ st.jail[p] = 0; log(st, '🎲 ' + nm(st, p) + ' fait un double ' + d[0] + ' et sort de Mornaguia !'); moveBy(st, p, sum); }
+      if(dbl){ st.jail[p] = 0; log(st, '🎲 ' + nm(st, p) + ' fait un double ' + d[0] + ' et sort de prison !'); moveBy(st, p, sum); }
       else if(st.jail[p] >= 3){
         st.jail[p] = 0;
         log(st, '🎲 ' + d[0] + '+' + d[1] + ' : 3e essai raté, ' + nm(st, p) + ' paie ' + JAIL_FEE + ' DT et sort.');
-        if(charge(st, p, -1, JAIL_FEE, 'Sortie de Mornaguia', { move: sum })) moveBy(st, p, sum);
-      } else { st.jail[p]++; log(st, '🎲 ' + d[0] + '+' + d[1] + ' : pas de double, ' + nm(st, p) + ' reste à Mornaguia.'); }
+        if(charge(st, p, -1, JAIL_FEE, 'Sortie de prison', { move: sum })) moveBy(st, p, sum);
+      } else { st.jail[p]++; log(st, '🎲 ' + d[0] + '+' + d[1] + ' : pas de double, ' + nm(st, p) + ' reste en prison.'); }
     } else {
       log(st, '🎲 ' + nm(st, p) + ' fait ' + d[0] + '+' + d[1] + (dbl ? ' : double !' : '.'));
       if(dbl) st.doubles++;
-      if(dbl && st.doubles >= 3){ log(st, '3 doubles de suite : direction Mornaguia !'); toJail(st, p); }
+      if(dbl && st.doubles >= 3){ log(st, '3 doubles de suite : direction la prison !'); toJail(st, p); }
       else { if(dbl) st.again = true; moveBy(st, p, sum); }
     }
     if(st.jail[p] > 0) st.again = false;
@@ -742,7 +773,7 @@ function aJailPay(){
     const p = R.me;
     if(!myTurn(st) || st.phase !== 'roll' || !st.jail[p] || st.money[p] < JAIL_FEE) return false;
     st.money[p] -= JAIL_FEE; st.jail[p] = 0; st.pot = (st.pot || 0) + JAIL_FEE;
-    log(st, nm(st, p) + ' paie ' + JAIL_FEE + ' DT et sort de Mornaguia.');
+    log(st, nm(st, p) + ' paie ' + DT(JAIL_FEE) + ' et sort de prison.');
   });
 }
 function aJailCard(){
@@ -750,7 +781,7 @@ function aJailCard(){
     const p = R.me;
     if(!myTurn(st) || st.phase !== 'roll' || !st.jail[p] || !st.jailCards[p].length) return false;
     const c = st.jailCards[p].shift(); st.decks[c.deck].push(c.idx); st.jail[p] = 0;
-    log(st, nm(st, p) + ' utilise sa carte et sort de Mornaguia.');
+    log(st, nm(st, p) + ' utilise sa carte et sort de prison.');
   });
 }
 function aPayDebt(){
@@ -848,12 +879,12 @@ function buildBoard(){
     const [r, c] = cellPos(i), corner = i % 10 === 0;
     const side = r === 10 ? 'b-top' : c === 0 ? 'b-right' : r === 0 ? 'b-bottom' : 'b-left';
     const g = s.g ? GROUPS[s.g].c : '';
-    html += '<div class="sq '+(s.g ? side : '')+(corner ? ' corner' : (s.g ? '' : ' special'))+'" id="sq-'+i+'" style="grid-row:'+(r+1)+';grid-column:'+(c+1)+(g ? ';--g:'+g : '')+'" onclick="showSquare('+i+')">'+
+    html += '<div class="sq '+(s.g ? side : '')+(corner ? ' corner' : (s.g ? '' : ' special'))+(s.t === 'chance' ? ' chance-sq' : '')+'" id="sq-'+i+'" style="grid-row:'+(r+1)+';grid-column:'+(c+1)+(g ? ';--g:'+g : '')+'" onclick="showSquare('+i+')">'+
       (s.g ? '<div class="band"><span class="hs" id="hs-'+i+'"></span></div>' : '')+
       svgIcon(i)+
-      '<span class="nm">'+esc(s.s)+'</span>'+(s.p ? '<span class="pr" id="pr-'+i+'">'+s.p+'</span>' : '')+'</div>';
+      '<span class="nm"'+(LANG === 'ar' ? ' lang="ar"' : '')+'>'+esc(sqShort(i))+'</span>'+((s.p || s.a) ? '<span class="pr" id="pr-'+i+'">'+DT(s.p || s.a)+'</span>' : '')+'</div>';
   });
-  html += '<div class="center"><div class="logo">Skonopoly<small lang="ar">سكونوبولي</small></div><div class="pot" id="pot-center"></div><div class="dice" id="dice">'+[0,1].map(k => '<div class="cube'+(k ? ' red' : '')+'" id="cube'+k+'">'+[1,2,3,4,5,6].map(v => '<div class="face f'+v+'">'+[0,1,2,3,4,5,6,7,8].map(x => '<i class="'+(PIPS[v].includes(x) ? 'on' : '')+'"></i>').join('')+'</div>').join('')+'</div>').join('')+'</div></div>';
+  html += '<div class="center"><div class="logo" lang="ar">سكونوبولي<small>SKONOPOLY</small></div><div class="deck fam" id="deck-fam"><b lang="ar">الصندوق<br>البلدي</b></div><div class="deck chance" id="deck-chance"><b lang="ar">حظ ?</b><small>CHANCE</small></div><div class="pot" id="pot-center"></div><div class="dice" id="dice">'+[0,1].map(k => '<div class="cube'+(k ? ' red' : '')+'" id="cube'+k+'">'+[1,2,3,4,5,6].map(v => '<div class="face f'+v+'">'+[0,1,2,3,4,5,6,7,8].map(x => '<i class="'+(PIPS[v].includes(x) ? 'on' : '')+'"></i>').join('')+'</div>').join('')+'</div>').join('')+'</div></div>';
   html += '<div class="tokens" id="tokens"></div>';
   $('board').innerHTML = html;
 }
@@ -903,7 +934,7 @@ function camera(cell){
 function homeCamera(){
   const st = R.state; if(!st || !st.pos) return;
   camera(overview ? null : (shown ? shown[st.turn] : st.pos[st.turn]));
-  $('view-btn').textContent = overview ? 'Revenir au pion' : 'Voir tout le plateau';
+  $('view-btn').textContent = overview ? L('Revenir au pion', 'ارجع إلى البيدق') : L('Voir tout le plateau', 'شاهد كل اللوحة');
 }
 function toggleOverview(){ overview = !overview; homeCamera(); }
 function setDice(st){ [0, 1].forEach(k => { $('cube' + k).style.transform = faceTf(st.dice[k]); }); }
@@ -977,7 +1008,7 @@ function moneyFx(a, b){
 }
 function deedFx(st, i){
   const s = SQ[i], g = s.g ? GROUPS[s.g] : null, o = st.props[i].o, c = bankRect();
-  const el = fxEl('deed-fly', '<div class="hd' + (g && g.light ? ' light' : '') + '" style="--g:' + (g ? g.c : 'var(--blue)') + '"><small>Titre de propriété</small>' + (s.i ? s.i + ' ' : '') + esc(s.n) + '</div><div class="bd">' + esc(nm(st, o)) + ' · <b>' + DT(s.p) + '</b></div>', c.x, c.y - 60);
+  const el = fxEl('deed-fly', '<div class="hd' + (g && g.light ? ' light' : '') + '" style="--g:' + (g ? g.c : 'var(--blue)') + '"><small>Titre de propriété</small>' + (s.i ? s.i + ' ' : '') + esc(sqName(i)) + '</div><div class="bd">' + esc(nm(st, o)) + ' · <b>' + DT(s.p) + '</b></div>', c.x, c.y - 60);
   const to = chipRect(o) || c, dx = to.x - c.x, dy = to.y - (c.y - 60);
   SND('cash');
   el.animate([
@@ -1001,11 +1032,20 @@ function houseFx(i){
 }
 function cardFx(st, e){
   const c = DECKS[e.deck][e.idx], ch = e.deck === 'chance', at = bankRect();
-  const el = fxEl('card-fly', '<div class="in"><div class="side back">' + (ch ? '🔮<br>Mektoub' : '👪<br>Famille') + '</div><div class="side front"><small>' + (ch ? 'Mektoub' : 'Famille') + '</small>' + esc(c.t) + '</div></div>', at.x, at.y);
-  el.style.setProperty('--cb', ch ? '#6a3fa0' : '#1f9d55'); el.style.setProperty('--cb2', ch ? '#55308a' : '#178246');
+  const pile = $('deck-' + e.deck), from = pile ? rectOf(pile) : at;
+  const el = fxEl('card-fly', '<div class="in"><div class="side back"><span lang="ar">' + (ch ? 'حظ ?' : 'الصندوق البلدي') + '</span></div><div class="side front"><small>' + deckName(e.deck) + '</small>' + esc(cardText(c)) + '</div></div>', at.x, at.y);
+  el.style.setProperty('--cb', ch ? '#2fa3e6' : '#e6007e'); el.style.setProperty('--cb2', ch ? '#1f8fd0' : '#c8006d');
+  const dx = from.x - at.x, dy = from.y - at.y;
   SND('sweep');
-  el.animate([{ transform: 'translateY(60px) scale(.4)', opacity: 0 }, { transform: 'none', opacity: 1, offset: 0.12 }, { transform: 'none', opacity: 1, offset: 0.88 }, { transform: 'translateY(-30px) scale(.9)', opacity: 0 }], { duration: 2600, easing: 'ease-out' }).onfinish = () => el.remove();
-  el.firstChild.animate([{ transform: 'rotateY(0)' }, { transform: 'rotateY(0)', offset: 0.18 }, { transform: 'rotateY(180deg)', offset: 0.36 }, { transform: 'rotateY(180deg)' }], { duration: 2600, easing: 'ease-in-out', fill: 'forwards' });
+  el.animate([
+    { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(-45deg) scale(.32)', opacity: 1 },
+    { transform: 'translate(' + dx * 0.4 + 'px,' + (dy * 0.4 - 40) + 'px) rotate(-12deg) scale(.8)', opacity: 1, offset: 0.12 },
+    { transform: 'none', opacity: 1, offset: 0.2 },
+    { transform: 'none', opacity: 1, offset: 0.84 },
+    { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(-45deg) scale(.32)', opacity: 0.6 }
+  ], { duration: 3000, easing: 'ease-in-out' }).onfinish = () => el.remove();
+  el.firstChild.animate([{ transform: 'rotateY(0)' }, { transform: 'rotateY(0)', offset: 0.22 }, { transform: 'rotateY(180deg)', offset: 0.38 }, { transform: 'rotateY(180deg)', offset: 0.84 }, { transform: 'rotateY(0)' }], { duration: 3000, easing: 'ease-in-out', fill: 'forwards' });
+  if(pile) pile.animate([{ transform: 'rotate(-45deg)' }, { transform: 'rotate(-45deg) translateY(-4px) scale(1.04)', offset: 0.1 }, { transform: 'rotate(-45deg)', offset: 0.2 }], { duration: 3000 });
 }
 function bankruptFx(i){
   dying[i] = true;
@@ -1073,7 +1113,7 @@ function playPath(st, path, t){
       t += 100;
     } else if(e.k === 'card'){
       setTimeout(() => cardFx(st, e), t);
-      t += 2300;
+      t += 2700;
     } else if(e.k === 'jail'){
       setTimeout(() => { jailClosing[e.p] = true; placeTokens(R.state); SND('clank'); if(window.GYMFeedback) window.GYMFeedback.vibrate([40, 30, 80]); setTimeout(() => { delete jailClosing[e.p]; }, 700); }, t);
       t += 700;
@@ -1096,8 +1136,8 @@ function paintSquares(st){
 let shownPot = null;
 function renderPot(st){
   const pot = st.pot || 0;
-  $('pot-center').innerHTML = '<small>☕ Cagnotte du Café</small>' + DT(pot);
-  $('pot-pill').innerHTML = '☕ ' + DT(pot);
+  $('pot-center').innerHTML = '<small>🅿️ ' + L('Cagnotte', 'الأموال المجمّعة') + '</small>' + DT(pot);
+  $('pot-pill').innerHTML = '🅿️ ' + DT(pot);
   if(shownPot !== null && pot !== shownPot && !RM){
     [$('pot-center'), $('pot-pill')].forEach(el => el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 450, easing: 'ease-out' }));
     if(pot === 0 && shownPot > 0) SND('cash');
@@ -1162,6 +1202,7 @@ function render(st){
   else later();
   if(sheetKind && sheetKind !== 'trade') renderSheet();
   updateSoundBtn();
+  updateLangBtn();
 }
 // While a replay is running, tokens keep their animated squares.
 function walkingTo(st){ return busyUntil > Date.now(); }
@@ -1180,35 +1221,35 @@ function infoFor(st, i){
   const g = s.g ? GROUPS[s.g] : null;
   let body = '';
   if(ownable(i)){
-    if(!pr) body = 'À vendre · <b>' + DT(s.p) + '</b>';
-    else body = 'À <b>' + esc(nm(st, pr.o)) + '</b>' + (pr.m ? ' · hypothéqué' : ' · loyer <b>' + (s.t === 'util' ? '×' + (UTILS.filter(j => ownerOf(st, j) === pr.o).length === 2 ? 10 : 4) + ' les dés' : DT(rentOf(st, i, 0))) + '</b>');
-  } else if(s.t === 'tax') body = 'Paie <b>' + DT(s.a) + '</b>';
-  else if(s.t === 'go') body = 'Reçois <b>200 DT</b> à chaque passage';
-  else if(s.t === 'jail') body = 'Simple visite… ou prisonnier';
-  else if(s.t === 'park') body = 'Arrête-toi ici pour gagner la cagnotte : <b>' + DT(st.pot || 0) + '</b>';
-  else if(s.t === 'gojail') body = 'Direction Mornaguia';
-  else body = 'Pioche une carte';
-  return '<div class="hd'+(g && g.light ? ' light' : '')+'" style="--g:'+(g ? g.c : 'var(--blue)')+'">'+svgIcon(i)+esc(s.n)+'</div><div class="bd"><span>'+body+'</span></div>';
+    if(!pr) body = L('À vendre · ', 'للبيع · ') + '<b>' + DT(s.p) + '</b>';
+    else body = L('À ', 'لـ ') + '<b>' + esc(nm(st, pr.o)) + '</b>' + (pr.m ? L(' · hypothéqué', ' · مرهون') : L(' · loyer ', ' · الكراء ') + '<b>' + (s.t === 'util' ? '×' + (UTILS.filter(j => ownerOf(st, j) === pr.o).length === 2 ? 1000 : 400) + L(' les dés', ' × النرد') : DT(rentOf(st, i, 0))) + '</b>');
+  } else if(s.t === 'tax') body = L('Paie ', 'ادفع ') + '<b>' + DT(s.a) + '</b>';
+  else if(s.t === 'go') body = L('Reçois <b>20.000 DT</b> à chaque passage', 'خذ <b>20.000 د</b> كل مرة تمرّ من هنا');
+  else if(s.t === 'jail') body = L('Simple visite… ou prisonnier', 'زيارة… أو سجين');
+  else if(s.t === 'park') body = L('Arrête-toi ici pour gagner la cagnotte : ', 'توقّف هنا لتربح الأموال المجمّعة: ') + '<b>' + DT(st.pot || 0) + '</b>';
+  else if(s.t === 'gojail') body = L('Direction la prison', 'اذهب إلى السجن');
+  else body = L('Pioche une carte', 'اسحب بطاقة');
+  return '<div class="hd'+(g && g.light ? ' light' : '')+'" style="--g:'+(g ? g.c : 'var(--blue)')+'">'+svgIcon(i)+esc(sqName(i))+'</div><div class="bd"><span>'+body+'</span></div>';
 }
 function cardBox(st){
   if(!st.card) return '';
   const c = DECKS[st.card.deck][st.card.idx];
-  return '<div class="card-pop '+st.card.deck+'"><small>'+(st.card.deck === 'chance' ? '🔮 Mektoub' : '👪 Famille')+'</small>'+esc(c.t)+'</div>';
+  return '<div class="card-pop '+st.card.deck+'"><small>'+(st.card.deck === 'chance' ? '❓ ' : '🏛️ ')+deckName(st.card.deck)+'</small>'+esc(cardText(c))+'</div>';
 }
 function renderPanel(st){
   const me = R.me, t = st.turn, p = $('panel');
-  const manage = '<button class="ui-btn alt small" onclick="openManage()">🏠 Mes biens</button>';
-  const trade = '<button class="ui-btn alt small" onclick="openTrade()"'+(st.trade || alive(st).length < 2 ? ' disabled' : '')+'>🤝 Échanger</button>';
+  const manage = '<button class="ui-btn alt small" onclick="openManage()">🏠 ' + L('Mes biens', 'أملاكي') + '</button>';
+  const trade = '<button class="ui-btn alt small" onclick="openTrade()"'+(st.trade || alive(st).length < 2 ? ' disabled' : '')+'>🤝 ' + L('Échanger', 'تبادل') + '</button>';
   let html = '';
   if(st.trade && st.trade.to === me){
-    html += '<div class="msg"><b>' + esc(nm(st, st.trade.from)) + '</b> te propose cet échange.</div><div class="row"><button class="ui-btn red" onclick="aTradeAnswer(false)">Refuser</button><button class="ui-btn go" onclick="aTradeAnswer(true)">Accepter</button></div>';
+    html += '<div class="msg"><b>' + esc(nm(st, st.trade.from)) + '</b> ' + L('te propose cet échange.', 'يقترح عليك هذا التبادل.') + '</div><div class="row"><button class="ui-btn red" onclick="aTradeAnswer(false)">' + L('Refuser', 'رفض') + '</button><button class="ui-btn go" onclick="aTradeAnswer(true)">' + L('Accepter', 'قبول') + '</button></div>';
     p.innerHTML = html; return;
   }
-  if(st.out[me]){ p.innerHTML = '<div class="wait-msg">Tu as fait faillite. Tu peux suivre la fin de la partie.</div>'; return; }
+  if(st.out[me]){ p.innerHTML = '<div class="wait-msg">' + L('Tu as fait faillite. Tu peux suivre la fin de la partie.', 'أفلست. يمكنك متابعة بقية اللعبة.') + '</div>'; return; }
   if(t !== me){
-    let w = 'Au tour de <b>' + esc(nm(st, t)) + '</b>…';
-    if(st.phase === 'buy') w = '<b>' + esc(nm(st, t)) + '</b> réfléchit à acheter ' + esc(SQ[st.pos[t]].n) + '…';
-    if(st.phase === 'debt') w = '<b>' + esc(nm(st, t)) + '</b> doit trouver ' + DT(st.debt.amount) + '…';
+    let w = L('Au tour de ', 'دور ') + '<b>' + esc(nm(st, t)) + '</b>…';
+    if(st.phase === 'buy') w = '<b>' + esc(nm(st, t)) + '</b> ' + L('réfléchit à acheter ', 'يفكّر في شراء ') + esc(sqName(st.pos[t])) + '…';
+    if(st.phase === 'debt') w = '<b>' + esc(nm(st, t)) + '</b> ' + L('doit trouver ', 'عليه أن يجد ') + DT(st.debt.amount) + '…';
     html += cardBox(st) + '<div class="msg pulse">' + w + '</div>';
     html += '<div class="row">' + manage + '</div>';
     p.innerHTML = html; return;
@@ -1216,27 +1257,27 @@ function renderPanel(st){
   html += cardBox(st);
   if(st.phase === 'roll'){
     if(st.jail[me]){
-      html += '<div class="msg">⛓️ Tu es à <b>Mornaguia</b> (essai ' + st.jail[me] + '/3). Fais un double, ou paie pour sortir.</div>';
-      html += '<button class="ui-btn" onclick="aRoll()">🎲 Tenter un double</button><div class="row"><button class="ui-btn alt small" onclick="aJailPay()"'+(st.money[me] < JAIL_FEE ? ' disabled' : '')+'>Payer ' + JAIL_FEE + ' DT</button>'+(st.jailCards[me].length ? '<button class="ui-btn alt small" onclick="aJailCard()">🎟️ Utiliser ma carte</button>' : '')+'</div>';
-    } else html += '<button class="ui-btn" onclick="aRoll()">🎲 Lancer les dés</button>';
+      html += '<div class="msg">⛓️ ' + L('Tu es en <b>prison</b> (essai ', 'أنت في <b>السجن</b> (محاولة ') + st.jail[me] + '/3). ' + L('Fais un double, ou paie pour sortir.', 'اعمل دوبل، أو ادفع لتخرج.') + '</div>';
+      html += '<button class="ui-btn" onclick="aRoll()">🎲 ' + L('Tenter un double', 'جرّب دوبل') + '</button><div class="row"><button class="ui-btn alt small" onclick="aJailPay()"'+(st.money[me] < JAIL_FEE ? ' disabled' : '')+'>' + L('Payer ', 'ادفع ') + DT(JAIL_FEE) + '</button>'+(st.jailCards[me].length ? '<button class="ui-btn alt small" onclick="aJailCard()">🎟️ ' + L('Utiliser ma carte', 'استعمل بطاقتي') + '</button>' : '')+'</div>';
+    } else html += '<button class="ui-btn" onclick="aRoll()">🎲 ' + L('Lancer les dés', 'ارمِ النرد') + '</button>';
     html += '<div class="row">' + manage + trade + '</div>';
   } else if(st.phase === 'buy'){
     const i = st.pos[me], s = SQ[i], ok = st.money[me] >= s.p;
-    html += '<div class="msg">Acheter <b>' + esc(s.n) + '</b> pour <b>' + DT(s.p) + '</b> ?' + (ok ? '' : '<br><small>Il te manque ' + DT(s.p - st.money[me]) + ' : hypothèque des biens ou vends des maisons dans <b>Mes biens</b>, puis achète.</small>') + '</div>';
-    html += '<div class="row"><button class="ui-btn alt" onclick="aBuy(false)">Non merci</button><button class="ui-btn go" onclick="aBuy(true)"'+(ok ? '' : ' disabled')+'>Acheter</button></div><div class="row">' + manage + '</div>';
+    html += '<div class="msg">' + L('Acheter ', 'شراء ') + '<b>' + esc(sqName(i)) + '</b> ' + L('pour ', 'بـ ') + '<b>' + DT(s.p) + '</b> ?' + (ok ? '' : '<br><small>' + L('Il te manque ', 'ينقصك ') + DT(s.p - st.money[me]) + L(' : hypothèque des biens ou vends des maisons dans <b>Mes biens</b>, puis achète.', ': ارهن أملاكًا أو بِع منازل في <b>أملاكي</b>، ثم اشترِ.') + '</small>') + '</div>';
+    html += '<div class="row"><button class="ui-btn alt" onclick="aBuy(false)">' + L('Non merci', 'لا شكرًا') + '</button><button class="ui-btn go" onclick="aBuy(true)"'+(ok ? '' : ' disabled')+'>' + L('Acheter', 'اشترِ') + '</button></div><div class="row">' + manage + '</div>';
   } else if(st.phase === 'debt'){
     const d = st.debt, ok = st.money[me] >= d.amount;
-    html += '<div class="msg">💸 Tu dois <b>' + DT(d.amount) + '</b> (' + esc(d.why) + ').<br>Tu as ' + DT(st.money[me]) + '. Vends des maisons ou hypothèque des biens.</div>';
-    html += '<button class="ui-btn go" onclick="aPayDebt()"'+(ok ? '' : ' disabled')+'>Payer ' + DT(d.amount) + '</button><div class="row">' + manage + '<button class="ui-btn red small" onclick="aBankrupt()">Faillite</button></div>';
+    html += '<div class="msg">💸 ' + L('Tu dois ', 'عليك ') + '<b>' + DT(d.amount) + '</b> (' + esc(d.why) + ').<br>' + L('Tu as ', 'عندك ') + DT(st.money[me]) + L('. Vends des maisons ou hypothèque des biens.', '. بِع منازل أو ارهن أملاكًا.') + '</div>';
+    html += '<button class="ui-btn go" onclick="aPayDebt()"'+(ok ? '' : ' disabled')+'>' + L('Payer ', 'ادفع ') + DT(d.amount) + '</button><div class="row">' + manage + '<button class="ui-btn red small" onclick="aBankrupt()">' + L('Faillite', 'إفلاس') + '</button></div>';
   } else if(st.phase === 'end'){
     const again = st.again && !st.jail[me];
-    html += '<button class="ui-btn'+(again ? ' go' : '')+'" onclick="aEnd()">' + (again ? '🎲 Double ! Relancer' : 'Fin du tour ›') + '</button><div class="row">' + manage + trade + '</div>';
+    html += '<button class="ui-btn'+(again ? ' go' : '')+'" onclick="aEnd()">' + (again ? '🎲 ' + L('Double ! Relancer', 'دوبل! ارمِ مجددًا') : L('Fin du tour ›', 'نهاية الدور ›')) + '</button><div class="row">' + manage + trade + '</div>';
   } else html += '<div class="msg pulse">…</div>';
   p.innerHTML = html;
 }
 const REACTS = ['👍', '😂', '😮', '👎'];
 function giveChips(a){
-  const chips = a.props.map(i => '<span class="tchip" style="--g:' + (SQ[i].g ? GROUPS[SQ[i].g].c : '#9ab') + '"><i></i>' + esc(SQ[i].n) + '</span>');
+  const chips = a.props.map(i => '<span class="tchip" style="--g:' + (SQ[i].g ? GROUPS[SQ[i].g].c : '#9ab') + '"><i></i>' + esc(sqName(i)) + '</span>');
   if(a.m) chips.push('<span class="tchip money">+' + DT(a.m) + '</span>');
   return chips.join('') || '<span class="tchip none">rien</span>';
 }
@@ -1307,16 +1348,16 @@ function renderSheet(){
   let html = '';
   if(sheetKind === 'square'){
     const i = sheetArg, s = SQ[i], pr = st.props[i], g = s.g ? GROUPS[s.g] : null;
-    html += '<div class="deed"><div class="hd'+(g && g.light ? ' light' : '')+'" style="--g:'+(g ? g.c : 'var(--blue)')+'"><small>'+(g ? 'Titre de propriété · ' + g.n : (s.t === 'tr' ? 'Transport' : s.t === 'util' ? 'Service public' : 'Case'))+'</small>'+(s.i ? s.i + ' ' : '')+esc(s.n)+'</div>';
+    html += '<div class="deed"><div class="hd'+(g && g.light ? ' light' : '')+'" style="--g:'+(g ? g.c : 'var(--blue)')+'"><small>'+(g ? L('Titre de propriété · ' + g.n, 'سند ملكية · ' + g.ar) : (s.t === 'tr' ? L('Transport', 'نقل') : s.t === 'util' ? L('Service public', 'مرفق عمومي') : L('Case', 'خانة')))+'</small>'+(s.i ? s.i + ' ' : '')+esc(sqName(i))+'</div>';
     if(s.t === 'prop'){
-      const rows = [['Loyer', s.r[0]], ['Couleur complète', s.r[0] * 2], ['Avec 1 maison', s.r[1]], ['Avec 2 maisons', s.r[2]], ['Avec 3 maisons', s.r[3]], ['Avec 4 maisons', s.r[4]], ['Avec un hôtel', s.r[5]]];
+      const rows = [[L('Loyer', 'الكراء'), s.r[0]], [L('Couleur complète', 'كل اللون'), s.r[0] * 2], [L('Avec 1 maison', 'مع منزل'), s.r[1]], [L('Avec 2 maisons', 'مع منزلين'), s.r[2]], [L('Avec 3 maisons', 'مع 3 منازل'), s.r[3]], [L('Avec 4 maisons', 'مع 4 منازل'), s.r[4]], [L('Avec un hôtel', 'مع نزل'), s.r[5]]];
       const cur = pr ? (pr.h ? pr.h + 1 : (ownsGroup(st, pr.o, s.g) ? 1 : 0)) : -1;
       html += '<table>' + rows.map((r, k) => '<tr'+(k === cur ? ' class="cur"' : '')+'><td>'+r[0]+'</td><td>'+DT(r[1])+'</td></tr>').join('') + '</table>';
-      html += '<div class="ft">Prix ' + DT(s.p) + ' · maison ' + DT(g.h) + ' · hypothèque ' + DT(s.p / 2) + '</div>';
+      html += '<div class="ft">' + L('Prix ', 'السعر ') + DT(s.p) + L(' · maison ', ' · منزل ') + DT(g.h) + L(' · hypothèque ', ' · رهن ') + DT(s.p / 2) + '</div>';
     } else if(s.t === 'tr'){
-      html += '<table>' + [1, 2, 3, 4].map(n => '<tr><td>' + n + ' transport' + (n > 1 ? 's' : '') + '</td><td>' + DT(25 * Math.pow(2, n - 1)) + '</td></tr>').join('') + '</table><div class="ft">Prix ' + DT(s.p) + ' · hypothèque ' + DT(s.p / 2) + '</div>';
+      html += '<table>' + [1, 2, 3, 4].map(n => '<tr><td>' + n + ' transport' + (n > 1 ? 's' : '') + '</td><td>' + DT(2500 * Math.pow(2, n - 1)) + '</td></tr>').join('') + '</table><div class="ft">Prix ' + DT(s.p) + ' · hypothèque ' + DT(s.p / 2) + '</div>';
     } else if(s.t === 'util'){
-      html += '<table><tr><td>STEG ou SONEDE</td><td>4 × dés</td></tr><tr><td>Les deux</td><td>10 × dés</td></tr></table><div class="ft">Prix ' + DT(s.p) + ' · hypothèque ' + DT(s.p / 2) + '</div>';
+      html += '<table><tr><td>STEG ou SONEDE</td><td>400 × dés</td></tr><tr><td>Les deux</td><td>1000 × dés</td></tr></table><div class="ft">Prix ' + DT(s.p) + ' · hypothèque ' + DT(s.p / 2) + '</div>';
     } else html += '<div class="ft" style="font-size:15px">' + infoFor(st, i).replace(/^.*?<div class="bd">/, '').replace(/<\/div>$/, '') + '</div>';
     html += '</div>';
     if(pr) html += '<p class="muted" style="text-align:center;margin-top:10px">Propriétaire : <b>' + esc(nm(st, pr.o)) + '</b>' + (pr.m ? ' · hypothéqué' : '') + (pr.h ? ' · ' + (pr.h === 5 ? 'hôtel' : pr.h + ' maison' + (pr.h > 1 ? 's' : '')) : '') + '</p>';
@@ -1324,7 +1365,7 @@ function renderSheet(){
     if(here.length) html += '<p class="muted" style="text-align:center">Ici : ' + here.map(k => av(st.players[k]) + ' ' + esc(nm(st, k))).join(', ') + '</p>';
   } else if(sheetKind === 'player'){
     const i = sheetArg, list = myProps(st, i);
-    html += '<div class="ui-sheet-title">' + av(st.players[i]) + ' ' + esc(nm(st, i)) + '</div><p class="muted">' + DT(st.money[i]) + (st.jail[i] ? ' · à Mornaguia' : '') + (st.jailCards[i].length ? ' · 🎟️ carte de sortie' : '') + (st.out[i] ? ' · en faillite' : '') + '</p>';
+    html += '<div class="ui-sheet-title">' + av(st.players[i]) + ' ' + esc(nm(st, i)) + '</div><p class="muted">' + DT(st.money[i]) + (st.jail[i] ? L(' · en prison', ' · في السجن') : '') + (st.jailCards[i].length ? ' · 🎟️ carte de sortie' : '') + (st.out[i] ? ' · en faillite' : '') + '</p>';
     html += list.length ? '<div class="pl-props">' + list.map(k => '<span style="--g:' + (SQ[k].g ? GROUPS[SQ[k].g].c : '#9ab') + '" onclick="showSquare(' + k + ')"><i></i>' + esc(SQ[k].n) + (st.props[k].h ? ' ' + (st.props[k].h === 5 ? '🏨' : '🏠×' + st.props[k].h) : '') + (st.props[k].m ? ' (hyp.)' : '') + '</span>').join('') + '</div>' : '<p class="mng-empty">Aucun bien pour l’instant.</p>';
   } else if(sheetKind === 'manage'){
     const me = R.me, list = myProps(st, me), can = canManage(st);
@@ -1342,7 +1383,7 @@ function renderSheet(){
         if(!pr.m && pr.h === 0) btns += '<button class="alt" onclick="aMortgage(' + i + ',true)"' + (canMortgage(st, me, i) ? '' : ' disabled') + '>Hyp. +' + s.p / 2 + '</button>';
         if(pr.m && !raising(st)) btns += '<button onclick="aMortgage(' + i + ',false)"' + (canUnmortgage(st, me, i) ? '' : ' disabled') + '>Lever −' + unmortgageCost(i) + '</button>';
       }
-      html += '<div class="mng-row" style="--g:' + (g ? g.c : '#9ab') + '"><span class="chip"></span><span class="t"><b>' + esc(s.n) + '</b><small>' + status + '</small></span>' + btns + '</div>';
+      html += '<div class="mng-row" style="--g:' + (g ? g.c : '#9ab') + '"><span class="chip"></span><span class="t"><b>' + esc(sqName(i)) + '</b><small>' + status + '</small></span>' + btns + '</div>';
     });
     html += '</div>';
     if(!st.out[me]) html += '<button class="ui-btn alt small" style="margin-top:12px;color:var(--flag)" onclick="aBankrupt()">Abandonner la partie</button>';
@@ -1362,8 +1403,8 @@ function renderSheet(){
     if(d.to !== null){
       const col = (who, side, title) => {
         const list = myProps(st, who).filter(i => tradable(st, i));
-        return '<div class="trd-col"><h4>' + title + '</h4>' + (list.length ? list.map(i => '<label style="--g:' + (SQ[i].g ? GROUPS[SQ[i].g].c : '#9ab') + '"><input type="checkbox" ' + (d[side].props.includes(i) ? 'checked ' : '') + 'onchange="toggleTrade(\'' + side + '\',' + i + ',this.checked)"><i></i><span>' + esc(SQ[i].n) + (st.props[i].m ? ' (hyp.)' : '') + '</span></label>').join('') : '<small class="muted">Aucun bien échangeable</small>') +
-          '<input type="number" min="0" max="' + st.money[who] + '" step="10" inputmode="numeric" placeholder="+ DT" value="' + (d[side].m || '') + '" oninput="tradeDraft.' + side + '.m=Math.max(0,Math.min(' + st.money[who] + ',parseInt(this.value)||0))"></div>';
+        return '<div class="trd-col"><h4>' + title + '</h4>' + (list.length ? list.map(i => '<label style="--g:' + (SQ[i].g ? GROUPS[SQ[i].g].c : '#9ab') + '"><input type="checkbox" ' + (d[side].props.includes(i) ? 'checked ' : '') + 'onchange="toggleTrade(\'' + side + '\',' + i + ',this.checked)"><i></i><span>' + esc(sqName(i)) + (st.props[i].m ? ' (hyp.)' : '') + '</span></label>').join('') : '<small class="muted">Aucun bien échangeable</small>') +
+          '<input type="number" min="0" max="' + st.money[who] + '" step="500" inputmode="numeric" placeholder="+ DT" value="' + (d[side].m || '') + '" oninput="tradeDraft.' + side + '.m=Math.max(0,Math.min(' + st.money[who] + ',parseInt(this.value)||0))"></div>';
       };
       html += '<div class="trd-cols" style="margin-top:10px">' + col(me, 'give', 'Tu donnes') + col(d.to, 'get', 'Tu demandes') + '</div>';
       html += '<div class="error" id="trd-err"></div><button class="ui-btn" style="margin-top:8px" onclick="sendTrade()">Envoyer l’offre</button>';
