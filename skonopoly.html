@@ -156,20 +156,23 @@
   .thit .tr-r{margin-top:6px;font-size:16px}
   .pot{display:flex;flex-direction:column;align-items:center;padding:1.4cqw 3cqw;border-radius:2.4cqw;background:#fff;box-shadow:0 .6cqw 0 #e3d6b8;font:700 4.2cqw 'Space Mono',monospace;color:#7a4a26;line-height:1.1}
   .pot small{font:600 2.2cqw 'Fredoka',sans-serif;color:#a27c52;letter-spacing:.02em}
-  .pot-pill{position:absolute;left:10px;top:10px;z-index:5;padding:6px 11px;border-radius:999px;background:#fff;color:#7a4a26;font:700 13px 'Space Mono',monospace;box-shadow:0 3px 10px rgba(60,45,20,.2)}
 
   /* ---------- 3D table: tilted board seen close-up, camera on the active pawn ---------- */
-  .board-wrap{aspect-ratio:1/.92;perspective:950px;perspective-origin:50% 0%;background:radial-gradient(120% 90% at 50% 100%,#efe6d2,#e3d6b8);box-shadow:inset 0 0 0 1px #e1d4b6,0 8px 24px rgba(60,45,20,.18);border-radius:18px}
-  .stage{position:absolute;inset:0;transform:rotateX(36deg);transform-origin:50% 45%}
+  .board-wrap{width:calc(100% + 20px);margin:0 -10px;aspect-ratio:1/.96;perspective:1100px;perspective-origin:50% 0%;background:radial-gradient(120% 90% at 50% 100%,#efe6d2,#e3d6b8);box-shadow:inset 0 0 0 1px #e1d4b6,0 8px 24px rgba(60,45,20,.18);border-radius:18px}
+  .stage{position:absolute;inset:0;transform:rotateX(28deg);transform-origin:50% 45%}
   .board{background:#26302a;border:none;gap:1px;border-radius:14px;box-shadow:0 0 0 2px #26302a,0 22px 34px rgba(30,50,30,.32);transition:transform .55s cubic-bezier(.3,.7,.3,1)}
   .sq{background:#cfe5c3}
   .sq.b-top .band,.sq.b-bottom .band{height:11%}
   .sq.b-left .band,.sq.b-right .band{width:11%}
-  .sq.b-top .nm{margin-top:11%} .sq.b-bottom .nm{margin-bottom:11%} .sq.b-left .nm{margin-left:11%} .sq.b-right .nm{margin-right:11%}
+  .sq.b-top .nm,.sq.b-bottom .nm,.sq.b-left .nm,.sq.b-right .nm{margin:0}
+  .sq.b-top{padding-top:11%} .sq.b-bottom{padding-bottom:11%} .sq.b-left{padding-left:11%} .sq.b-right{padding-right:11%}
+  .sq .nm{flex:1 1 0;min-height:0;width:100%;display:flex;align-items:safe center;justify-content:center;overflow:hidden;padding:0 .15cqw}
+  .sq .pr{flex:none;padding-bottom:.25cqw}
+  .sq .pi,.sq .si{flex:none}
   .sq .nm{font-size:1.45cqw;font-weight:600;letter-spacing:0;color:#1f2a22}
   .sq .nm{white-space:normal;word-break:keep-all;overflow-wrap:normal;text-align:center;line-height:1.05;max-height:2.2em}
   .sq .nm[lang=ar]{font-family:'Amiri',serif;font-size:1.55cqw;font-weight:700;line-height:1.15;max-height:3.4em}
-  .sq .nm{max-height:3.4em}
+  .sq .nm,.sq .nm[lang=ar]{max-height:none}
   .sq .nm.long{font-size:1.2cqw}
   .sq .nm.xlong{font-size:.95cqw}
   .sq .nm.long[lang=ar]{font-size:1.4cqw}
@@ -181,7 +184,7 @@
   .sq .si{width:3.6cqw;height:3.6cqw;color:#1f2a22}
   .sq .pi{width:4cqw;height:3.8cqw;object-fit:contain;margin:.1cqw 0;flex:none;pointer-events:none;-webkit-user-select:none;user-select:none}
   .sq.corner .pi{width:5.4cqw;height:4.6cqw}
-  .sq.corner .nm{font-size:1.3cqw!important;line-height:1.1;margin-top:.2cqw!important;max-height:none}
+  .sq.corner .nm{font-size:1.3cqw;line-height:1.1;flex:none;margin-top:.2cqw}
   .sq .pi-go-arrow{width:8cqw;height:2.8cqw}
   .sq.corner .pi-go{width:10cqw;height:9cqw}
   #sq-0:has(.pi-go) .nm{display:none}
@@ -212,7 +215,7 @@
   .tok.jailed::after{display:none}
   .tok.jailed .tk::after{content:"";position:absolute;inset:-.6cqw;border-radius:50%;background:repeating-linear-gradient(90deg,transparent 0 .9cqw,#2b2b2b .9cqw 1.5cqw);box-shadow:inset 0 .6cqw 0 #2b2b2b,inset 0 -.6cqw 0 #2b2b2b}
   @media (prefers-reduced-motion:no-preference){ .tok.jailed.closing .tk::after{animation:bars .5s cubic-bezier(.5,0,.8,.4) both} }
-  .view-btn{position:absolute;right:10px;bottom:10px;z-index:5;padding:8px 12px;border-radius:999px;background:#0a4f9c;color:#fff;font-size:13px;font-weight:600;box-shadow:0 4px 10px rgba(10,40,80,.25)}
+  .view-btn{position:absolute;right:10px;bottom:10px;opacity:.92;z-index:5;padding:8px 12px;border-radius:999px;background:#0a4f9c;color:#fff;font-size:13px;font-weight:600;box-shadow:0 4px 10px rgba(10,40,80,.25)}
   .here-strip{display:flex;align-items:stretch;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 0 var(--line);cursor:pointer}
   .here-strip .hd{display:flex;align-items:center;gap:6px;background:var(--g,var(--blue));color:#fff;font-weight:700;font-size:14px;padding:8px 12px;white-space:nowrap}
   .here-strip .hd.light{color:var(--ink)}
@@ -399,7 +402,7 @@
       <button class="ui-round snd-top" id="snd-btn" onclick="toggleSound()" aria-label="Son">🔊</button>
       <button class="ui-round" data-rules aria-label="Règles">?</button>
     </div>
-    <div class="board-wrap" id="board-wrap"><div class="stage"><div class="board" id="board"></div></div><button class="view-btn" id="view-btn" onclick="toggleOverview()">Voir tout le plateau</button><div class="pot-pill" id="pot-pill"></div><button class="trades-btn hidden" id="trades-btn" onclick="openTrades()"></button></div>
+    <div class="board-wrap" id="board-wrap"><div class="stage"><div class="board" id="board"></div></div><button class="view-btn" id="view-btn" onclick="toggleOverview()">Voir tout le plateau</button><button class="trades-btn hidden" id="trades-btn" onclick="openTrades()"></button></div>
     <div class="here-strip" id="info"></div>
     <div class="players" id="players"></div>
     <div class="tbox hidden" id="trade-box"></div>
@@ -487,7 +490,7 @@ const GROUPS = {
   green:{c:'#0f6b3b', h:20000, n:'Vert', ar:'أخضر'}, dblue:{c:'#1f63d6', h:20000, n:'Bleu', ar:'أزرق'}
 };
 const SQ = [
-  {t:'go', n:'Départ', ar:'انطلاق', s:'Départ', sa:'انطلاق'},
+  {t:'go', n:'Départ', ar:'إنطلاق', s:'Départ', sa:'إنطلاق'},
   {t:'prop', g:'brown', n:'Rue 9 Avril 1938', ar:'نهج 9 أفريل 1938', s:'9 Avril', sa:'9 أفريل', p:5000, r:[200,1000,3000,9000,16000,25000]},
   {t:'fam', n:'Sandouk Baladi', ar:'الصندوق البلدي', s:'Sandouk', sa:'الصندوق'},
   {t:'prop', g:'brown', n:'Rue Amilcar', ar:'نهج أميلكار', s:'Amilcar', sa:'أميلكار', p:6000, r:[400,2000,6000,18000,32000,45000]},
@@ -936,7 +939,18 @@ function buildBoard(){
   html += '<div class="center"><div class="logo" lang="ar">سكونوبولي<small>SKONOPOLY</small></div><div class="deck fam" id="deck-fam"><b lang="ar">الصندوق<br>البلدي</b></div><div class="deck chance" id="deck-chance"><b lang="ar">حظ ?</b><small>CHANCE</small></div><div class="pot" id="pot-center"></div><div class="dice" id="dice">'+[0,1].map(k => '<div class="cube'+(k ? ' red' : '')+'" id="cube'+k+'">'+[1,2,3,4,5,6].map(v => '<div class="face f'+v+'">'+[0,1,2,3,4,5,6,7,8].map(x => '<i class="'+(PIPS[v].includes(x) ? 'on' : '')+'"></i>').join('')+'</div>').join('')+'</div>').join('')+'</div></div>';
   html += '<div class="tokens" id="tokens"></div>';
   $('board').innerHTML = html;
+  fitNames();
 }
+// Shrinks each square's name until it fits above its price.
+function fitNames(){
+  document.querySelectorAll('#board .sq:not(.corner) .nm').forEach(nm => {
+    nm.style.fontSize = '';
+    let fs = parseFloat(getComputedStyle(nm).fontSize);
+    while(nm.scrollHeight > nm.clientHeight + 1 && fs > 4){ fs -= 0.5; nm.style.fontSize = fs + 'px'; }
+  });
+}
+addEventListener('resize', () => { if($('board') && $('board').children.length) fitNames(); });
+if(document.fonts) document.fonts.ready.then(() => { if($('board') && $('board').children.length) fitNames(); });
 const PIPS = {1:[4], 2:[0,8], 3:[0,4,8], 4:[0,2,6,8], 5:[0,2,4,6,8], 6:[0,2,3,5,6,8]};
 const FACE = {1:[0,0], 2:[0,-90], 3:[-90,0], 4:[90,0], 5:[0,90], 6:[0,180]};
 const faceTf = v => 'rotateX(' + FACE[v][0] + 'deg) rotateY(' + FACE[v][1] + 'deg)';
@@ -970,13 +984,14 @@ function placeTokens(st){
 }
 let overview = false;
 // null = the whole tilted table; a square = close-up on it.
+const OVERVIEW_Z = 0.88;
 function camera(cell){
   const b = $('board'), W = b.offsetWidth;
-  if(cell === null){ const z = 0.8; b.style.transform = 'translate(' + (W * (1 - z) / 2) + 'px,' + (W * (1 - z) / 2 - W * 0.04) + 'px) scale(' + z + ')'; return; }
-  const [r, c] = cellPos(cell), z = 1.75, m = W * 0.2;
+  if(cell === null){ const z = OVERVIEW_Z; b.style.transform = 'translate(' + (W * (1 - z) / 2) + 'px,' + (W * (1 - z) / 2 - W * 0.065) + 'px) scale(' + z + ')'; return; }
+  const [r, c] = cellPos(cell), z = 1.75, m = W * 0.06;
   // Keep the pawn near the middle; a bit of table may show past the board's edge.
   const x = (c + 0.5) / 11 * W, y = (r + 0.5) / 11 * W;
-  const tx = Math.min(m, Math.max(W - z * W - m, W / 2 - z * x)), ty = Math.min(m, Math.max(W - z * W - m, W * 0.55 - z * y));
+  const tx = Math.min(m, Math.max(W - z * W - m, W / 2 - z * x)), ty = Math.min(m, Math.max(W - z * W - W * 0.17, W * 0.5 - z * y));
   b.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + z + ')';
 }
 // Where the camera rests: the whole table, or the pawn of the player whose turn it is.
@@ -1219,9 +1234,8 @@ let shownPot = null;
 function renderPot(st){
   const pot = st.pot || 0;
   $('pot-center').innerHTML = '<small>🅿️ ' + 'Cagnotte' + '</small>' + DT(pot);
-  $('pot-pill').innerHTML = '🅿️ ' + DT(pot);
   if(shownPot !== null && pot !== shownPot && !RM){
-    [$('pot-center'), $('pot-pill')].forEach(el => el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 450, easing: 'ease-out' }));
+    [$('pot-center')].forEach(el => el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 450, easing: 'ease-out' }));
     if(pot === 0 && shownPot > 0) SND('cash');
   }
   shownPot = pot;
