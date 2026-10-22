@@ -161,6 +161,8 @@
   .board-wrap{width:calc(100% + 20px);margin:0 -10px;aspect-ratio:1/.96;perspective:1100px;perspective-origin:50% 0%;background:radial-gradient(120% 90% at 50% 100%,#efe6d2,#e3d6b8);box-shadow:inset 0 0 0 1px #e1d4b6,0 8px 24px rgba(60,45,20,.18);border-radius:18px}
   .stage{position:absolute;inset:0;transform:rotateX(28deg);transform-origin:50% 45%}
   .board{background:#26302a;border:none;gap:1px;border-radius:14px;box-shadow:0 0 0 2px #26302a,0 22px 34px rgba(30,50,30,.32);transition:transform .55s cubic-bezier(.3,.7,.3,1)}
+  /* Corner squares follow the rounded outline of the mat. */
+  #sq-20{border-top-left-radius:13px} #sq-30{border-top-right-radius:13px} #sq-10{border-bottom-left-radius:13px} #sq-0{border-bottom-right-radius:13px}
   .sq{background:#cfe5c3}
   .sq.b-top .band,.sq.b-bottom .band{height:11%}
   .sq.b-left .band,.sq.b-right .band{width:11%}
