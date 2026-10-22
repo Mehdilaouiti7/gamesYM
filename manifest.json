@@ -6,7 +6,22 @@
   "background_color": "#1b2c24",
   "theme_color": "#233a2f",
   "icons": [
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "icons/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+    {
+      "src": "icons/gr-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/gr-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/gr-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
   ]
 }
