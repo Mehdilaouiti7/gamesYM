@@ -106,6 +106,18 @@
   .card-fly .front small{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cb);margin-bottom:6px}
   canvas.fireworks{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:90}
   .snd-top{font-size:17px}
+  /* player photos: a cut-out head standing on a stand of the player's colour */
+  .avh{width:1.4em;height:1.4em;object-fit:contain;vertical-align:middle}
+  .pl .dot .avh{width:22px;height:22px}
+  .tok.ph .tk{background:none;border:none;box-shadow:none;overflow:visible}
+  .tok.ph .tk .socle{position:absolute;left:-10%;right:-10%;bottom:-6%;height:42%;border-radius:50%;background:var(--c);box-shadow:0 .6cqw .8cqw rgba(0,0,0,.35),inset 0 -.4cqw 0 rgba(0,0,0,.2)}
+  .tok.ph .tk img{position:absolute;left:50%;bottom:12%;width:150%;height:150%;object-fit:contain;object-position:50% 100%;transform:translateX(-50%);filter:drop-shadow(0 .5cqw .5cqw rgba(0,0,0,.35))}
+  .ph-pick{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .ph-btn{padding:10px 14px;border-radius:14px;background:var(--blue);color:#fff;font-weight:700;font-size:15px}
+  .ph-prev{width:58px;height:58px;border-radius:50%;background:#cfe5c3;box-shadow:0 0 0 3px #fff,0 0 0 5px var(--blue);display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+  .ph-prev img{width:90%;height:90%;object-fit:contain;object-position:50% 100%}
+  .ph-x{width:34px;height:34px;border-radius:50%;background:#fff;color:var(--dim);box-shadow:0 2px 0 var(--line)}
+  .ph-msg{color:var(--dim);font-size:12px;flex-basis:100%}
   .lang-top{font-family:'Marhey',sans-serif;font-size:17px;font-weight:700}
   /* trade offers, visible to everyone */
   .tbox{background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 0 0 2px #ffd166,0 4px 0 var(--line);display:flex;flex-direction:column;gap:8px}
@@ -304,6 +316,7 @@
     <div class="ui-field">
       <div class="ui-label">Ton pion</div>
       <div class="avatar-row" id="create-avatar-row"></div>
+      <div class="ph-pick"><button type="button" class="ph-btn" onclick="pickPhoto()">📷 Prendre une photo</button><span class="ph-prev hidden"></span><button type="button" class="ph-x hidden" onclick="clearPhoto()" aria-label="Retirer la photo">✕</button><small class="ph-msg"></small></div>
     </div>
     <div class="ui-dock">
       <div class="error" id="create-err"></div>
@@ -334,6 +347,7 @@
     <div class="ui-field">
       <div class="ui-label">Ton pion</div>
       <div class="avatar-row" id="join-avatar-row"></div>
+      <div class="ph-pick"><button type="button" class="ph-btn" onclick="pickPhoto()">📷 Prendre une photo</button><span class="ph-prev hidden"></span><button type="button" class="ph-x hidden" onclick="clearPhoto()" aria-label="Retirer la photo">✕</button><small class="ph-msg"></small></div>
     </div>
     <div class="ui-dock">
       <div class="error" id="join-err"></div>
@@ -417,6 +431,7 @@
 </div>
 
 <div class="fx" id="fx"></div>
+<input type="file" id="ph-input" accept="image/*" capture="user" hidden onchange="onPhoto(this.files && this.files[0]); this.value = ''">
 <script src="cafe-sound.js"></script>
 <script src="realtime.js"></script>
 <script src="leave-guard.js"></script>
@@ -428,7 +443,11 @@
 <script src="gym-ui.js"></script>
 <script src="gym-room.js"></script>
 <script>
-const R = GYMRoom, $ = id => document.getElementById(id), esc = R.esc, av = R.av;
+const R = GYMRoom, $ = id => document.getElementById(id), esc = R.esc;
+// A player's photo is only ever a small image data URL; anything else falls back to the emoji.
+const PHOTO_RE = /^data:image\/(png|webp|jpeg);base64,[A-Za-z0-9+\/=]+$/;
+const photoOf = p => p && typeof p.photo === 'string' && p.photo.length < 80000 && PHOTO_RE.test(p.photo) ? p.photo : null;
+const av = p => photoOf(p) ? '<img class="avh" src="' + photoOf(p) + '" alt="">' : R.av(p);
 // Language of this phone: French or Arabic (board, cards and buttons).
 var LANG = (function(){ try{ return localStorage.getItem('sko-lang') === 'ar' ? 'ar' : 'fr'; }catch(e){ return 'fr'; } })();
 const L = (fr, ar) => LANG === 'ar' ? ar : fr;
@@ -906,7 +925,7 @@ function placeTokens(st){
   const byCell = {};
   st.players.forEach((p, i) => { if(st.out[i] && !dying[i]) return; const c = shown[i]; (byCell[c] = byCell[c] || []).push(i); });
   const layer = $('tokens');
-  if(layer.children.length !== st.players.length) layer.innerHTML = st.players.map((p, i) => '<div class="tok" id="tok-'+i+'" style="--c:'+COLORS[i % COLORS.length]+'"><span class="tk">'+av(p)+'</span></div>').join('');
+  if(layer.children.length !== st.players.length) layer.innerHTML = st.players.map((p, i) => '<div class="tok'+(photoOf(p) ? ' ph' : '')+'" id="tok-'+i+'" style="--c:'+COLORS[i % COLORS.length]+'"><span class="tk">'+(photoOf(p) ? '<span class="socle"></span><img src="'+photoOf(p)+'" alt="">' : av(p))+'</span></div>').join('');
   st.players.forEach((p, i) => {
     const el = layer.children[i], c = shown[i], list = byCell[c] || [i], k = list.indexOf(i), n = list.length;
     const [r, col] = cellPos(c);
@@ -1433,8 +1452,81 @@ function renderEnd(st){
   if(w === R.me && window.GYMFeedback && !renderEnd.done){ renderEnd.done = true; window.GYMFeedback.win(); }
 }
 
+/* ---------- player photo: cut out the head on the phone (MediaPipe), nothing is uploaded but the small result ---------- */
+let myPhoto = null;
+try{ const v = localStorage.getItem('sko-photo'); if(v && PHOTO_RE.test(v)) myPhoto = v; }catch(e){}
+const MP = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+const MP_MODEL = 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite';
+let segmenterP = null;
+function segmenter(){
+  if(!segmenterP) segmenterP = import(MP + '/vision_bundle.mjs').then(async m => {
+    const files = await m.FilesetResolver.forVisionTasks(MP + '/wasm');
+    return m.ImageSegmenter.createFromOptions(files, { baseOptions: { modelAssetPath: MP_MODEL }, outputConfidenceMasks: true, outputCategoryMask: false, runningMode: 'IMAGE' });
+  }).catch(e => { segmenterP = null; throw e; });
+  return segmenterP;
+}
+function phMsg(t){ document.querySelectorAll('.ph-msg').forEach(e => { e.textContent = t; }); }
+function showMyPhoto(){
+  document.querySelectorAll('.ph-prev').forEach(e => { e.classList.toggle('hidden', !myPhoto); e.innerHTML = myPhoto ? '<img src="' + myPhoto + '" alt="">' : ''; });
+  document.querySelectorAll('.ph-x').forEach(e => e.classList.toggle('hidden', !myPhoto));
+  document.querySelectorAll('.ph-btn').forEach(e => { e.textContent = myPhoto ? '📷 Reprendre la photo' : '📷 Prendre une photo'; });
+}
+function pickPhoto(){ segmenter().catch(() => {}); $('ph-input').click(); }
+function clearPhoto(){ myPhoto = null; try{ localStorage.removeItem('sko-photo'); }catch(e){} showMyPhoto(); phMsg('Tu joueras avec ton emoji.'); }
+function loadImage(file){ return new Promise((ok, ko) => { const url = URL.createObjectURL(file), img = new Image(); img.onload = () => ok(img); img.onerror = ko; img.src = url; }); }
+// Smallest image that still looks good on the board; WebP when the browser can write it, else PNG.
+function encode(canvas){ const w = canvas.toDataURL('image/webp', 0.85); return w.startsWith('data:image/webp') ? w : canvas.toDataURL('image/png'); }
+async function onPhoto(file){
+  if(!file) return;
+  phMsg('Détourage de ta tête…');
+  let img;
+  try{ img = await loadImage(file); }catch(e){ phMsg('Photo illisible, réessaie.'); return; }
+  // Square crop around the centre of the selfie.
+  const side = Math.min(img.naturalWidth, img.naturalHeight), sq = document.createElement('canvas');
+  sq.width = sq.height = 512;
+  sq.getContext('2d').drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, 512, 512);
+  let out = null;
+  try{
+    const seg = await segmenter();
+    const res = seg.segment(sq);
+    const m = res.confidenceMasks, W = m[0].width, H = m[0].height;
+    const hair = m[1].getAsFloat32Array(), face = m[3].getAsFloat32Array(), other = m[5].getAsFloat32Array();
+    const g = sq.getContext('2d'), d = g.getImageData(0, 0, 512, 512);
+    let x0 = 512, y0 = 512, x1 = 0, y1 = 0, kept = 0;
+    for(let y = 0; y < 512; y++) for(let x = 0; x < 512; x++){
+      const i = Math.floor(y * H / 512) * W + Math.floor(x * W / 512);
+      const a = Math.round(255 * Math.min(1, Math.max(0, (hair[i] + face[i] + other[i] - 0.25) / 0.5)));
+      d.data[(y * 512 + x) * 4 + 3] = a;
+      if(a > 128){ kept++; if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y; }
+    }
+    m.forEach(c => c.close && c.close());
+    if(kept > 512 * 512 * 0.04){
+      g.putImageData(d, 0, 0);
+      const bw = x1 - x0 + 1, bh = y1 - y0 + 1, k = 96 / Math.max(bw, bh), c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(bw * k)); c.height = Math.max(1, Math.round(bh * k));
+      c.getContext('2d').drawImage(sq, x0, y0, bw, bh, 0, 0, c.width, c.height);
+      out = encode(c);
+    }
+  }catch(e){}
+  if(!out){
+    // No cut-out (model unavailable or no face found): a round photo instead.
+    const c = document.createElement('canvas'); c.width = c.height = 88;
+    const g = c.getContext('2d'); g.beginPath(); g.arc(44, 44, 44, 0, Math.PI * 2); g.clip();
+    g.drawImage(sq, 0, 0, 512, 512, 0, 0, 88, 88);
+    out = encode(c);
+    phMsg('Je n\'ai pas réussi à détourer : ta photo sera ronde.');
+  } else phMsg('C\'est toi ! Ta tête sera ton pion.');
+  if(!PHOTO_RE.test(out) || out.length > 80000){ phMsg('Photo trop lourde, réessaie de plus près.'); return; }
+  myPhoto = out;
+  try{ localStorage.setItem('sko-photo', out); }catch(e){}
+  showMyPhoto();
+}
+showMyPhoto();
+
 R.init({
   key: 'sko', table: 'sko_games', title: 'Skonopoly', page: 'skonopoly.html', min: 2, max: 6,
+  newState: st => { if(myPhoto) st.players[0].photo = myPhoto; },
+  onJoin: (st, idx) => { if(myPhoto) st.players[idx].photo = myPhoto; },
   start: setup,
   startLabel: st => 'Lancer la partie · ' + st.players.length + ' joueurs',
   render
