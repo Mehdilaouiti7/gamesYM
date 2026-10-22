@@ -196,6 +196,7 @@
   .go-box img{width:72%;height:auto;margin-top:.2cqw;pointer-events:none}
   .sq .pi-chance-blue,.sq .pi-chance-pink{width:4.4cqw;height:5.4cqw}
   .sq .pi-gojail{transform:scaleX(-1)}
+  .sqn[lang=ar]{font-family:'Amiri',serif;font-weight:700;font-size:1.1em}
   .sq.corner .nm{font-size:1.3cqw;line-height:1.1;flex:none;margin-top:.2cqw}
   .sq .pi-go-arrow{width:8cqw;height:2.8cqw}
   .sq.corner .pi-go{width:10cqw;height:9cqw}
@@ -482,6 +483,8 @@ const av = p => photoOf(p) ? '<img class="avh" src="' + photoOf(p) + '" alt="">'
 var LANG = (function(){ try{ return localStorage.getItem('sko-lang') === 'ar' ? 'ar' : 'fr'; }catch(e){ return 'fr'; } })();
 const L = (fr, ar) => LANG === 'ar' ? ar : fr;
 const sqName = i => L(SQ[i].n, SQ[i].ar);
+// A street name inside French interface text: Arabic names keep their own font and direction.
+const sqHtml = i => LANG === 'ar' ? '<bdi class="sqn" lang="ar">' + esc(SQ[i].ar) + '</bdi>' : esc(SQ[i].n);
 const sqShort = i => L(SQ[i].s, SQ[i].sa);
 const cardText = c => L(c.t, c.ar);
 const deckName = d => d === 'chance' ? L('Chance', 'حظ') : L('Sandouk Baladi', 'الصندوق البلدي');
@@ -1085,7 +1088,7 @@ function moneyFx(a, b){
 }
 function deedFx(st, i){
   const s = SQ[i], g = s.g ? GROUPS[s.g] : null, o = st.props[i].o, c = bankRect();
-  const el = fxEl('deed-fly', '<div class="hd' + (g && g.light ? ' light' : '') + '" style="--g:' + (g ? g.c : 'var(--blue)') + '"><small>Titre de propriété</small>' + (s.i ? s.i + ' ' : '') + esc(sqName(i)) + '</div><div class="bd">' + esc(nm(st, o)) + ' · <b>' + DT(s.p) + '</b></div>', c.x, c.y - 60);
+  const el = fxEl('deed-fly', '<div class="hd' + (g && g.light ? ' light' : '') + '" style="--g:' + (g ? g.c : 'var(--blue)') + '"><small>Titre de propriété</small>' + (s.i ? s.i + ' ' : '') + sqHtml(i) + '</div><div class="bd">' + esc(nm(st, o)) + ' · <b>' + DT(s.p) + '</b></div>', c.x, c.y - 60);
   const to = chipRect(o) || c, dx = to.x - c.x, dy = to.y - (c.y - 60);
   SND('cash');
   el.animate([
@@ -1353,7 +1356,7 @@ function infoFor(st, i){
   else if(s.t === 'park') body = 'Arrête-toi ici pour gagner la cagnotte : ' + '<b>' + DT(st.pot || 0) + '</b>';
   else if(s.t === 'gojail') body = 'Direction la prison';
   else body = 'Pioche une carte';
-  return '<div class="hd'+(g && g.light ? ' light' : '')+'" style="--g:'+(g ? g.c : 'var(--blue)')+'">'+svgIcon(i)+esc(sqName(i))+'</div><div class="bd"><span>'+body+'</span></div>';
+  return '<div class="hd'+(g && g.light ? ' light' : '')+'" style="--g:'+(g ? g.c : 'var(--blue)')+'">'+svgIcon(i)+sqHtml(i)+'</div><div class="bd"><span>'+body+'</span></div>';
 }
 function cardBox(st){
   if(!st.card) return '';
@@ -1387,7 +1390,7 @@ function renderPanel(st){
     html += '<div class="row">' + manage + trade + '</div>';
   } else if(st.phase === 'buy'){
     const i = st.pos[me], s = SQ[i], ok = st.money[me] >= s.p;
-    html += '<div class="msg">' + 'Acheter ' + '<b>' + esc(sqName(i)) + '</b> ' + 'pour ' + '<b>' + DT(s.p) + '</b> ?' + (ok ? '' : '<br><small>' + 'Il te manque ' + DT(s.p - st.money[me]) + ' : hypothèque des biens ou vends des maisons dans <b>Mes biens</b>, puis achète.' + '</small>') + '</div>';
+    html += '<div class="msg">' + 'Acheter ' + '<b>' + sqHtml(i) + '</b> ' + 'pour ' + '<b>' + DT(s.p) + '</b> ?' + (ok ? '' : '<br><small>' + 'Il te manque ' + DT(s.p - st.money[me]) + ' : hypothèque des biens ou vends des maisons dans <b>Mes biens</b>, puis achète.' + '</small>') + '</div>';
     html += '<div class="row"><button class="ui-btn alt" onclick="aBuy(false)">' + 'Non merci' + '</button><button class="ui-btn go" onclick="aBuy(true)"'+(ok ? '' : ' disabled')+'>' + 'Acheter' + '</button></div><div class="row">' + manage + '</div>';
   } else if(st.phase === 'debt'){
     const d = st.debt, ok = st.money[me] >= d.amount;
@@ -1401,7 +1404,7 @@ function renderPanel(st){
 }
 const REACTS = ['👍', '😂', '😮', '👎'];
 function giveChips(a){
-  const chips = a.props.map(i => '<span class="tchip" style="--g:' + (SQ[i].g ? GROUPS[SQ[i].g].c : '#9ab') + '"><i></i>' + esc(sqName(i)) + '</span>');
+  const chips = a.props.map(i => '<span class="tchip" style="--g:' + (SQ[i].g ? GROUPS[SQ[i].g].c : '#9ab') + '"><i></i>' + sqHtml(i) + '</span>');
   if(a.m) chips.push('<span class="tchip money">+' + DT(a.m) + '</span>');
   return chips.join('') || '<span class="tchip none">rien</span>';
 }
@@ -1452,7 +1455,7 @@ function toast(txt, kind){
   el.animate([{ transform: 'translateY(-20px)', opacity: 0 }, { transform: 'none', opacity: 1, offset: 0.1 }, { transform: 'none', opacity: 1, offset: 0.85 }, { transform: 'translateY(-10px)', opacity: 0 }], { duration: 3500, easing: 'ease-out' }).onfinish = () => el.remove();
 }
 function offerText(st, t, forTarget){
-  const list = a => a.props.map(i => SQ[i].n).concat(a.m ? [DT(a.m)] : []).join(', ') || 'rien';
+  const list = a => a.props.map(i => sqName(i)).concat(a.m ? [DT(a.m)] : []).join(', ') || 'rien';
   return forTarget ? 'Tu reçois : <b>' + esc(list(t.give)) + '</b><br>Tu donnes : <b>' + esc(list(t.get)) + '</b>'
                    : 'Tu donnes : <b>' + esc(list(t.give)) + '</b><br>Tu reçois : <b>' + esc(list(t.get)) + '</b>';
 }
@@ -1472,12 +1475,12 @@ function renderSheet(){
   let html = '';
   if(sheetKind === 'square'){
     const i = sheetArg, s = SQ[i], pr = st.props[i], g = s.g ? GROUPS[s.g] : null;
-    html += '<div class="deed"><div class="hd'+(g && g.light ? ' light' : '')+'" style="--g:'+(g ? g.c : 'var(--blue)')+'"><small>'+(g ? L('Titre de propriété · ' + g.n, 'سند ملكية · ' + g.ar) : (s.t === 'tr' ? L('Transport', 'نقل') : s.t === 'util' ? L('Service public', 'مرفق عمومي') : L('Case', 'خانة')))+'</small>'+(s.i ? s.i + ' ' : '')+esc(sqName(i))+'</div>';
+    html += '<div class="deed"><div class="hd'+(g && g.light ? ' light' : '')+'" style="--g:'+(g ? g.c : 'var(--blue)')+'"><small>'+(g ? 'Titre de propriété · ' + g.n : (s.t === 'tr' ? 'Transport' : s.t === 'util' ? 'Service public' : 'Case'))+'</small>'+(s.i ? s.i + ' ' : '')+sqHtml(i)+'</div>';
     if(s.t === 'prop'){
-      const rows = [[L('Loyer', 'الكراء'), s.r[0]], [L('Couleur complète', 'كل اللون'), s.r[0] * 2], [L('Avec 1 maison', 'مع منزل'), s.r[1]], [L('Avec 2 maisons', 'مع منزلين'), s.r[2]], [L('Avec 3 maisons', 'مع 3 منازل'), s.r[3]], [L('Avec 4 maisons', 'مع 4 منازل'), s.r[4]], [L('Avec un hôtel', 'مع نزل'), s.r[5]]];
+      const rows = [['Loyer', s.r[0]], ['Couleur complète', s.r[0] * 2], ['Avec 1 maison', s.r[1]], ['Avec 2 maisons', s.r[2]], ['Avec 3 maisons', s.r[3]], ['Avec 4 maisons', s.r[4]], ['Avec un hôtel', s.r[5]]];
       const cur = pr ? (pr.h ? pr.h + 1 : (ownsGroup(st, pr.o, s.g) ? 1 : 0)) : -1;
-      html += '<table>' + rows.map((r, k) => '<tr'+(k === cur ? ' class="cur"' : '')+'><td>'+r[0]+'</td><td>'+DTb(r[1])+'</td></tr>').join('') + '</table>';
-      html += '<div class="ft">' + L('Prix ', 'السعر ') + DTb(s.p) + L(' · maison ', ' · منزل ') + DTb(g.h) + L(' · hypothèque ', ' · رهن ') + DTb(s.p / 2) + '</div>';
+      html += '<table>' + rows.map((r, k) => '<tr'+(k === cur ? ' class="cur"' : '')+'><td>'+r[0]+'</td><td>'+DT(r[1])+'</td></tr>').join('') + '</table>';
+      html += '<div class="ft">' + 'Prix ' + DT(s.p) + ' · maison ' + DT(g.h) + ' · hypothèque ' + DT(s.p / 2) + '</div>';
     } else if(s.t === 'tr'){
       html += '<table>' + [1, 2, 3, 4].map(n => '<tr><td>' + n + ' transport' + (n > 1 ? 's' : '') + '</td><td>' + DT(2500 * Math.pow(2, n - 1)) + '</td></tr>').join('') + '</table><div class="ft">Prix ' + DT(s.p) + ' · hypothèque ' + DT(s.p / 2) + '</div>';
     } else if(s.t === 'util'){
@@ -1490,7 +1493,7 @@ function renderSheet(){
   } else if(sheetKind === 'player'){
     const i = sheetArg, list = myProps(st, i);
     html += '<div class="ui-sheet-title">' + av(st.players[i]) + ' ' + esc(nm(st, i)) + '</div><p class="muted">' + DT(st.money[i]) + (st.jail[i] ? ' · en prison' : '') + (st.jailCards[i].length ? ' · 🎟️ carte de sortie' : '') + (st.out[i] ? ' · en faillite' : '') + '</p>';
-    html += list.length ? '<div class="pl-props">' + list.map(k => '<span style="--g:' + (SQ[k].g ? GROUPS[SQ[k].g].c : '#9ab') + '" onclick="showSquare(' + k + ')"><i></i>' + esc(SQ[k].n) + (st.props[k].h ? ' ' + (st.props[k].h === 5 ? '🏨' : '🏠×' + st.props[k].h) : '') + (st.props[k].m ? ' (hyp.)' : '') + '</span>').join('') + '</div>' : '<p class="mng-empty">Aucun bien pour l’instant.</p>';
+    html += list.length ? '<div class="pl-props">' + list.map(k => '<span style="--g:' + (SQ[k].g ? GROUPS[SQ[k].g].c : '#9ab') + '" onclick="showSquare(' + k + ')"><i></i>' + sqHtml(k) + (st.props[k].h ? ' ' + (st.props[k].h === 5 ? '🏨' : '🏠×' + st.props[k].h) : '') + (st.props[k].m ? ' (hyp.)' : '') + '</span>').join('') + '</div>' : '<p class="mng-empty">Aucun bien pour l’instant.</p>';
   } else if(sheetKind === 'manage'){
     const me = R.me, list = myProps(st, me), can = canManage(st);
     html += '<div class="ui-sheet-title">Mes biens</div><p class="muted">' + DT(st.money[me]) + (can ? '' : ' · tu peux gérer tes biens pendant ton tour') + '</p><div class="mng">';
@@ -1507,7 +1510,7 @@ function renderSheet(){
         if(!pr.m && pr.h === 0) btns += '<button class="alt" onclick="aMortgage(' + i + ',true)"' + (canMortgage(st, me, i) ? '' : ' disabled') + '>Hyp. +' + s.p / 2 + '</button>';
         if(pr.m && !raising(st)) btns += '<button onclick="aMortgage(' + i + ',false)"' + (canUnmortgage(st, me, i) ? '' : ' disabled') + '>Lever −' + unmortgageCost(i) + '</button>';
       }
-      html += '<div class="mng-row" style="--g:' + (g ? g.c : '#9ab') + '"><span class="chip"></span><span class="t"><b>' + esc(sqName(i)) + '</b><small>' + status + '</small></span>' + btns + '</div>';
+      html += '<div class="mng-row" style="--g:' + (g ? g.c : '#9ab') + '"><span class="chip"></span><span class="t"><b>' + sqHtml(i) + '</b><small>' + status + '</small></span>' + btns + '</div>';
     });
     html += '</div>';
     if(!st.out[me]) html += '<button class="ui-btn alt small" style="margin-top:12px;color:var(--flag)" onclick="aBankrupt()">Abandonner la partie</button>';
@@ -1527,7 +1530,7 @@ function renderSheet(){
     if(d.to !== null){
       const col = (who, side, title) => {
         const list = myProps(st, who).filter(i => tradable(st, i));
-        return '<div class="trd-col"><h4>' + title + '</h4>' + (list.length ? list.map(i => '<label style="--g:' + (SQ[i].g ? GROUPS[SQ[i].g].c : '#9ab') + '"><input type="checkbox" ' + (d[side].props.includes(i) ? 'checked ' : '') + 'onchange="toggleTrade(\'' + side + '\',' + i + ',this.checked)"><i></i><span>' + esc(sqName(i)) + (st.props[i].m ? ' (hyp.)' : '') + '</span></label>').join('') : '<small class="muted">Aucun bien échangeable</small>') +
+        return '<div class="trd-col"><h4>' + title + '</h4>' + (list.length ? list.map(i => '<label style="--g:' + (SQ[i].g ? GROUPS[SQ[i].g].c : '#9ab') + '"><input type="checkbox" ' + (d[side].props.includes(i) ? 'checked ' : '') + 'onchange="toggleTrade(\'' + side + '\',' + i + ',this.checked)"><i></i><span>' + sqHtml(i) + (st.props[i].m ? ' (hyp.)' : '') + '</span></label>').join('') : '<small class="muted">Aucun bien échangeable</small>') +
           '<input type="number" min="0" max="' + st.money[who] + '" step="500" inputmode="numeric" placeholder="+ DT" value="' + (d[side].m || '') + '" oninput="tradeDraft.' + side + '.m=Math.max(0,Math.min(' + st.money[who] + ',parseInt(this.value)||0))"></div>';
       };
       html += '<div class="trd-cols" style="margin-top:10px">' + col(me, 'give', 'Tu donnes') + col(d.to, 'get', 'Tu demandes') + '</div>';
