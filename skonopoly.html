@@ -97,12 +97,17 @@
   .deed-fly .hd small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
   .deed-fly .bd{padding:10px;font-size:13px;color:var(--dim)}
   .deed-fly .bd b{font-family:'Space Mono',monospace;color:var(--fg)}
-  .card-fly{position:absolute;width:200px;height:130px;margin:-65px 0 0 -100px;perspective:800px}
+  .card-fly{position:absolute;width:250px;height:170px;margin:-85px 0 0 -125px;perspective:900px}
+  .card-fly.held{pointer-events:auto}
+  .card-fly .x{position:absolute;top:6px;right:6px;width:32px;height:32px;border-radius:50%;border:0;background:var(--cb);color:#fff;font-size:17px;font-weight:800;cursor:pointer;display:grid;place-items:center}
+  .card-fly .ok{margin-top:10px;border:0;border-radius:999px;background:var(--cb);color:#fff;font:800 14px/1 inherit;padding:9px 22px;cursor:pointer}
+  .card-fly .rd{margin-top:10px;font-size:11px;color:#8a8a8a;font-style:italic}
   .card-fly .in{position:absolute;inset:0;transform-style:preserve-3d}
   .card-fly .side{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;text-align:center;box-shadow:0 16px 36px rgba(0,0,0,.35)}
   .card-fly .back{background:repeating-linear-gradient(45deg,var(--cb) 0 10px,var(--cb2) 10px 20px);color:#fff;font-family:'Titan One',sans-serif;font-size:22px;border:4px solid #fff}
   .card-fly .back span{font-family:'Marhey',sans-serif;font-size:26px}
-  .card-fly .front{transform:rotateY(180deg);background:#fffdf6;border:3px solid var(--cb);color:var(--ink);font-size:14px;line-height:1.35}
+  .card-fly .front{transform:rotateY(180deg);background:#fffdf6;border:3px solid var(--cb);color:var(--ink);font-size:16px;line-height:1.35;padding:14px 18px}
+  .card-fly .front[lang=ar]{font-family:'Marhey',sans-serif;font-size:17px}
   .card-fly .front small{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cb);margin-bottom:6px}
   canvas.fireworks{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:90}
   .snd-top{font-size:17px}
@@ -163,14 +168,18 @@
   .sq.b-top .nm{margin-top:11%} .sq.b-bottom .nm{margin-bottom:11%} .sq.b-left .nm{margin-left:11%} .sq.b-right .nm{margin-right:11%}
   .sq .nm{font-size:1.45cqw;font-weight:600;letter-spacing:0;color:#1f2a22}
   .sq .nm{white-space:normal;word-break:keep-all;overflow-wrap:normal;text-align:center;line-height:1.05;max-height:2.2em}
-  .sq .nm[lang=ar]{font-family:'Marhey',sans-serif;font-size:1.4cqw;font-weight:700;line-height:1.15;max-height:2.4em}
+  .sq .nm[lang=ar]{font-family:'Marhey',sans-serif;font-size:1.35cqw;font-weight:700;line-height:1.12;max-height:3.4em}
+  .sq .nm{max-height:3.4em}
+  .sq .nm.long{font-size:1.2cqw}
+  .sq .nm.xlong{font-size:.95cqw}
+  .sq.special .si{width:2.8cqw;height:2.8cqw;margin-bottom:.2cqw}
   .sq .pr{font-size:1.2cqw;color:#3f5544;margin-top:.2cqw;font-family:'Space Mono',monospace;font-weight:700}
-  .sq.special .nm{display:none}
   .sq.corner{background:#cfe5c3}
   .sq.corner .nm{display:block;font-size:1.6cqw;margin-top:.4cqw}
   .sq .si{width:3.6cqw;height:3.6cqw;color:#1f2a22}
   .sq.corner .si{width:5.2cqw;height:5.2cqw;color:#c0392b}
   .sq.chance-sq .si{color:#e6007e}
+  .sq.fam-sq .si{color:#9a5b16}
   .sq.owned{box-shadow:none;background:color-mix(in srgb, var(--own) 22%, #cfe5c3)}
   .sq.here{background:#e9f5c9}
   .sq .hs i{background:#1f9d55}
@@ -415,7 +424,7 @@
     <div class="ui-step"><b>1</b><span>Chacun commence avec <b>150.000 DT</b>. Lance les dés et avance. À chaque passage par la case <b>Départ</b>, reçois 20.000 DT.</span></div>
     <div class="ui-step"><b>2</b><span>Tu tombes sur une ville, un transport ou la STEG / SONEDE libre ? Tu peux l'acheter. Chez un autre joueur, tu paies le loyer.</span></div>
     <div class="ui-step"><b>3</b><span>Toutes les villes d'une couleur ? Le loyer double, et tu peux construire des <b>maisons</b> puis un <b>hôtel</b> (de façon égale dans la couleur) depuis <b>Mes biens</b>.</span></div>
-    <div class="ui-step"><b>🅿️</b><span>Les impôts, amendes et pénalités payés à la banque vont dans la <b>cagnotte</b>, au milieu de la table. Celui qui s'arrête sur le <b>Parking gratuit</b>, ou pioche la carte Jackpot, remporte tout.</span></div>
+    <div class="ui-step"><b>🅿️</b><span>Les impôts, amendes et pénalités payés à la banque vont dans la <b>cagnotte</b>, au milieu de la table. Celui qui s'arrête sur le <b>Parc gratuit</b>, ou pioche la carte Jackpot, remporte tout.</span></div>
     <div class="ui-step"><b>4</b><span>Un double ? Tu rejoues. Trois doubles de suite, ou la case « Va en prison » : direction la <b>prison</b>. Pour sortir : un double, 5.000 DT, ou une carte de sortie.</span></div>
     <div class="ui-step"><b>5</b><span>Pas assez d'argent ? Vends des maisons ou <b>hypothèque</b> des biens. Sinon c'est la <b>faillite</b> : tu es éliminé. Le dernier joueur en jeu gagne.</span></div>
     <div class="ui-step"><b>🤝</b><span>À ton tour, tu peux proposer un <b>échange</b> (biens et argent) à un autre joueur.</span></div>
@@ -471,36 +480,36 @@ const GROUPS = {
 };
 const SQ = [
   {t:'go', n:'Départ', ar:'انطلاق', s:'Départ', sa:'انطلاق'},
-  {t:'prop', g:'brown', n:'Rue du 9 Avril 1938', ar:'نهج 9 أفريل 1938', s:'9 Avril', sa:'9 أفريل', p:5000, r:[200,1000,3000,9000,16000,25000]},
+  {t:'prop', g:'brown', n:'Rue 9 Avril 1938', ar:'نهج 9 أفريل 1938', s:'9 Avril', sa:'9 أفريل', p:5000, r:[200,1000,3000,9000,16000,25000]},
   {t:'fam', n:'Sandouk Baladi', ar:'الصندوق البلدي', s:'Sandouk', sa:'الصندوق'},
   {t:'prop', g:'brown', n:'Rue Amilcar', ar:'نهج أميلكار', s:'Amilcar', sa:'أميلكار', p:6000, r:[400,2000,6000,18000,32000,45000]},
   {t:'tax', n:'Impôt sur le revenu', ar:'أداء على المداخيل', s:'Impôts', sa:'أداء', a:20000},
   {t:'tr', n:'Gare de Tunis', ar:'محطة تونس', s:'Gare Tunis', sa:'محطة تونس', p:20000},
-  {t:'prop', g:'lblue', n:'Rue Antar', ar:'نهج عنتر', s:'Antar', sa:'عنتر', p:10000, r:[600,3000,9000,27000,40000,55000]},
+  {t:'prop', g:'lblue', n:"Rue d'Antar", ar:'نهج عنتر', s:'Antar', sa:'عنتر', p:10000, r:[600,3000,9000,27000,40000,55000]},
   {t:'chance', n:'Chance', ar:'حظ', s:'Chance', sa:'حظ'},
-  {t:'prop', g:'lblue', n:'Rue Annaba', ar:'نهج عنابة', s:'Annaba', sa:'عنابة', p:10000, r:[600,3000,9000,27000,40000,55000]},
+  {t:'prop', g:'lblue', n:"Rue d'Annaba", ar:'نهج عنابة', s:'Annaba', sa:'عنابة', p:10000, r:[600,3000,9000,27000,40000,55000]},
   {t:'prop', g:'lblue', n:'Avenue de la République', ar:'شارع الجمهورية', s:'République', sa:'الجمهورية', p:12000, r:[800,4000,10000,30000,45000,60000]},
-  {t:'jail', n:'Prison · simple visite', ar:'السجن · زيارة', s:'Prison', sa:'السجن'},
-  {t:'prop', g:'pink', n:'Avenue Mohamed V', ar:'شارع محمد الخامس', s:'Mohamed V', sa:'محمد الخامس', p:14000, r:[1000,5000,15000,45000,62500,75000]},
-  {t:'util', n:'STEG · électricité', ar:'الستاغ · الكهرباء', s:'STEG', sa:'الستاغ', p:15000},
+  {t:'jail', n:'Prison · Simple visite', ar:'السجن · زيارة', s:'Prison', sa:'السجن'},
+  {t:'prop', g:'pink', n:'Avenue Mohammed V', ar:'شارع محمد الخامس', s:'Mohamed V', sa:'محمد الخامس', p:14000, r:[1000,5000,15000,45000,62500,75000]},
+  {t:'util', n:'STEG', ar:'الستاغ', s:'STEG', sa:'الستاغ', p:15000},
   {t:'prop', g:'pink', n:'Avenue Hédi Chaker', ar:'شارع الهادي شاكر', s:'Hédi Chaker', sa:'الهادي شاكر', p:14000, r:[1000,5000,15000,45000,62500,75000]},
   {t:'prop', g:'pink', n:'Rue Ibn Khaldoun', ar:'نهج ابن خلدون', s:'Ibn Khaldoun', sa:'ابن خلدون', p:16000, r:[1200,6000,18000,50000,70000,90000]},
   {t:'tr', n:'Gare de Sousse', ar:'محطة سوسة', s:'Gare Sousse', sa:'محطة سوسة', p:20000},
   {t:'prop', g:'orange', n:'Rue Ahmed Tlili', ar:'نهج أحمد التليلي', s:'Ahmed Tlili', sa:'أحمد التليلي', p:18000, r:[1400,7000,20000,55000,75000,95000]},
   {t:'fam', n:'Sandouk Baladi', ar:'الصندوق البلدي', s:'Sandouk', sa:'الصندوق'},
   {t:'prop', g:'orange', n:'Avenue Ali Belhouane', ar:'شارع علي بلحوان', s:'Belhouane', sa:'علي بلحوان', p:18000, r:[1400,7000,20000,55000,75000,95000]},
-  {t:'prop', g:'orange', n:"Place d'Afrique", ar:'ساحة إفريقيا', s:'Pl. Afrique', sa:'ساحة إفريقيا', p:20000, r:[1600,8000,22000,60000,80000,100000]},
-  {t:'park', n:'Parking gratuit', ar:'موقف مجاني', s:'Parking', sa:'موقف مجاني'},
+  {t:'prop', g:'orange', n:"Place de l'Afrique", ar:'ساحة إفريقيا', s:'Pl. Afrique', sa:'ساحة إفريقيا', p:20000, r:[1600,8000,22000,60000,80000,100000]},
+  {t:'park', n:'Parc gratuit', ar:'موقف مجاني', s:'Parking', sa:'موقف مجاني'},
   {t:'prop', g:'red', n:'Place Jugurtha', ar:'ساحة يوغرطة', s:'Jugurtha', sa:'يوغرطة', p:22000, r:[1800,9000,25000,70000,87500,105000]},
   {t:'chance', n:'Chance', ar:'حظ', s:'Chance', sa:'حظ'},
-  {t:'prop', g:'red', n:'Avenue de Carthage', ar:'شارع قرطاج', s:'Carthage', sa:'قرطاج', p:22000, r:[1800,9000,25000,70000,87500,105000]},
+  {t:'prop', g:'red', n:'Avenue Carthage', ar:'شارع قرطاج', s:'Carthage', sa:'قرطاج', p:22000, r:[1800,9000,25000,70000,87500,105000]},
   {t:'prop', g:'red', n:'Avenue Farhat Hached', ar:'شارع فرحات حشاد', s:'Farhat Hached', sa:'فرحات حشاد', p:24000, r:[2000,10000,30000,75000,92500,110000]},
   {t:'tr', n:'Gare de Sfax', ar:'محطة صفاقس', s:'Gare Sfax', sa:'محطة صفاقس', p:20000},
   {t:'prop', g:'yellow', n:'Boulevard Bab Bnet', ar:'جادة باب بنات', s:'Bab Bnet', sa:'باب بنات', p:26000, r:[2200,11000,33000,80000,97500,115000]},
-  {t:'prop', g:'yellow', n:'Place Mohamed Ali', ar:'ساحة محمد علي', s:'Mohamed Ali', sa:'محمد علي', p:26000, r:[2200,11000,33000,80000,97500,115000]},
-  {t:'util', n:'SONEDE · eau', ar:'الشركة الوطنية لاستغلال وتوزيع المياه (الصوناد)', s:'SONEDE', sa:'الصوناد', p:15000},
+  {t:'prop', g:'yellow', n:'Place Mohammed Ali', ar:'ساحة محمد علي', s:'Mohamed Ali', sa:'محمد علي', p:26000, r:[2200,11000,33000,80000,97500,115000]},
+  {t:'util', n:'SONEDE', ar:'الشركة الوطنية لاستغلال وتوزيع المياه (الصوناد)', s:'SONEDE', sa:'الصوناد', p:15000},
   {t:'prop', g:'yellow', n:'Rue Bab Souika', ar:'نهج باب سويقة', s:'Bab Souika', sa:'باب سويقة', p:28000, r:[2400,12000,36000,85000,102500,120000]},
-  {t:'gojail', n:'Va en prison', ar:'إلى السجن', s:'En prison', sa:'إلى السجن'},
+  {t:'gojail', n:'Allez en prison', ar:'إلى السجن', s:'En prison', sa:'إلى السجن'},
   {t:'prop', g:'green', n:'Avenue de la Liberté', ar:'شارع الحرية', s:'Liberté', sa:'الحرية', p:30000, r:[2600,13000,39000,90000,110000,127500]},
   {t:'prop', g:'green', n:'Rue de Palestine', ar:'نهج فلسطين', s:'Palestine', sa:'فلسطين', p:30000, r:[2600,13000,39000,90000,110000,127500]},
   {t:'fam', n:'Sandouk Baladi', ar:'الصندوق البلدي', s:'Sandouk', sa:'الصندوق'},
@@ -519,7 +528,7 @@ const ICON = {
   park:'<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M10 17V7h3.2a3 3 0 0 1 0 6H10"/>',
   gojail:'<path d="M7 18v-5a5 5 0 0 1 10 0v5"/><path d="M5 18h14v3H5z"/><path d="M12 3v2M4.6 6.6l1.4 1.4M19.4 6.6 18 8"/>',
   chance:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .8-1 1.5v.7"/><path d="M12 17.3v.2"/>',
-  fam:'<path d="M4 11 12 4l8 7v9H4z"/><path d="M12 17.2s-3-1.8-3-3.7a1.6 1.6 0 0 1 3-.8 1.6 1.6 0 0 1 3 .8c0 1.9-3 3.7-3 3.7z"/>',
+  fam:'<path d="M3 11V9a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5v2"/><rect x="3" y="11" width="18" height="9" rx="1.5"/><path d="M3 11h18M8 4v7M16 4v7"/><rect x="10" y="10" width="4" height="5" rx="1" fill="currentColor"/>',
   tax:'<ellipse cx="12" cy="7" rx="6" ry="2.5"/><path d="M6 7v5c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V7"/><path d="M6 12v5c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-5"/>',
   ring:'<circle cx="9" cy="14.5" r="5"/><circle cx="15" cy="14.5" r="5"/><path d="M10 6l2-2.5L14 6l-2 2z"/>',
   van:'<path d="M3 16V8a2 2 0 0 1 2-2h9l5 5v5H3z"/><path d="M14 6v5h5"/><circle cx="7.5" cy="17" r="1.8"/><circle cx="15.5" cy="17" r="1.8"/>',
@@ -556,7 +565,7 @@ const MEKTOUB = [
   {t:"Travaux : paie 2.500 DT par maison et 10.000 DT par hôtel.", ar:'أشغال: ادفع 2.500 د لكل منزل و10.000 د لكل نزل.', repairs:[2500, 10000]},
   {t:"Ton café préféré te fait crédit : reçois 5.000 DT.", ar:'القهوة متاعك عملتلك كريدي: خذ 5.000 د.', money:5000},
   {t:"Amende de la municipalité : paie 5.000 DT.", ar:'خطية من البلدية: ادفع 5.000 د.', money:-5000},
-  {t:"Jackpot ! Tu remportes toute la cagnotte du parking.", ar:'جاكبوت! تربح كل أموال الموقف المجاني.', pot:true}
+  {t:"Jackpot ! Tu remportes toute la cagnotte du Parc gratuit.", ar:'جاكبوت! تربح كل أموال الموقف المجاني.', pot:true}
 ];
 const FAMILLE = [
   {t:"Mariage de ton cousin : chaque joueur te donne 2.000 DT.", ar:'عرس ولد عمّك: كل لاعب يعطيك 2.000 د.', collect:2000},
@@ -577,7 +586,9 @@ const FAMILLE = [
 const DECKS = { chance: MEKTOUB, fam: FAMILLE };
 
 /* ---------- helpers ---------- */
-const DT = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (window.LANG === 'ar' ? ' د' : ' DT');
+const DT = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' DT';
+// Prices printed on the board follow the board's language.
+const DTb = n => LANG === 'ar' ? String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' د' : DT(n);
 const nm = (st, i) => st.players[i].name;
 const ownable = i => ['prop','tr','util'].includes(SQ[i].t);
 const groupIdx = g => SQ.map((s, i) => i).filter(i => SQ[i].g === g);
@@ -674,12 +685,12 @@ function drawCard(st, p, deck, dice){
     if(cost) charge(st, p, -1, cost, 'Travaux'); else log(st, 'Pas de maison : rien à payer.');
   }
 }
-// Fines paid to the bank wait in the parking pot; whoever stops on Parking gratuit (or draws the Jackpot card) takes it all.
+// Fines paid to the bank wait in the pot; whoever stops on Parc gratuit (or draws the Jackpot card) takes it all.
 function takePot(st, p, byCard){
   const pot = st.pot || 0;
-  if(!pot){ log(st, byCard ? '🅿️ La cagnotte du parking est vide : pas de chance !' : '🅿️ ' + nm(st, p) + ' se gare au parking gratuit : la cagnotte est vide.'); return; }
+  if(!pot){ log(st, byCard ? '🅿️ La cagnotte du Parc gratuit est vide : pas de chance !' : '🅿️ ' + nm(st, p) + ' s\'arrête au Parc gratuit : la cagnotte est vide.'); return; }
   st.money[p] += pot; st.pot = 0;
-  log(st, '🅿️ ' + nm(st, p) + ' remporte la cagnotte du parking : +' + DT(pot) + ' !');
+  log(st, '🅿️ ' + nm(st, p) + ' remporte la cagnotte du Parc gratuit : +' + DT(pot) + ' !');
 }
 function moveBy(st, p, steps){
   walk(st, p, (st.pos[p] + steps) % 40, true);
@@ -898,10 +909,10 @@ function buildBoard(){
     const [r, c] = cellPos(i), corner = i % 10 === 0;
     const side = r === 10 ? 'b-top' : c === 0 ? 'b-right' : r === 0 ? 'b-bottom' : 'b-left';
     const g = s.g ? GROUPS[s.g].c : '';
-    html += '<div class="sq '+(s.g ? side : '')+(corner ? ' corner' : (s.g ? '' : ' special'))+(s.t === 'chance' ? ' chance-sq' : '')+'" id="sq-'+i+'" style="grid-row:'+(r+1)+';grid-column:'+(c+1)+(g ? ';--g:'+g : '')+'" onclick="showSquare('+i+')">'+
+    html += '<div class="sq '+(s.g ? side : '')+(corner ? ' corner' : (s.g ? '' : ' special'))+(s.t === 'chance' ? ' chance-sq' : '')+(s.t === 'fam' ? ' fam-sq' : '')+'" id="sq-'+i+'" style="grid-row:'+(r+1)+';grid-column:'+(c+1)+(g ? ';--g:'+g : '')+'" onclick="showSquare('+i+')">'+
       (s.g ? '<div class="band"><span class="hs" id="hs-'+i+'"></span></div>' : '')+
       svgIcon(i)+
-      '<span class="nm"'+(LANG === 'ar' ? ' lang="ar"' : '')+'>'+esc(sqShort(i))+'</span>'+((s.p || s.a) ? '<span class="pr" id="pr-'+i+'">'+DT(s.p || s.a)+'</span>' : '')+'</div>';
+      '<span class="nm'+(sqName(i).length > 15 ? ' long' : '')+(sqName(i).length > 26 ? ' xlong' : '')+'"'+(LANG === 'ar' ? ' lang="ar"' : '')+'>'+esc(sqName(i))+'</span>'+((s.p || s.a) ? '<span class="pr" id="pr-'+i+'">'+DTb(s.p || s.a)+'</span>' : '')+'</div>';
   });
   html += '<div class="center"><div class="logo" lang="ar">سكونوبولي<small>SKONOPOLY</small></div><div class="deck fam" id="deck-fam"><b lang="ar">الصندوق<br>البلدي</b></div><div class="deck chance" id="deck-chance"><b lang="ar">حظ ?</b><small>CHANCE</small></div><div class="pot" id="pot-center"></div><div class="dice" id="dice">'+[0,1].map(k => '<div class="cube'+(k ? ' red' : '')+'" id="cube'+k+'">'+[1,2,3,4,5,6].map(v => '<div class="face f'+v+'">'+[0,1,2,3,4,5,6,7,8].map(x => '<i class="'+(PIPS[v].includes(x) ? 'on' : '')+'"></i>').join('')+'</div>').join('')+'</div>').join('')+'</div></div>';
   html += '<div class="tokens" id="tokens"></div>';
@@ -953,7 +964,7 @@ function camera(cell){
 function homeCamera(){
   const st = R.state; if(!st || !st.pos) return;
   camera(overview ? null : (shown ? shown[st.turn] : st.pos[st.turn]));
-  $('view-btn').textContent = overview ? L('Revenir au pion', 'ارجع إلى البيدق') : L('Voir tout le plateau', 'شاهد كل اللوحة');
+  $('view-btn').textContent = overview ? 'Revenir au pion' : 'Voir tout le plateau';
 }
 function toggleOverview(){ overview = !overview; homeCamera(); }
 function setDice(st){ [0, 1].forEach(k => { $('cube' + k).style.transform = faceTf(st.dice[k]); }); }
@@ -1049,22 +1060,49 @@ function houseFx(i){
   $('sq-' + i).animate([{ transform: 'none' }, { transform: 'translateY(-2px)' }, { transform: 'none' }], { duration: 300 });
   SND('pop');
 }
-function cardFx(st, e){
+// A drawn card flies to the center and stays open until the drawer closes it.
+let cardHold = null;
+function cardsIn(st){ return (st.path || []).filter(e => e.k === 'card'); }
+function cardsClosed(st){ return st.cardAck && st.cardAck.id === st.pathId ? st.cardAck.k : 0; }
+function openCard(st, e, j, resume, still){
+  if(cardHold){
+    if(cardHold.pid === st.pathId && cardHold.j === j) return;
+    cardHold.el.remove(); cardHold = null;
+  }
   const c = DECKS[e.deck][e.idx], ch = e.deck === 'chance', at = bankRect();
-  const pile = $('deck-' + e.deck), from = pile ? rectOf(pile) : at;
-  const el = fxEl('card-fly', '<div class="in"><div class="side back"><span lang="ar">' + (ch ? 'حظ ?' : 'الصندوق البلدي') + '</span></div><div class="side front"><small>' + deckName(e.deck) + '</small>' + esc(cardText(c)) + '</div></div>', at.x, at.y);
+  const pile = $('deck-' + e.deck), from = pile ? rectOf(pile) : at, mine = e.p === R.me;
+  const foot = mine ? '<button class="ok" onclick="closeCard()">Fermer</button>' : '<div class="rd">' + esc(st.players[e.p].name) + ' lit la carte…</div>';
+  const el = fxEl('card-fly held', '<div class="in"><div class="side back"><span lang="ar">' + (ch ? 'حظ ?' : 'الصندوق البلدي') + '</span></div><div class="side front"' + (LANG === 'ar' ? ' lang="ar"' : '') + '>' + (mine ? '<button class="x" onclick="closeCard()" aria-label="Fermer">✕</button>' : '') + '<small>' + deckName(e.deck) + '</small>' + esc(cardText(c)) + foot + '</div></div>', at.x, at.y);
   el.style.setProperty('--cb', ch ? '#2fa3e6' : '#e6007e'); el.style.setProperty('--cb2', ch ? '#1f8fd0' : '#c8006d');
-  const dx = from.x - at.x, dy = from.y - at.y;
+  const dx = from.x - at.x, dy = from.y - at.y, away = 'translate(' + dx + 'px,' + dy + 'px) rotate(-45deg) scale(.26)';
+  cardHold = { el, j, pid: st.pathId, resume, away };
+  if(still || RM){ el.firstChild.style.transform = 'rotateY(180deg)'; return; }
   SND('sweep');
-  el.animate([
-    { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(-45deg) scale(.32)', opacity: 1 },
-    { transform: 'translate(' + dx * 0.4 + 'px,' + (dy * 0.4 - 40) + 'px) rotate(-12deg) scale(.8)', opacity: 1, offset: 0.12 },
-    { transform: 'none', opacity: 1, offset: 0.2 },
-    { transform: 'none', opacity: 1, offset: 0.84 },
-    { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(-45deg) scale(.32)', opacity: 0.6 }
-  ], { duration: 3000, easing: 'ease-in-out' }).onfinish = () => el.remove();
-  el.firstChild.animate([{ transform: 'rotateY(0)' }, { transform: 'rotateY(0)', offset: 0.22 }, { transform: 'rotateY(180deg)', offset: 0.38 }, { transform: 'rotateY(180deg)', offset: 0.84 }, { transform: 'rotateY(0)' }], { duration: 3000, easing: 'ease-in-out', fill: 'forwards' });
-  if(pile) pile.animate([{ transform: 'rotate(-45deg)' }, { transform: 'rotate(-45deg) translateY(-4px) scale(1.04)', offset: 0.1 }, { transform: 'rotate(-45deg)', offset: 0.2 }], { duration: 3000 });
+  el.animate([{ transform: away }, { transform: 'translate(' + dx * 0.4 + 'px,' + (dy * 0.4 - 40) + 'px) rotate(-12deg) scale(.8)', offset: 0.5 }, { transform: 'none' }], { duration: 650, easing: 'ease-out', fill: 'backwards' });
+  el.firstChild.animate([{ transform: 'rotateY(0)' }, { transform: 'rotateY(0)', offset: 0.55 }, { transform: 'rotateY(180deg)' }], { duration: 1000, easing: 'ease-in-out', fill: 'forwards' });
+  if(pile) pile.animate([{ transform: 'rotate(-45deg)' }, { transform: 'rotate(-45deg) translateY(-4px) scale(1.04)', offset: 0.3 }, { transform: 'rotate(-45deg)' }], { duration: 650 });
+}
+function closeHeld(){
+  const h = cardHold; if(!h) return;
+  cardHold = null; busyUntil = 0;
+  h.el.classList.remove('held');
+  if(RM) h.el.remove();
+  else {
+    h.el.firstChild.animate([{ transform: 'rotateY(180deg)' }, { transform: 'rotateY(0)' }], { duration: 300, fill: 'forwards' });
+    h.el.animate([{ transform: 'none', opacity: 1 }, { transform: h.away, opacity: 0.5 }], { duration: 550, easing: 'ease-in', fill: 'forwards' }).onfinish = () => h.el.remove();
+  }
+  h.resume();
+}
+function closeCard(){
+  const h = cardHold; if(!h) return;
+  const pid = h.pid, k = h.j + 1;
+  closeHeld();
+  R.act(st => {
+    if(st.pathId !== pid) return false;
+    if(!st.cardAck || st.cardAck.id !== pid) st.cardAck = { id: pid, k: 0 };
+    if(st.cardAck.k >= k) return false;
+    st.cardAck.k = k;
+  });
 }
 function bankruptFx(i){
   dying[i] = true;
@@ -1100,9 +1138,10 @@ function fireworks(){
   requestAnimationFrame(frame);
 }
 
-// Replays one action's path; returns how long it takes (ms).
-function playPath(st, path, t){
-  path.forEach((e, n) => {
+// Replays one action's path, pausing on each drawn card until it is closed; done(ms) gets the remaining time.
+function playPath(st, path, t, done, j){
+  for(let n = 0; n < path.length; n++){
+    const e = path[n];
     if(e.k === 'move'){
       const steps = e.jump ? 0 : (e.to - e.from + 40) % 40;
       const police = path[n + 1] && path[n + 1].k === 'jail' && path[n + 1].police;
@@ -1114,7 +1153,7 @@ function playPath(st, path, t){
           if(tok){ tok.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-5cqw) scale(1.4)', offset: 0.5 }, { transform: 'translateY(0) scale(1)' }], { duration: 450 }); setTimeout(() => tok.classList.remove('jump'), 500); }
         }, t);
         t += police ? 700 : 550;
-        return;
+        continue;
       }
       setTimeout(() => camera(e.from), t);
       t += RM ? 0 : 450;
@@ -1125,20 +1164,25 @@ function playPath(st, path, t){
           const tok = $('tok-' + e.p);
           if(tok) tok.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-3.2cqw) scale(1.2)', offset: 0.45 }, { transform: 'translateY(0) scale(1)' }], { duration: STEP - 10, easing: 'ease-out' });
           SND('tick');
-          if(cell === 0 && e.go){ SND('cash'); const sq = $('sq-0'); if(sq) floatText('+200 DT', rectOf(sq)); }
+          if(cell === 0 && e.go){ SND('cash'); const sq = $('sq-0'); if(sq) floatText('+' + DT(GO_BONUS), rectOf(sq)); }
         }, t + 250 + k * STEP);
       }
       t += 250 + steps * STEP + 350;
       t += 100;
     } else if(e.k === 'card'){
-      setTimeout(() => cardFx(st, e), t);
-      t += 2700;
+      const rest = path.slice(n + 1);
+      busyUntil = Infinity;
+      setTimeout(() => {
+        if(cardsClosed(R.state) > j && R.state.pathId === st.pathId){ busyUntil = 0; playPath(st, rest, 0, done, j + 1); return; }
+        openCard(st, e, j, () => playPath(st, rest, 600, done, j + 1));
+      }, t);
+      return;
     } else if(e.k === 'jail'){
       setTimeout(() => { jailClosing[e.p] = true; placeTokens(R.state); SND('clank'); if(window.GYMFeedback) window.GYMFeedback.vibrate([40, 30, 80]); setTimeout(() => { delete jailClosing[e.p]; }, 700); }, t);
       t += 700;
     }
-  });
-  return t;
+  }
+  done(t);
 }
 
 function paintSquares(st){
@@ -1155,7 +1199,7 @@ function paintSquares(st){
 let shownPot = null;
 function renderPot(st){
   const pot = st.pot || 0;
-  $('pot-center').innerHTML = '<small>🅿️ ' + L('Cagnotte', 'الأموال المجمّعة') + '</small>' + DT(pot);
+  $('pot-center').innerHTML = '<small>🅿️ ' + 'Cagnotte' + '</small>' + DT(pot);
   $('pot-pill').innerHTML = '🅿️ ' + DT(pot);
   if(shownPot !== null && pot !== shownPot && !RM){
     [$('pot-center'), $('pot-pill')].forEach(el => el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 450, easing: 'ease-out' }));
@@ -1179,6 +1223,7 @@ function renderPlayers(st){
 function render(st){
   if(st.status === 'finished'){
     if(prev && prev.status === 'playing'){ fireworks(); SND('fireworks'); }
+    if(cardHold){ cardHold.el.remove(); cardHold = null; }
     prev = JSON.parse(JSON.stringify(st));
     renderEnd(st); return;
   }
@@ -1188,40 +1233,54 @@ function render(st){
   if(!shownMoney) shownMoney = st.money.slice();
   const a = prev && prev.money && prev.players.length === st.players.length ? prev : null;
   prev = JSON.parse(JSON.stringify(st));
-  let t = 0;
+  // A card the drawer closed (or a stale one from another action) goes back to its pile.
+  if(cardHold && (cardHold.pid !== st.pathId || cardsClosed(st) > cardHold.j)) closeHeld();
+  let t = 0, played = false;
+  // 1. dice, 2. the action's path (pausing on cards), 3. consequences
+  const finish = t => {
+    if(a){
+      Object.keys(st.props).forEach(i => { if(!a.props[i] && !RM){ pendingOwn[i] = true; setTimeout(() => deedFx(st, +i), t); } });
+      Object.keys(st.props).forEach(i => { const o = a.props[i]; if(o && st.props[i].h > o.h) setTimeout(() => houseFx(+i), t); });
+      st.out.forEach((o, i) => { if(o && !a.out[i]) setTimeout(() => bankruptFx(i), t); });
+      if(st.money.some((m, i) => m !== a.money[i])){ const before = a; setTimeout(() => moneyFx(before, st), t); }
+    }
+    busyUntil = Math.max(busyUntil, Date.now() + t);
+    schedulePanel();
+  };
   if(a){
-    // 1. dice, 2. the action's path, 3. consequences
     const newRoll = st.rollSeq !== a.rollSeq;
     if(newRoll && !RM){ camera(null); setTimeout(() => rollDice(st), 350); t = 1400; } else setDice(st);
-    if(st.pathId && st.pathId !== a.pathId && st.path && !RM) t = playPath(st, st.path, t);
-    else if(!walkingTo(st)) { shown = st.pos.slice(); }
-    Object.keys(st.props).forEach(i => { if(!a.props[i] && !RM){ pendingOwn[i] = true; setTimeout(() => deedFx(st, +i), t); } });
-    Object.keys(st.props).forEach(i => { const o = a.props[i]; if(o && st.props[i].h > o.h) setTimeout(() => houseFx(+i), t); });
-    st.out.forEach((o, i) => { if(o && !a.out[i]) setTimeout(() => bankruptFx(i), t); });
-    if(st.money.some((m, i) => m !== a.money[i])){ const before = a; setTimeout(() => moneyFx(before, st), t); }
-  } else { setDice(st); shown = st.pos.slice(); }
-  busyUntil = Math.max(busyUntil, Date.now() + t);
+    if(st.pathId && st.pathId !== a.pathId && st.path && !RM){ played = true; playPath(st, st.path, t, finish, 0); }
+    else { if(!walkingTo(st)) shown = st.pos.slice(); finish(t); }
+  } else { setDice(st); shown = st.pos.slice(); finish(0); }
+  // Joining mid-read (or reduced motion): show the card that is still open.
+  const open = cardsIn(st), k = cardsClosed(st);
+  if(!played && !cardHold && open.length > k && st.status === 'playing'){ busyUntil = Infinity; openCard(st, open[open.length - 1], open.length - 1, () => schedulePanel(), true); }
   paintSquares(st);
   placeTokens(st);
   renderPlayers(st);
   renderPot(st);
   renderTradeBox(st);
   tradeResults(st);
-  const later = () => {
-    const cur = R.state; if(!cur || cur.status !== 'playing') return;
-    homeCamera();
-    $('info').innerHTML = infoFor(cur, cur.pos[cur.turn]);
-    $('info').onclick = () => showSquare(cur.pos[cur.turn]);
-    renderPanel(cur);
-    renderLog(cur);
-  };
-  clearTimeout(panelTimer);
-  const wait = busyUntil - Date.now();
-  if(wait > 0){ $('panel').querySelectorAll('button').forEach(b => b.disabled = true); panelTimer = setTimeout(later, wait); }
-  else later();
+  schedulePanel();
   if(sheetKind && sheetKind !== 'trade') renderSheet();
   updateSoundBtn();
   updateLangBtn();
+}
+function panelNow(){
+  const cur = R.state; if(!cur || cur.status !== 'playing') return;
+  homeCamera();
+  $('info').innerHTML = infoFor(cur, cur.pos[cur.turn]);
+  $('info').onclick = () => showSquare(cur.pos[cur.turn]);
+  renderPanel(cur);
+  renderLog(cur);
+}
+// The panel waits for the replay (and for any open card) before showing the next choices.
+function schedulePanel(){
+  clearTimeout(panelTimer);
+  const wait = busyUntil - Date.now();
+  if(wait > 0){ $('panel').querySelectorAll('button').forEach(b => b.disabled = true); if(wait !== Infinity) panelTimer = setTimeout(panelNow, wait); }
+  else panelNow();
 }
 // While a replay is running, tokens keep their animated squares.
 function walkingTo(st){ return busyUntil > Date.now(); }
@@ -1240,35 +1299,35 @@ function infoFor(st, i){
   const g = s.g ? GROUPS[s.g] : null;
   let body = '';
   if(ownable(i)){
-    if(!pr) body = L('À vendre · ', 'للبيع · ') + '<b>' + DT(s.p) + '</b>';
-    else body = L('À ', 'لـ ') + '<b>' + esc(nm(st, pr.o)) + '</b>' + (pr.m ? L(' · hypothéqué', ' · مرهون') : L(' · loyer ', ' · الكراء ') + '<b>' + (s.t === 'util' ? '×' + (UTILS.filter(j => ownerOf(st, j) === pr.o).length === 2 ? 1000 : 400) + L(' les dés', ' × النرد') : DT(rentOf(st, i, 0))) + '</b>');
-  } else if(s.t === 'tax') body = L('Paie ', 'ادفع ') + '<b>' + DT(s.a) + '</b>';
-  else if(s.t === 'go') body = L('Reçois <b>20.000 DT</b> à chaque passage', 'خذ <b>20.000 د</b> كل مرة تمرّ من هنا');
-  else if(s.t === 'jail') body = L('Simple visite… ou prisonnier', 'زيارة… أو سجين');
-  else if(s.t === 'park') body = L('Arrête-toi ici pour gagner la cagnotte : ', 'توقّف هنا لتربح الأموال المجمّعة: ') + '<b>' + DT(st.pot || 0) + '</b>';
-  else if(s.t === 'gojail') body = L('Direction la prison', 'اذهب إلى السجن');
-  else body = L('Pioche une carte', 'اسحب بطاقة');
+    if(!pr) body = 'À vendre · ' + '<b>' + DT(s.p) + '</b>';
+    else body = 'À ' + '<b>' + esc(nm(st, pr.o)) + '</b>' + (pr.m ? ' · hypothéqué' : ' · loyer ' + '<b>' + (s.t === 'util' ? '×' + (UTILS.filter(j => ownerOf(st, j) === pr.o).length === 2 ? 1000 : 400) + ' les dés' : DT(rentOf(st, i, 0))) + '</b>');
+  } else if(s.t === 'tax') body = 'Paie ' + '<b>' + DT(s.a) + '</b>';
+  else if(s.t === 'go') body = 'Reçois <b>20.000 DT</b> à chaque passage';
+  else if(s.t === 'jail') body = 'Simple visite… ou prisonnier';
+  else if(s.t === 'park') body = 'Arrête-toi ici pour gagner la cagnotte : ' + '<b>' + DT(st.pot || 0) + '</b>';
+  else if(s.t === 'gojail') body = 'Direction la prison';
+  else body = 'Pioche une carte';
   return '<div class="hd'+(g && g.light ? ' light' : '')+'" style="--g:'+(g ? g.c : 'var(--blue)')+'">'+svgIcon(i)+esc(sqName(i))+'</div><div class="bd"><span>'+body+'</span></div>';
 }
 function cardBox(st){
   if(!st.card) return '';
   const c = DECKS[st.card.deck][st.card.idx];
-  return '<div class="card-pop '+st.card.deck+'"><small>'+(st.card.deck === 'chance' ? '❓ ' : '🏛️ ')+deckName(st.card.deck)+'</small>'+esc(cardText(c))+'</div>';
+  return '<div class="card-pop '+st.card.deck+'"><small>'+(st.card.deck === 'chance' ? '❓ Chance' : '🧰 Sandouk Baladi')+'</small>'+esc(c.t)+'</div>';
 }
 function renderPanel(st){
   const me = R.me, t = st.turn, p = $('panel');
-  const manage = '<button class="ui-btn alt small" onclick="openManage()">🏠 ' + L('Mes biens', 'أملاكي') + '</button>';
-  const trade = '<button class="ui-btn alt small" onclick="openTrade()"'+(st.trade || alive(st).length < 2 ? ' disabled' : '')+'>🤝 ' + L('Échanger', 'تبادل') + '</button>';
+  const manage = '<button class="ui-btn alt small" onclick="openManage()">🏠 ' + 'Mes biens' + '</button>';
+  const trade = '<button class="ui-btn alt small" onclick="openTrade()"'+(st.trade || alive(st).length < 2 ? ' disabled' : '')+'>🤝 ' + 'Échanger' + '</button>';
   let html = '';
   if(st.trade && st.trade.to === me){
-    html += '<div class="msg"><b>' + esc(nm(st, st.trade.from)) + '</b> ' + L('te propose cet échange.', 'يقترح عليك هذا التبادل.') + '</div><div class="row"><button class="ui-btn red" onclick="aTradeAnswer(false)">' + L('Refuser', 'رفض') + '</button><button class="ui-btn go" onclick="aTradeAnswer(true)">' + L('Accepter', 'قبول') + '</button></div>';
+    html += '<div class="msg"><b>' + esc(nm(st, st.trade.from)) + '</b> ' + 'te propose cet échange.' + '</div><div class="row"><button class="ui-btn red" onclick="aTradeAnswer(false)">' + 'Refuser' + '</button><button class="ui-btn go" onclick="aTradeAnswer(true)">' + 'Accepter' + '</button></div>';
     p.innerHTML = html; return;
   }
-  if(st.out[me]){ p.innerHTML = '<div class="wait-msg">' + L('Tu as fait faillite. Tu peux suivre la fin de la partie.', 'أفلست. يمكنك متابعة بقية اللعبة.') + '</div>'; return; }
+  if(st.out[me]){ p.innerHTML = '<div class="wait-msg">' + 'Tu as fait faillite. Tu peux suivre la fin de la partie.' + '</div>'; return; }
   if(t !== me){
-    let w = L('Au tour de ', 'دور ') + '<b>' + esc(nm(st, t)) + '</b>…';
-    if(st.phase === 'buy') w = '<b>' + esc(nm(st, t)) + '</b> ' + L('réfléchit à acheter ', 'يفكّر في شراء ') + esc(sqName(st.pos[t])) + '…';
-    if(st.phase === 'debt') w = '<b>' + esc(nm(st, t)) + '</b> ' + L('doit trouver ', 'عليه أن يجد ') + DT(st.debt.amount) + '…';
+    let w = 'Au tour de ' + '<b>' + esc(nm(st, t)) + '</b>…';
+    if(st.phase === 'buy') w = '<b>' + esc(nm(st, t)) + '</b> ' + 'réfléchit à acheter ' + esc(sqName(st.pos[t])) + '…';
+    if(st.phase === 'debt') w = '<b>' + esc(nm(st, t)) + '</b> ' + 'doit trouver ' + DT(st.debt.amount) + '…';
     html += cardBox(st) + '<div class="msg pulse">' + w + '</div>';
     html += '<div class="row">' + manage + '</div>';
     p.innerHTML = html; return;
@@ -1276,21 +1335,21 @@ function renderPanel(st){
   html += cardBox(st);
   if(st.phase === 'roll'){
     if(st.jail[me]){
-      html += '<div class="msg">⛓️ ' + L('Tu es en <b>prison</b> (essai ', 'أنت في <b>السجن</b> (محاولة ') + st.jail[me] + '/3). ' + L('Fais un double, ou paie pour sortir.', 'اعمل دوبل، أو ادفع لتخرج.') + '</div>';
-      html += '<button class="ui-btn" onclick="aRoll()">🎲 ' + L('Tenter un double', 'جرّب دوبل') + '</button><div class="row"><button class="ui-btn alt small" onclick="aJailPay()"'+(st.money[me] < JAIL_FEE ? ' disabled' : '')+'>' + L('Payer ', 'ادفع ') + DT(JAIL_FEE) + '</button>'+(st.jailCards[me].length ? '<button class="ui-btn alt small" onclick="aJailCard()">🎟️ ' + L('Utiliser ma carte', 'استعمل بطاقتي') + '</button>' : '')+'</div>';
-    } else html += '<button class="ui-btn" onclick="aRoll()">🎲 ' + L('Lancer les dés', 'ارمِ النرد') + '</button>';
+      html += '<div class="msg">⛓️ ' + 'Tu es en <b>prison</b> (essai ' + st.jail[me] + '/3). ' + 'Fais un double, ou paie pour sortir.' + '</div>';
+      html += '<button class="ui-btn" onclick="aRoll()">🎲 ' + 'Tenter un double' + '</button><div class="row"><button class="ui-btn alt small" onclick="aJailPay()"'+(st.money[me] < JAIL_FEE ? ' disabled' : '')+'>' + 'Payer ' + DT(JAIL_FEE) + '</button>'+(st.jailCards[me].length ? '<button class="ui-btn alt small" onclick="aJailCard()">🎟️ ' + 'Utiliser ma carte' + '</button>' : '')+'</div>';
+    } else html += '<button class="ui-btn" onclick="aRoll()">🎲 ' + 'Lancer les dés' + '</button>';
     html += '<div class="row">' + manage + trade + '</div>';
   } else if(st.phase === 'buy'){
     const i = st.pos[me], s = SQ[i], ok = st.money[me] >= s.p;
-    html += '<div class="msg">' + L('Acheter ', 'شراء ') + '<b>' + esc(sqName(i)) + '</b> ' + L('pour ', 'بـ ') + '<b>' + DT(s.p) + '</b> ?' + (ok ? '' : '<br><small>' + L('Il te manque ', 'ينقصك ') + DT(s.p - st.money[me]) + L(' : hypothèque des biens ou vends des maisons dans <b>Mes biens</b>, puis achète.', ': ارهن أملاكًا أو بِع منازل في <b>أملاكي</b>، ثم اشترِ.') + '</small>') + '</div>';
-    html += '<div class="row"><button class="ui-btn alt" onclick="aBuy(false)">' + L('Non merci', 'لا شكرًا') + '</button><button class="ui-btn go" onclick="aBuy(true)"'+(ok ? '' : ' disabled')+'>' + L('Acheter', 'اشترِ') + '</button></div><div class="row">' + manage + '</div>';
+    html += '<div class="msg">' + 'Acheter ' + '<b>' + esc(sqName(i)) + '</b> ' + 'pour ' + '<b>' + DT(s.p) + '</b> ?' + (ok ? '' : '<br><small>' + 'Il te manque ' + DT(s.p - st.money[me]) + ' : hypothèque des biens ou vends des maisons dans <b>Mes biens</b>, puis achète.' + '</small>') + '</div>';
+    html += '<div class="row"><button class="ui-btn alt" onclick="aBuy(false)">' + 'Non merci' + '</button><button class="ui-btn go" onclick="aBuy(true)"'+(ok ? '' : ' disabled')+'>' + 'Acheter' + '</button></div><div class="row">' + manage + '</div>';
   } else if(st.phase === 'debt'){
     const d = st.debt, ok = st.money[me] >= d.amount;
-    html += '<div class="msg">💸 ' + L('Tu dois ', 'عليك ') + '<b>' + DT(d.amount) + '</b> (' + esc(d.why) + ').<br>' + L('Tu as ', 'عندك ') + DT(st.money[me]) + L('. Vends des maisons ou hypothèque des biens.', '. بِع منازل أو ارهن أملاكًا.') + '</div>';
-    html += '<button class="ui-btn go" onclick="aPayDebt()"'+(ok ? '' : ' disabled')+'>' + L('Payer ', 'ادفع ') + DT(d.amount) + '</button><div class="row">' + manage + '<button class="ui-btn red small" onclick="aBankrupt()">' + L('Faillite', 'إفلاس') + '</button></div>';
+    html += '<div class="msg">💸 ' + 'Tu dois ' + '<b>' + DT(d.amount) + '</b> (' + esc(d.why) + ').<br>' + 'Tu as ' + DT(st.money[me]) + '. Vends des maisons ou hypothèque des biens.' + '</div>';
+    html += '<button class="ui-btn go" onclick="aPayDebt()"'+(ok ? '' : ' disabled')+'>' + 'Payer ' + DT(d.amount) + '</button><div class="row">' + manage + '<button class="ui-btn red small" onclick="aBankrupt()">' + 'Faillite' + '</button></div>';
   } else if(st.phase === 'end'){
     const again = st.again && !st.jail[me];
-    html += '<button class="ui-btn'+(again ? ' go' : '')+'" onclick="aEnd()">' + (again ? '🎲 ' + L('Double ! Relancer', 'دوبل! ارمِ مجددًا') : L('Fin du tour ›', 'نهاية الدور ›')) + '</button><div class="row">' + manage + trade + '</div>';
+    html += '<button class="ui-btn'+(again ? ' go' : '')+'" onclick="aEnd()">' + (again ? '🎲 ' + 'Double ! Relancer' : 'Fin du tour ›') + '</button><div class="row">' + manage + trade + '</div>';
   } else html += '<div class="msg pulse">…</div>';
   p.innerHTML = html;
 }
@@ -1371,8 +1430,8 @@ function renderSheet(){
     if(s.t === 'prop'){
       const rows = [[L('Loyer', 'الكراء'), s.r[0]], [L('Couleur complète', 'كل اللون'), s.r[0] * 2], [L('Avec 1 maison', 'مع منزل'), s.r[1]], [L('Avec 2 maisons', 'مع منزلين'), s.r[2]], [L('Avec 3 maisons', 'مع 3 منازل'), s.r[3]], [L('Avec 4 maisons', 'مع 4 منازل'), s.r[4]], [L('Avec un hôtel', 'مع نزل'), s.r[5]]];
       const cur = pr ? (pr.h ? pr.h + 1 : (ownsGroup(st, pr.o, s.g) ? 1 : 0)) : -1;
-      html += '<table>' + rows.map((r, k) => '<tr'+(k === cur ? ' class="cur"' : '')+'><td>'+r[0]+'</td><td>'+DT(r[1])+'</td></tr>').join('') + '</table>';
-      html += '<div class="ft">' + L('Prix ', 'السعر ') + DT(s.p) + L(' · maison ', ' · منزل ') + DT(g.h) + L(' · hypothèque ', ' · رهن ') + DT(s.p / 2) + '</div>';
+      html += '<table>' + rows.map((r, k) => '<tr'+(k === cur ? ' class="cur"' : '')+'><td>'+r[0]+'</td><td>'+DTb(r[1])+'</td></tr>').join('') + '</table>';
+      html += '<div class="ft">' + L('Prix ', 'السعر ') + DTb(s.p) + L(' · maison ', ' · منزل ') + DTb(g.h) + L(' · hypothèque ', ' · رهن ') + DTb(s.p / 2) + '</div>';
     } else if(s.t === 'tr'){
       html += '<table>' + [1, 2, 3, 4].map(n => '<tr><td>' + n + ' transport' + (n > 1 ? 's' : '') + '</td><td>' + DT(2500 * Math.pow(2, n - 1)) + '</td></tr>').join('') + '</table><div class="ft">Prix ' + DT(s.p) + ' · hypothèque ' + DT(s.p / 2) + '</div>';
     } else if(s.t === 'util'){
@@ -1384,7 +1443,7 @@ function renderSheet(){
     if(here.length) html += '<p class="muted" style="text-align:center">Ici : ' + here.map(k => av(st.players[k]) + ' ' + esc(nm(st, k))).join(', ') + '</p>';
   } else if(sheetKind === 'player'){
     const i = sheetArg, list = myProps(st, i);
-    html += '<div class="ui-sheet-title">' + av(st.players[i]) + ' ' + esc(nm(st, i)) + '</div><p class="muted">' + DT(st.money[i]) + (st.jail[i] ? L(' · en prison', ' · في السجن') : '') + (st.jailCards[i].length ? ' · 🎟️ carte de sortie' : '') + (st.out[i] ? ' · en faillite' : '') + '</p>';
+    html += '<div class="ui-sheet-title">' + av(st.players[i]) + ' ' + esc(nm(st, i)) + '</div><p class="muted">' + DT(st.money[i]) + (st.jail[i] ? ' · en prison' : '') + (st.jailCards[i].length ? ' · 🎟️ carte de sortie' : '') + (st.out[i] ? ' · en faillite' : '') + '</p>';
     html += list.length ? '<div class="pl-props">' + list.map(k => '<span style="--g:' + (SQ[k].g ? GROUPS[SQ[k].g].c : '#9ab') + '" onclick="showSquare(' + k + ')"><i></i>' + esc(SQ[k].n) + (st.props[k].h ? ' ' + (st.props[k].h === 5 ? '🏨' : '🏠×' + st.props[k].h) : '') + (st.props[k].m ? ' (hyp.)' : '') + '</span>').join('') + '</div>' : '<p class="mng-empty">Aucun bien pour l’instant.</p>';
   } else if(sheetKind === 'manage'){
     const me = R.me, list = myProps(st, me), can = canManage(st);
