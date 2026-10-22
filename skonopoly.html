@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Titan+One&family=Marhey:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Titan+One&family=Marhey:wght@600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="gym-ui.css">
 <style>
   /* ---------- Skonopoly — « Sidi Bou Saïd » : murs blancs, portes bleues, sable et jasmin ---------- */
@@ -100,14 +100,14 @@
   .card-fly{position:absolute;width:250px;height:170px;margin:-85px 0 0 -125px;perspective:900px}
   .card-fly.held{pointer-events:auto}
   .card-fly .x{position:absolute;top:6px;right:6px;width:32px;height:32px;border-radius:50%;border:0;background:var(--cb);color:#fff;font-size:17px;font-weight:800;cursor:pointer;display:grid;place-items:center}
-  .card-fly .ok{margin-top:10px;border:0;border-radius:999px;background:var(--cb);color:#fff;font:800 14px/1 inherit;padding:9px 22px;cursor:pointer}
+  .card-fly .ok{margin-top:10px;border:0;border-radius:999px;background:var(--cb);color:#fff;font:700 14px/1 'Fredoka',sans-serif;padding:9px 22px;cursor:pointer}
   .card-fly .rd{margin-top:10px;font-size:11px;color:#8a8a8a;font-style:italic}
   .card-fly .in{position:absolute;inset:0;transform-style:preserve-3d}
   .card-fly .side{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;text-align:center;box-shadow:0 16px 36px rgba(0,0,0,.35)}
   .card-fly .back{background:repeating-linear-gradient(45deg,var(--cb) 0 10px,var(--cb2) 10px 20px);color:#fff;font-family:'Titan One',sans-serif;font-size:22px;border:4px solid #fff}
-  .card-fly .back span{font-family:'Marhey',sans-serif;font-size:26px}
+  .card-fly .back span{font-family:'Amiri',serif;font-weight:700;font-size:30px}
   .card-fly .front{transform:rotateY(180deg);background:#fffdf6;border:3px solid var(--cb);color:var(--ink);font-size:16px;line-height:1.35;padding:14px 18px}
-  .card-fly .front[lang=ar]{font-family:'Marhey',sans-serif;font-size:17px}
+  .card-fly .front[lang=ar]{font-family:'Amiri',serif;font-weight:700;font-size:20px;line-height:1.5}
   .card-fly .front small{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cb);margin-bottom:6px}
   canvas.fireworks{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:90}
   .snd-top{font-size:17px}
@@ -168,10 +168,12 @@
   .sq.b-top .nm{margin-top:11%} .sq.b-bottom .nm{margin-bottom:11%} .sq.b-left .nm{margin-left:11%} .sq.b-right .nm{margin-right:11%}
   .sq .nm{font-size:1.45cqw;font-weight:600;letter-spacing:0;color:#1f2a22}
   .sq .nm{white-space:normal;word-break:keep-all;overflow-wrap:normal;text-align:center;line-height:1.05;max-height:2.2em}
-  .sq .nm[lang=ar]{font-family:'Marhey',sans-serif;font-size:1.35cqw;font-weight:700;line-height:1.12;max-height:3.4em}
+  .sq .nm[lang=ar]{font-family:'Amiri',serif;font-size:1.55cqw;font-weight:700;line-height:1.15;max-height:3.4em}
   .sq .nm{max-height:3.4em}
   .sq .nm.long{font-size:1.2cqw}
   .sq .nm.xlong{font-size:.95cqw}
+  .sq .nm.long[lang=ar]{font-size:1.4cqw}
+  .sq .nm.xlong[lang=ar]{font-size:1.1cqw}
   .sq.special .si{width:2.8cqw;height:2.8cqw;margin-bottom:.2cqw}
   .sq .pr{font-size:1.2cqw;color:#3f5544;margin-top:.2cqw;font-family:'Space Mono',monospace;font-weight:700}
   .sq.corner{background:#cfe5c3}
@@ -191,11 +193,11 @@
   .sq .hs i{background:#1f9d55}
   .center{background:#cfe5c3}
   .center::before{background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.35),transparent 70%)}
-  .logo{position:absolute!important;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-45deg);font-family:'Marhey',sans-serif;font-size:11cqw;color:rgba(20,30,22,.82);text-shadow:none;white-space:nowrap;line-height:1;pointer-events:none}
+  .logo{position:absolute!important;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-45deg);font-family:'Amiri',serif;font-weight:700;font-size:11cqw;color:rgba(20,30,22,.82);text-shadow:none;white-space:nowrap;line-height:1;pointer-events:none}
   .logo small{font-family:'Titan One',sans-serif;font-size:3cqw;color:rgba(20,30,22,.55);letter-spacing:.08em}
   .center .pot,.center .dice{z-index:1}
   /* card piles on the table, like the real board: Sandouk (pink) top-left, Chance (blue) bottom-right */
-  .deck{position:absolute;width:19cqw;height:12.5cqw;border-radius:1.4cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:'Marhey',sans-serif;transform:rotate(-45deg);box-shadow:.5cqw .5cqw 0 rgba(0,0,0,.18);z-index:1}
+  .deck{position:absolute;width:19cqw;height:12.5cqw;border-radius:1.4cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:'Amiri',serif;font-weight:700;transform:rotate(-45deg);box-shadow:.5cqw .5cqw 0 rgba(0,0,0,.18);z-index:1}
   .deck::before,.deck::after{content:"";position:absolute;inset:0;border-radius:inherit;background:inherit;z-index:-1}
   .deck::before{transform:translate(.6cqw,.6cqw);filter:brightness(.88)} .deck::after{transform:translate(1.2cqw,1.2cqw);filter:brightness(.76)}
   .deck b{font-size:3.6cqw;line-height:1.1;text-align:center}
