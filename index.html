@@ -125,6 +125,9 @@
   .h-filter button.on{background:#f3efe4;color:#14171a;font-weight:600}
 
   .h-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+  .h-foot{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:4px;font-size:13px;color:#6f7471}
+  .h-foot a{color:#8e918f;text-decoration:none}
+  .h-foot a:active{color:#f3efe4}
   .tile.tile-off{position:relative;opacity:.55;outline:2px dashed rgba(243,239,228,.5);outline-offset:-2px}
   .tile.tile-off::after{content:'🔒';position:absolute;right:8px;bottom:8px;font-size:15px}
   .tile{
@@ -296,6 +299,7 @@
         <h1 class="h-title">Games Room</h1>
       </div>
       <div class="h-actions">
+        <a class="h-icon-btn" href="classement.html" aria-label="Classement">🏆</a>
         <a class="h-icon-btn hidden" id="admin-btn" href="admin.html" aria-label="Mode admin">🛠️</a>
       </div>
     </div>
@@ -377,6 +381,12 @@
         <span class="tb-info"><span class="tile-name">TABOO</span><span class="tb-sub">Deux équipes · 60 s</span></span>
         <span class="tile-n">4+</span>
       </a>
+    </div>
+
+    <div class="h-foot">
+      <a href="classement.html">🏆 Classement</a>
+      <span>·</span>
+      <a href="confidentialite.html">Confidentialité</a>
     </div>
 
     <form class="h-dock" onsubmit="homeJoin();return false;">
@@ -1112,5 +1122,6 @@ document.body.classList.toggle('home', !$('screen-home').classList.contains('hid
 })();
 </script>
 <script src="install-tutorial.js" defer></script>
+<script src="consent.js" defer></script>
 </body>
 </html>

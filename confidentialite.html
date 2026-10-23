@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Games Room · Confidentialité</title>
+<meta name="theme-color" content="#14171a">
+<link rel="manifest" href="manifest.json?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/gr-180.png">
+<link rel="icon" href="icons/gr-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#14171a; --surface:#22262a; --fg:#f3efe4; --dim:#9a9d9a; --gold:#e9c46a; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Fredoka',system-ui,sans-serif;background:var(--bg);color:var(--fg);min-height:100dvh;
+    display:flex;flex-direction:column;align-items:center;
+    padding:calc(16px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));line-height:1.6}
+  .frame{width:100%;max-width:560px}
+  .top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .back{width:44px;height:44px;flex:none;border-radius:14px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:18px;text-decoration:none;color:var(--fg)}
+  .back:active{transform:scale(.94)}
+  h1{font-size:24px;font-weight:700}
+  .top small{display:block;font-size:13px;color:var(--dim)}
+  .card{background:var(--surface);border-radius:18px;padding:18px 18px 6px;margin-bottom:14px}
+  h2{font-size:16px;color:var(--gold);margin:4px 0 8px}
+  p{font-size:14.5px;color:#d7d9d6;margin-bottom:12px}
+  ul{margin:0 0 12px 18px}
+  li{font-size:14.5px;color:#d7d9d6;margin-bottom:6px}
+  b{color:var(--fg)}
+  a{color:var(--gold);text-decoration:none}
+  .upd{font-size:12.5px;color:var(--dim);text-align:center;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="top">
+    <a class="back" href="index.html" aria-label="Retour">←</a>
+    <div><small>Games Room</small><h1>Confidentialité &amp; mentions</h1></div>
+  </div>
+
+  <div class="card">
+    <h2>En deux mots</h2>
+    <p>Games Room est une app de jeux à jouer entre amis et en famille. On collecte le <b>strict minimum</b> pour que les jeux fonctionnent, on ne vend rien, et il n'y a <b>ni publicité ni pistage</b> aujourd'hui.</p>
+  </div>
+
+  <div class="card">
+    <h2>Ce qu'on garde sur ton téléphone</h2>
+    <p>Pour te simplifier la vie, certaines infos restent <b>uniquement sur ton appareil</b> (stockage local du navigateur) et ne sont envoyées à personne&nbsp;:</p>
+    <ul>
+      <li>ton <b>prénom</b> et ton <b>avatar</b> choisis&nbsp;;</li>
+      <li>tes <b>préférences</b> (son, langue)&nbsp;;</li>
+      <li>les <b>parties récentes</b> pour les reprendre&nbsp;;</li>
+      <li>ton choix sur ce bandeau de confidentialité.</li>
+    </ul>
+    <p>Tu peux tout effacer en vidant les données du site dans ton navigateur.</p>
+  </div>
+
+  <div class="card">
+    <h2>Ce qui est stocké en ligne (pour jouer ensemble)</h2>
+    <p>Pour qu'une partie puisse se jouer à plusieurs téléphones, les infos de la partie en cours sont enregistrées sur notre base de données&nbsp;:</p>
+    <ul>
+      <li>le <b>code</b> de la partie et son déroulé (cartes, scores, tour de jeu)&nbsp;;</li>
+      <li>le <b>prénom</b> et l'<b>avatar</b> des joueurs de la partie&nbsp;;</li>
+      <li>le <b>résultat</b> des parties terminées (gagnant, scores, date), utilisé pour l'historique et le classement&nbsp;;</li>
+      <li>dans Skonopoly, si tu choisis de jouer avec ta <b>photo</b> comme pion, une petite image de ta tête est stockée avec la partie. C'est <b>toi qui choisis</b> de l'ajouter, et tu peux l'enlever.</li>
+    </ul>
+    <p>On ne demande <b>ni e-mail, ni numéro, ni compte</b>. Mets le prénom que tu veux&nbsp;: un surnom suffit.</p>
+  </div>
+
+  <div class="card">
+    <h2>Avec qui c'est partagé</h2>
+    <p>Les données de partie sont visibles par les <b>autres joueurs</b> de la même partie. Techniquement, l'app est hébergée par <b>Vercel</b> et la base de données par <b>Supabase</b>, qui stockent ces informations pour notre compte. On ne revend tes données à personne.</p>
+  </div>
+
+  <div class="card">
+    <h2>Les enfants</h2>
+    <p>L'app est pensée pour un usage familial. On ne collecte pas volontairement d'informations personnelles sur les enfants, et aucun prénom n'est obligatoire pour jouer.</p>
+  </div>
+
+  <div class="card">
+    <h2>Publicité</h2>
+    <p>Il n'y a <b>pas de publicité</b> pour le moment. Si de la publicité est ajoutée un jour, cette page sera mise à jour et un vrai choix de consentement te sera demandé avant toute pub personnalisée.</p>
+  </div>
+
+  <div class="card">
+    <h2>Tes droits &amp; le contact</h2>
+    <p>Tu peux demander à voir, corriger ou supprimer les données d'une partie. Pour toute question sur tes données, écris à&nbsp;: <a href="mailto:mehdilaouiti7@gmail.com">mehdilaouiti7@gmail.com</a>.</p>
+    <p class="upd">Éditeur du service&nbsp;: Mehdi Laouiti · Contact&nbsp;: mehdilaouiti7@gmail.com</p>
+  </div>
+
+  <p class="upd" id="maj"></p>
+</div>
+<script>
+  // Last-updated date, shown in the viewer's locale.
+  try{ document.getElementById('maj').textContent = 'Dernière mise à jour : ' + new Date(document.lastModified).toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'}); }catch(e){}
+</script>
+</body>
+</html>
