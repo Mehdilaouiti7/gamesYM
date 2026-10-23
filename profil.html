@@ -58,8 +58,16 @@
   .fav b{display:block;font-size:16px}
   .fav span{font-size:12.5px;color:var(--dim)}
   .muted{color:var(--dim);font-size:13.5px;text-align:center;line-height:1.5;padding:4px 8px}
+  .acc{display:flex;align-items:center;gap:12px}
+  .acc .e{font-size:30px}
+  .acc b{display:block;font-size:15px}
+  .acc span{font-size:12.5px;color:var(--dim);word-break:break-all}
+  .gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;color:#1f1f1f;border:none;border-radius:14px;padding:12px;font:600 15px 'Fredoka',sans-serif;cursor:pointer}
+  .gbtn:active{transform:scale(.98)}
+  .link-btn{display:block;width:100%;margin-top:10px;text-align:center;color:#ff8a7a;font-size:13.5px;background:none;border:none;cursor:pointer}
   a.link{color:var(--gold);text-decoration:none}
 </style>
+<script src="auth.js"></script>
 </head>
 <body>
 <div class="frame">
@@ -81,6 +89,11 @@
 
     <button class="save" id="save-btn" onclick="save()">Enregistrer</button>
     <div class="saved" id="saved-msg"></div>
+  </div>
+
+  <div class="card" id="account-card">
+    <h2 style="font-size:16px;color:var(--gold);margin:0 0 10px">Mon compte</h2>
+    <div id="account-body"><div class="muted" style="text-align:left">…</div></div>
   </div>
 
   <div class="label">Mes stats</div>
@@ -167,6 +180,21 @@ async function loadStats(){
     '</div>' +
     (fav ? '<div class="fav"><span class="e">' + fav.emoji + '</span><div><b>' + esc(fav.name) + '</b><span>Ton jeu préféré · ' + byGame[favKey].played + ' partie' + (byGame[favKey].played > 1 ? 's' : '') + '</span></div></div>' : '');
 }
+function renderAccount(){
+  const G = '<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M45 24c0-1.6-.1-3.1-.4-4.5H24v9h11.8c-.5 2.8-2 5.1-4.4 6.7v5.6h7.1C42.7 37 45 31 45 24z"/><path fill="#34A853" d="M24 46c6 0 11-2 14.6-5.3l-7.1-5.6c-2 1.3-4.5 2.1-7.5 2.1-5.8 0-10.7-3.9-12.4-9.2H4.3v5.8C7.9 40.9 15.4 46 24 46z"/><path fill="#FBBC05" d="M11.6 28c-.5-1.3-.7-2.7-.7-4s.3-2.7.7-4v-5.8H4.3C2.8 17.1 2 20.4 2 24s.8 6.9 2.3 9.8l7.3-5.8z"/><path fill="#EA4335" d="M24 10.8c3.3 0 6.2 1.1 8.5 3.3l6.3-6.3C35 4.1 30 2 24 2 15.4 2 7.9 7.1 4.3 14.2l7.3 5.8C13.3 14.7 18.2 10.8 24 10.8z"/></svg>';
+  const box = $('account-body');
+  if(!window.GYMAuth){ box.innerHTML = '<div class="muted" style="text-align:left">Connexion indisponible.</div>'; return; }
+  const u = GYMAuth.user();
+  if(u){
+    const m = u.user_metadata || {};
+    box.innerHTML = '<div class="acc"><span class="e">✅</span><div><b>' + esc(m.full_name || m.name || 'Connecté') + '</b><span>' + esc(u.email || '') + '</span></div></div>' +
+      '<button class="link-btn" onclick="GYMAuth.signOut()">Se déconnecter</button>';
+  } else {
+    box.innerHTML = '<p class="muted" style="text-align:left;margin:0 0 10px 0">Connecte-toi pour sauvegarder ton profil et le retrouver sur n\'importe quel téléphone.</p>' +
+      '<button class="gbtn" onclick="GYMAuth.signInGoogle()">' + G + 'Continuer avec Google</button>';
+  }
+}
+if(window.GYMAuth && GYMAuth.ready && GYMAuth.ready.then) GYMAuth.ready.then(renderAccount); else renderAccount();
 loadStats();
 </script>
 </body>
