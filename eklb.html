@@ -454,6 +454,7 @@ function renderEnd(st){
 
 R.init({
   key: 'kl', table: 'kl_games', title: 'EKLB', page: 'eklb.html', min: 2, max: 5,
+  result: st => st.winner == null ? null : { winner: nm(st, st.winner), result: '🏆 ' + nm(st, st.winner) },
   start: setup,
   render
 });

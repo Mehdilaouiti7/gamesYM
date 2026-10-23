@@ -1633,6 +1633,7 @@ showMyPhoto();
 
 R.init({
   key: 'sko', table: 'sko_games', title: 'Skonopoly', page: 'skonopoly.html', min: 2, max: 6,
+  result: st => st.winner == null ? null : { winner: nm(st, st.winner), result: '🏆 ' + nm(st, st.winner) + ' · ' + DT(st.money[st.winner]) },
   newState: st => { if(myPhoto) st.players[0].photo = myPhoto; },
   onJoin: (st, idx) => { if(myPhoto) st.players[idx].photo = myPhoto; },
   start: setup,

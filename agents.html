@@ -382,6 +382,10 @@ function renderEnd(st){
 
 R.init({
   key:'ag', table:'ag_games', title:'Agents secrets', page:'agents.html', min:4, max:8,
+  result(st){
+    const w = st.winner, team = st.players.filter((p,i) => st.teams[i]===w).map(p => p.name).join(', ');
+    return { winner: 'Équipe ' + TEAM[w].toLowerCase(), result: '🏆 Équipe ' + TEAM[w].toLowerCase() + ' (' + team + ')' + (st.reason==='assassin' ? ' · assassin touché' : '') };
+  },
   newState(st){ st.teams = [0]; st.chiefs = [0, null]; },
   onJoin(st, idx){ const a = st.teams.filter(t => t===0).length, b = st.teams.filter(t => t===1).length; st.teams.push(a<=b ? 0 : 1); fixChiefs(st); },
   canStart(st){ return members(st,0).length < 2 || members(st,1).length < 2 ? 'Il faut 2 joueurs par équipe' : ''; },

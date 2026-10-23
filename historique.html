@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Games Room · Historique</title>
-<meta name="theme-color" content="#233a2f">
+<meta name="theme-color" content="#14171a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Games Room">
@@ -14,293 +14,201 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --board:#24382e;
-    --board-deep:#1b2c24;
-    --chalk:#f3efe4;
-    --chalk-dim:#c9c4b4;
-    --butter:#e9c46a;
-    --red-chalk:#e76f51;
-    --blue-chalk:#8ecae6;
-    --line:rgba(243,239,228,.18);
-    --radius:14px;
-  }
+  :root{ --bg:#14171a; --surface:#22262a; --surface2:#1d2024; --fg:#f3efe4; --dim:#8e918f; --gold:#e9c46a; }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{min-height:100%}
   body{
-    font-family:'Fredoka',system-ui,sans-serif;
-    background:
-      radial-gradient(1200px 600px at 50% -10%, rgba(233,196,106,.07), transparent 60%),
-      linear-gradient(var(--board), var(--board-deep));
-    background-repeat: no-repeat;
-    color:var(--chalk);
-    min-height:100dvh;
-    display:flex;flex-direction:column;align-items:center;
-    padding:20px 16px 40px;
+    font-family:'Fredoka',system-ui,sans-serif;background:var(--bg);color:var(--fg);
+    min-height:100dvh;display:flex;flex-direction:column;align-items:center;
+    padding:calc(14px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
   }
-  .frame{width:100%;max-width:460px}
-  header{text-align:center;margin-bottom:14px;position:relative}
-  h1{font-weight:700;font-size:1.9rem;letter-spacing:.5px}
-  .tagline{color:var(--chalk-dim);font-size:.9rem;margin-top:2px}
-  .back-link{display:inline-block;margin-top:8px;color:var(--chalk-dim);font-size:.82rem;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
-  .refresh-btn{position:absolute;top:0;right:0;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:999px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;cursor:pointer}
-  .refresh-btn:active{transform:scale(.92)}
-  .refresh-btn.spin{animation:spin .7s linear}
-  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-  .card{
-    background:linear-gradient(160deg, rgba(52,74,62,.9), rgba(30,46,38,.88));
-    border:1px solid rgba(243,239,228,.13);
-    border-radius:var(--radius);
-    padding:18px 16px;
-    margin-bottom:14px;
-    box-shadow:0 10px 26px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.05);
-  }
-  .muted{color:var(--chalk-dim);font-size:.85rem;line-height:1.45;text-align:center}
-  .hidden{display:none !important}
+  .frame{width:100%;max-width:460px;display:flex;flex-direction:column;gap:12px}
+  button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
 
-  .date-row{display:flex;align-items:center;gap:6px;margin-bottom:12px}
-  .date-picker-wrap{flex:1;position:relative}
-  input[type=date]{
-    width:100%;
-    background:rgba(0,0,0,.25);
-    border:1.5px dashed var(--line);
-    border-radius:10px;
-    color:var(--chalk);
-    font-family:'Fredoka',sans-serif;
-    font-size:.92rem;
-    padding:9px 10px;
-    outline:none;
-    color-scheme: dark;
-    text-align:center;
-  }
-  input[type=date]::-webkit-date-and-time-value{ text-align:center; }
-  input[type=date]:focus{border-color:var(--butter)}
+  .top{display:flex;align-items:center;gap:12px}
+  .icon-btn{width:44px;height:44px;border-radius:14px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:18px;text-decoration:none;color:var(--fg);flex:none}
+  .icon-btn:active{transform:scale(.94)}
+  .icon-btn.spin span{display:inline-block;animation:spin .7s linear}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .top .ttl{flex:1;min-width:0}
+  .top small{display:block;font-size:13px;color:var(--dim)}
+  .top h1{font-size:26px;font-weight:700;letter-spacing:-.3px;line-height:1.2}
 
-  .filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:14px}
-  .filter-row::-webkit-scrollbar{display:none}
-  .chip{flex:0 0 auto;background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:.82rem;cursor:pointer;white-space:nowrap;transition:filter .15s}
-  .chip.active{background:linear-gradient(160deg,#eecd7c,var(--butter));color:#3a2c10;border-color:transparent;font-weight:600}
-  .chip:active{filter:brightness(.94)}
+  .days{display:flex;align-items:center;gap:6px;background:var(--surface2);border-radius:14px;padding:4px}
+  .days button.arrow{width:42px;height:40px;border-radius:11px;font-size:20px;color:#a9aca9;flex:none}
+  .days button.arrow:active{background:#2a2e33}
+  .days button.arrow:disabled{opacity:.25}
+  .day{flex:1;position:relative;height:40px;border-radius:11px;background:var(--fg);color:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;overflow:hidden}
+  .day input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
 
-  .day-header{font-size:.9rem;font-weight:600;color:var(--butter);margin:2px 2px 10px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .stat{background:var(--surface);border-radius:16px;padding:10px 12px}
+  .stat b{display:block;font-size:22px;font-weight:700;line-height:1.1}
+  .stat span{font-size:12px;color:var(--dim)}
 
-  .hrow{
-    display:flex;align-items:flex-start;gap:10px;
-    padding:10px 12px;border-radius:10px;
-    background:rgba(0,0,0,.18);
-    margin-bottom:6px;
-  }
-  .htime{color:var(--chalk-dim);font-size:.72rem;width:36px;flex-shrink:0;padding-top:2px;font-family:'Space Mono',monospace}
-  .hbody{flex:1;min-width:0}
-  .htitle{font-weight:600;font-size:.9rem}
-  .hdetail{color:var(--chalk-dim);font-size:.78rem;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .hresult{font-weight:600;font-size:.82rem;margin-top:4px;color:var(--butter)}
+  .chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;background:var(--surface);color:#c9ccc9;font-size:13.5px;font-weight:500;white-space:nowrap}
+  .chip i{font-style:normal;font-size:12px;opacity:.7}
+  .chip.on{background:var(--fg);color:var(--bg);font-weight:600}
+
+  .label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin:4px 2px -4px}
+  .empty{background:var(--surface);border-radius:18px;padding:28px 18px;text-align:center;color:var(--dim);font-size:14px;line-height:1.5}
+  .empty b{display:block;font-size:30px;margin-bottom:4px}
+
+  .list{display:flex;flex-direction:column;gap:8px}
+  .row{display:flex;gap:12px;align-items:stretch;background:var(--surface);border-radius:18px;padding:10px}
+  .badge{width:52px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--c);color:var(--t)}
+  .body{flex:1;min-width:0;padding:2px 0}
+  .head{display:flex;align-items:baseline;gap:8px}
+  .name{font-weight:600;font-size:15px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .time{font-family:'Space Mono',monospace;font-size:11px;color:var(--dim);flex:none}
+  .who{font-size:12.5px;color:var(--dim);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hidden{display:none!important}
+  .res{font-size:13.5px;font-weight:600;color:var(--gold);margin-top:4px;line-height:1.3}
 </style>
 <link rel="stylesheet" href="responsive.css">
 </head>
 <body>
 <div class="frame">
-  <header>
-    <h1>📊 Historique</h1>
-    <div class="tagline">Toutes les parties, tous les jours</div>
-    <a class="back-link" href="index.html">← Retour à l'accueil</a>
-    <div class="refresh-btn" id="refresh-btn" onclick="loadAll(true)">🔄</div>
-  </header>
-
-  <div class="date-row">
-    <div class="date-picker-wrap">
-      <input type="date" id="date-picker" onchange="onDateChange()">
-    </div>
+  <div class="top">
+    <a class="icon-btn" href="index.html" aria-label="Retour à l'accueil">←</a>
+    <div class="ttl"><small>Toutes les parties</small><h1>Historique</h1></div>
+    <button class="icon-btn" id="refresh-btn" onclick="loadAll(true)" aria-label="Actualiser"><span>↻</span></button>
   </div>
 
-  <div class="filter-row" id="filter-row"></div>
-
-  <div class="day-header" id="day-title"></div>
-
-  <div class="card hidden" id="sec-loading">
-    <p class="muted">Chargement…</p>
-  </div>
-  <div class="card hidden" id="sec-empty">
-    <p class="muted" id="empty-text">Aucune partie ce jour-là.</p>
+  <div class="days">
+    <button class="arrow" onclick="shiftDay(-1)" aria-label="Jour précédent">‹</button>
+    <label class="day"><span id="day-title"></span><input type="date" id="date-picker" onchange="onDateChange()"></label>
+    <button class="arrow" id="next-day" onclick="shiftDay(1)" aria-label="Jour suivant">›</button>
   </div>
 
-  <div id="list"></div>
+  <div class="stats" id="stats"></div>
+  <div class="chips" id="filter-row"></div>
+  <div class="empty" id="sec-loading">Chargement…</div>
+  <div class="empty hidden" id="sec-empty"><b>🎲</b>Aucune partie ce jour-là.</div>
+  <div class="list" id="list"></div>
 </div>
 
 <script>
 const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
-const HEADERS = {
-  "apikey": SB_KEY,
-  "Authorization": "Bearer " + SB_KEY,
-  "Content-Type": "application/json"
-};
+const HEADERS = { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json" };
 const $ = id => document.getElementById(id);
-function esc(s){ return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
+function esc(s){ return String(s == null ? '' : s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
 
-const GAME_FILTERS = [
-  {key:'all', label:'Tous'},
-  {key:'vt', label:'🐄 Vache & Taureau'},
-  {key:'sk', label:'🎴 Skyjo'},
-  {key:'tm', label:'🧠 The Mind'},
-  {key:'cb', label:'🃏 Chkobba'},
-  {key:'bw', label:'📖 Bent Walad'},
-  {key:'dm', label:'💼 Dlilek Mlek'},
-  {key:'tb', label:'🚫 Taboo'},
-  {key:'ttt', label:'⭕ Morpion'},
-  {key:'mot', label:'🔤 1, 2, 3 Mot !'}
-];
+// Every game of the home page, with the colours of its tile.
+const GAMES = {
+  vt:  { name:'Vache & Taureau', emoji:'🐄', c:'#f4ecd8', t:'#5a2a1c' },
+  dm:  { name:'Dlilek Mlek', emoji:'💼', c:'#120f1f', t:'#f2c14e' },
+  ttt: { name:'Morpion', emoji:'⭕', c:'#fbfaf4', t:'#1f3c88' },
+  mot: { name:'1, 2, 3 Mot !', emoji:'🔤', c:'#ff6b2c', t:'#fff' },
+  sk:  { name:'Skyjo', emoji:'🎴', c:'#dff1ff', t:'#123a6b' },
+  tm:  { name:'The Mind', emoji:'🧠', c:'#2a2170', t:'#d9d0ff' },
+  cb:  { name:'Chkobba', emoji:'🃏', c:'#1f5b43', t:'#fdf6e3' },
+  bw:  { name:'Bent Walad', emoji:'📖', c:'#e8d5b0', t:'#2b2118' },
+  in:  { name:"L'Intrus", emoji:'🕵️', c:'#1d2a2f', t:'#efe9dc' },
+  ag:  { name:'Agents secrets', emoji:'🕶️', c:'#0c1726', t:'#e6eefc' },
+  bl:  { name:'Bluff', emoji:'👑', c:'#4d1428', t:'#c9a227' },
+  ui:  { name:'Un indice chacun', emoji:'💡', c:'#efeaff', t:'#2d2a4a' },
+  kl:  { name:'EKLB', emoji:'🔄', c:'#2a1a55', t:'#f4efff' },
+  sko: { name:'Skonopoly', emoji:'🎲', c:'#e9f2fa', t:'#0a4f9c' },
+  tb:  { name:'Taboo', emoji:'🚫', c:'#b81d33', t:'#fff4e0' }
+};
 let activeFilter = 'all';
 let allEntries = [];
-let selectedDate = new Date();
+let selectedDate = new Date(); selectedDate.setHours(0, 0, 0, 0);
 
-async function fetchResults(table){
+async function fetchRows(table){
   try{
-    const r = await fetch(SB_URL+"/rest/v1/"+table+"?select=*&order=finished_at.desc&limit=500", {headers:HEADERS});
+    const r = await fetch(SB_URL + "/rest/v1/" + table + "?select=*&order=finished_at.desc&limit=500", {headers:HEADERS});
     if(!r.ok) return [];
     return await r.json();
   }catch(e){ return []; }
 }
+const names = a => (a || []).map(esc).join(', ');
+const nPlayers = n => n > 2 ? ' · ' + n + ' joueurs' : '';
 
-function buildEntries(vt, sk, tm, cb, bw, dm, tb, ttt, mot){
-  const entries = [];
-  vt.forEach(r => entries.push({
-    ts: r.finished_at, game:'vt', emoji:'🐄', title:'Vache &amp; Taureau',
-    detail: esc(r.p1_name)+' vs '+esc(r.p2_name),
-    result: '🏆 '+esc(r.winner_name)
-  }));
-  sk.forEach(r => entries.push({
-    ts: r.finished_at, game:'sk', emoji:'🎴', title:'Skyjo'+(r.max_players>2?' · '+r.max_players+' joueurs':''),
-    detail: (r.players||[]).map(esc).join(', '),
-    result: '🏆 '+esc(r.winner_name)
-  }));
-  tm.forEach(r => entries.push({
-    ts: r.finished_at, game:'tm', emoji:'🧠', title:'The Mind · '+r.max_players+' joueurs',
-    detail: (r.players||[]).map(esc).join(', '),
-    result: r.won ? '✅ Niveau '+r.level_reached+' (gagné)' : '❌ Niveau '+r.level_reached
-  }));
-  cb.forEach(r => {
-    const aNames = (r.side_a_names||[]).map(esc).join(' & ');
-    const bNames = (r.side_b_names||[]).map(esc).join(' & ');
-    const winNames = r.winner_side==='a' ? aNames : bNames;
-    entries.push({
-      ts: r.finished_at, game:'cb', emoji:'🃏', title:'Chkobba'+(r.max_players>2?' · '+r.max_players+' joueurs':''),
-      detail: aNames+' vs '+bNames,
-      result: '🏆 '+winNames+' · '+r.side_a_score+'–'+r.side_b_score
-    });
+function buildEntries(d){
+  const out = [];
+  const push = (game, ts, sub, who, res, ps) => out.push({ game, ts, sub: sub || '', who, res, ps: (ps || []).filter(Boolean) });
+  d.vt.forEach(r => push('vt', r.finished_at, '', esc(r.p1_name) + ' vs ' + esc(r.p2_name), '🏆 ' + esc(r.winner_name), [r.p1_name, r.p2_name]));
+  d.sk.forEach(r => push('sk', r.finished_at, nPlayers(r.max_players), names(r.players), '🏆 ' + esc(r.winner_name), r.players));
+  d.tm.forEach(r => push('tm', r.finished_at, nPlayers(r.max_players), names(r.players), r.won ? '✅ Niveau ' + r.level_reached + ' (gagné)' : '❌ Niveau ' + r.level_reached, r.players));
+  d.cb.forEach(r => {
+    const a = (r.side_a_names || []).map(esc).join(' & '), b = (r.side_b_names || []).map(esc).join(' & ');
+    push('cb', r.finished_at, nPlayers(r.max_players), a + ' vs ' + b, '🏆 ' + (r.winner_side === 'a' ? a : b) + ' · ' + r.side_a_score + '–' + r.side_b_score, (r.side_a_names || []).concat(r.side_b_names || []));
   });
-  bw.forEach(r => entries.push({
-    ts: r.finished_at, game:'bw', emoji:'📖', title:'Bent Walad'+((r.players||[]).length>2?' · '+r.players.length+' joueurs':''),
-    detail: (r.players||[]).map(esc).join(', '),
-    result: '🏆 '+esc(r.winner_name)
-  }));
-  dm.forEach(r => {
-    const won = r.final_label || (r.final_amount != null ? r.final_amount.toLocaleString('fr-FR')+' DT' : '?');
+  d.bw.forEach(r => push('bw', r.finished_at, nPlayers((r.players || []).length), names(r.players), '🏆 ' + esc(r.winner_name), r.players));
+  d.dm.forEach(r => {
+    const won = r.final_label || (r.final_amount != null ? r.final_amount.toLocaleString('fr-FR') + ' DT' : '?');
     const wilaya = r.candidate_wilaya ? ' (' + esc(r.candidate_wilaya) + ')' : '';
-    entries.push({
-      ts: r.finished_at, game:'dm', emoji:'💼', title:'Dlilek Mlek',
-      detail: esc(r.candidate_name)+wilaya+' (candidat·e) vs '+esc(r.banker_name)+' (banquier·ère)',
-      result: (r.accepted_offer ? '🤝 Offre acceptée : ' : '💼 Mallette ouverte : ')+esc(won)
-    });
+    push('dm', r.finished_at, '', esc(r.candidate_name) + wilaya + ' vs ' + esc(r.banker_name) + ' (banque)', (r.accepted_offer ? '🤝 Offre acceptée : ' : '💼 Mallette ouverte : ') + esc(won), [r.candidate_name, r.banker_name]);
   });
-  tb.forEach(r => {
-    const winner = r.winner_team==='tie' ? 'Égalité' : 'Équipe ' + esc(r.winner_team);
-    const scores = (r.scores||[]).join('–');
-    entries.push({
-      ts: r.finished_at, game:'tb', emoji:'🚫', title:'Taboo'+((r.players||[]).length>2?' · '+r.players.length+' joueurs':''),
-      detail: (r.players||[]).map(esc).join(', '),
-      result: '🏆 '+winner+' · '+scores
-    });
-  });
-  ttt.forEach(r => {
-    const winner = r.winner_name || 'Égalité';
-    entries.push({
-      ts: r.finished_at, game:'ttt', emoji:'⭕', title:'Morpion'+(r.rounds>1?' · '+r.rounds+' manches':''),
-      detail: esc(r.x_name)+' (X) vs '+esc(r.o_name)+' (O)',
-      result: '🏆 '+esc(winner)+' · '+r.x_score+'–'+r.o_score
-    });
-  });
-  mot.forEach(r => {
-    const winner = r.winner_name || 'Égalité';
-    entries.push({
-      ts: r.finished_at, game:'mot', emoji:'🔤', title:'1, 2, 3 Mot !'+(r.rounds>1?' · '+r.rounds+' manches':''),
-      detail: esc(r.p1_name)+' vs '+esc(r.p2_name),
-      result: '🏆 '+esc(winner)+' · '+r.p1_score+'–'+r.p2_score
-    });
-  });
-  entries.sort((a,b) => new Date(b.ts) - new Date(a.ts));
-  return entries;
+  d.tb.forEach(r => push('tb', r.finished_at, nPlayers((r.players || []).length), names(r.players), '🏆 ' + (r.winner_team === 'tie' ? 'Égalité' : 'Équipe ' + esc(r.winner_team)) + ' · ' + (r.scores || []).join('–'), r.players));
+  d.ttt.forEach(r => push('ttt', r.finished_at, r.rounds > 1 ? ' · ' + r.rounds + ' manches' : '', esc(r.x_name) + ' (X) vs ' + esc(r.o_name) + ' (O)', '🏆 ' + esc(r.winner_name || 'Égalité') + ' · ' + r.x_score + '–' + r.o_score, [r.x_name, r.o_name]));
+  d.mot.forEach(r => push('mot', r.finished_at, r.rounds > 1 ? ' · ' + r.rounds + ' manches' : '', esc(r.p1_name) + ' vs ' + esc(r.p2_name), '🏆 ' + esc(r.winner_name || 'Égalité') + ' · ' + r.p1_score + '–' + r.p2_score, [r.p1_name, r.p2_name]));
+  // Group games save one shared row each (see gym-room.js).
+  d.gr.forEach(r => { if(GAMES[r.game]) push(r.game, r.finished_at, nPlayers((r.players || []).length), r.detail ? esc(r.detail) : names(r.players), esc(r.result || ''), r.players); });
+  out.sort((a, b) => new Date(b.ts) - new Date(a.ts));
+  return out;
 }
 
-function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
-function dateKey(d){
-  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
-  return y+'-'+m+'-'+day;
-}
+function dateKey(d){ return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function today(){ const t = new Date(); t.setHours(0, 0, 0, 0); return t; }
 function dayLabel(d){
-  const today = new Date(); today.setHours(0,0,0,0);
-  const yesterday = new Date(today); yesterday.setDate(today.getDate()-1);
-  const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
-  const dd = new Date(d); dd.setHours(0,0,0,0);
-  if(dd.getTime()===today.getTime()) return "Aujourd'hui";
-  if(dd.getTime()===yesterday.getTime()) return "Hier";
-  if(dd.getTime()===tomorrow.getTime()) return "Demain";
-  return capitalize(d.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'}));
+  const diff = Math.round((today() - d) / 864e5);
+  if(diff === 0) return "Aujourd'hui";
+  if(diff === 1) return 'Hier';
+  const s = d.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
-
-function renderChips(){
-  $('filter-row').innerHTML = GAME_FILTERS.map(f =>
-    '<div class="chip'+(f.key===activeFilter?' active':'')+'" onclick="setFilter(\''+f.key+'\')">'+f.label+'</div>'
-  ).join('');
-}
-function setFilter(key){ activeFilter = key; renderChips(); renderList(); }
-
+function shiftDay(n){ selectedDate = new Date(selectedDate); selectedDate.setDate(selectedDate.getDate() + n); renderAll(); }
 function onDateChange(){
   const v = $('date-picker').value;
-  if(v){
-    const [y,m,d] = v.split('-').map(Number);
-    selectedDate = new Date(y, m-1, d);
-  }
-  renderList();
+  if(v){ const [y, m, d] = v.split('-').map(Number); selectedDate = new Date(y, m - 1, d); }
+  renderAll();
 }
-function syncDatePicker(){ $('date-picker').value = dateKey(selectedDate); }
+function setFilter(k){ activeFilter = k; renderAll(); }
 
-function renderList(){
+function renderAll(){
   $('day-title').textContent = dayLabel(selectedDate);
+  $('date-picker').value = dateKey(selectedDate);
+  $('next-day').disabled = selectedDate >= today();
   const dk = dateKey(selectedDate);
-  const dayEntries = allEntries.filter(e => dateKey(new Date(e.ts)) === dk);
-  const entries = activeFilter==='all' ? dayEntries : dayEntries.filter(e => e.game===activeFilter);
+  const day = allEntries.filter(e => dateKey(new Date(e.ts)) === dk);
+  // Chips: every game, the ones played that day first with their count.
+  const count = {}; day.forEach(e => count[e.game] = (count[e.game] || 0) + 1);
+  const keys = Object.keys(GAMES).sort((a, b) => (count[b] || 0) - (count[a] || 0));
+  if(activeFilter !== 'all' && !GAMES[activeFilter]) activeFilter = 'all';
+  $('filter-row').innerHTML = '<button class="chip' + (activeFilter === 'all' ? ' on' : '') + '" onclick="setFilter(\'all\')">Tous<i>' + day.length + '</i></button>' +
+    keys.map(k => '<button class="chip' + (activeFilter === k ? ' on' : '') + '" onclick="setFilter(\'' + k + '\')">' + GAMES[k].emoji + ' ' + esc(GAMES[k].name) + (count[k] ? '<i>' + count[k] + '</i>' : '') + '</button>').join('');
+  const players = new Set(); day.forEach(e => e.ps.forEach(p => players.add(String(p).trim().toLowerCase())));
+  const top = keys[0] && count[keys[0]] ? GAMES[keys[0]].emoji : '–';
+  $('stats').innerHTML = '<div class="stat"><b>' + day.length + '</b><span>parties</span></div><div class="stat"><b>' + players.size + '</b><span>joueurs</span></div><div class="stat"><b>' + top + '</b><span>le plus joué</span></div>';
+  const list = activeFilter === 'all' ? day : day.filter(e => e.game === activeFilter);
   $('sec-loading').classList.add('hidden');
-  if(!entries.length){
-    $('list').innerHTML = '';
-    $('sec-empty').classList.remove('hidden');
-    return;
-  }
-  $('sec-empty').classList.add('hidden');
-  $('list').innerHTML = entries.map(e => {
-    const time = new Date(e.ts).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-    return '<div class="hrow"><span class="htime">'+time+'</span>'+
-      '<div class="hbody"><div class="htitle">'+e.emoji+' '+e.title+'</div>'+
-      '<div class="hdetail">'+e.detail+'</div>'+
-      '<div class="hresult">'+e.result+'</div></div></div>';
+  $('sec-empty').classList.toggle('hidden', list.length > 0);
+  $('list').innerHTML = list.map(e => {
+    const g = GAMES[e.game], time = new Date(e.ts).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    return '<div class="row"><div class="badge" style="--c:' + g.c + ';--t:' + g.t + '">' + g.emoji + '</div><div class="body">' +
+      '<div class="head"><span class="name">' + esc(g.name) + e.sub + '</span><span class="time">' + time + '</span></div>' +
+      '<div class="who">' + e.who + '</div><div class="res">' + e.res + '</div></div></div>';
   }).join('');
 }
 
 async function loadAll(isRefresh){
   if(isRefresh) $('refresh-btn').classList.add('spin');
-  if(!allEntries.length) $('sec-loading').classList.remove('hidden');
-  const [vt, sk, tm, cb, bw, dm, tb, ttt, mot] = await Promise.all([
-    fetchResults('vt_results'), fetchResults('sk_results'), fetchResults('tm_results'),
-    fetchResults('cb_results'), fetchResults('bw_results'), fetchResults('dm_results'), fetchResults('tb_results'),
-    fetchResults('ttt_results'), fetchResults('mot_results')
-  ]);
-  allEntries = buildEntries(vt, sk, tm, cb, bw, dm, tb, ttt, mot);
-  renderChips();
-  renderList();
-  if(isRefresh) setTimeout(()=>$('refresh-btn').classList.remove('spin'), 700);
+  const t = ['vt', 'sk', 'tm', 'cb', 'bw', 'dm', 'tb', 'ttt', 'mot'];
+  const rows = await Promise.all(t.map(k => fetchRows(k + '_results')).concat([fetchRows('game_results')]));
+  const d = {}; t.forEach((k, i) => d[k] = rows[i]); d.gr = rows[t.length];
+  allEntries = buildEntries(d);
+  renderAll();
+  if(isRefresh) setTimeout(() => $('refresh-btn').classList.remove('spin'), 700);
 }
 
-syncDatePicker();
+renderAll();
+$('sec-loading').classList.remove('hidden'); $('sec-empty').classList.add('hidden');
 loadAll(false);
 </script>
 <script src="install-tutorial.js" defer></script>

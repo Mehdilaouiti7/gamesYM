@@ -523,6 +523,7 @@ function renderEnd(st){
 
 R.init({
   key:'bl', table:'bl_games', title:'Bluff', page:'bluff.html', min:2, max:6,
+  result: st => st.winner == null ? null : { winner: nm(st, st.winner), result: '🏆 ' + nm(st, st.winner) },
   start: setup,
   render
 });
