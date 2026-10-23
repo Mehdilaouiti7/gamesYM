@@ -125,6 +125,8 @@
   .h-filter button.on{background:#f3efe4;color:#14171a;font-weight:600}
 
   .h-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+  .tile.tile-off{position:relative;opacity:.55;outline:2px dashed rgba(243,239,228,.5);outline-offset:-2px}
+  .tile.tile-off::after{content:'🔒';position:absolute;right:8px;bottom:8px;font-size:15px}
   .tile{
     height:80px;border-radius:18px;padding:12px;margin:0;width:auto;
     display:flex;flex-direction:column;justify-content:space-between;
@@ -294,6 +296,7 @@
         <h1 class="h-title">Games Room</h1>
       </div>
       <div class="h-actions">
+        <a class="h-icon-btn hidden" id="admin-btn" href="admin.html" aria-label="Mode admin">🛠️</a>
       </div>
     </div>
 
@@ -1015,10 +1018,36 @@ function renderRecent(){
 }
 renderRecent();
 
+let homeFilter = 'all';
 function setFilter(f){
+  homeFilter = f;
   document.querySelectorAll('.h-filter button').forEach(b => b.classList.toggle('on', b.dataset.f===f));
-  document.querySelectorAll('#h-grid .tile').forEach(t => t.classList.toggle('hidden', f!=='all' && t.dataset.cat!==f));
+  applyTiles();
 }
+
+// Games hidden from the admin page vanish for everyone else; the admin still sees them, marked 🔒.
+const IS_ADMIN = (() => { try{ return !!localStorage.getItem('gr-admin'); }catch(e){ return false; } })();
+let hiddenGames = (() => { try{ return JSON.parse(localStorage.getItem('gr-hidden') || '[]'); }catch(e){ return []; } })();
+const tileKey = t => ((t.className.match(/\bt-([a-z]+)/) || [])[1]);
+function applyTiles(){
+  document.querySelectorAll('#h-grid .tile').forEach(t => {
+    const off = hiddenGames.includes(tileKey(t));
+    t.classList.toggle('hidden', (off && !IS_ADMIN) || (homeFilter!=='all' && t.dataset.cat!==homeFilter));
+    t.classList.toggle('tile-off', off && IS_ADMIN);
+  });
+}
+async function loadHiddenGames(){
+  try{
+    const r = await fetch(SB_URL+"/rest/v1/gr_settings?key=eq.hidden_games&select=value", {headers:HEADERS});
+    const rows = r.ok ? await r.json() : [];
+    hiddenGames = rows.length && Array.isArray(rows[0].value) ? rows[0].value : [];
+    try{ localStorage.setItem('gr-hidden', JSON.stringify(hiddenGames)); }catch(e){}
+  }catch(e){}
+  applyTiles();
+}
+if(IS_ADMIN) $('admin-btn').classList.remove('hidden');
+applyTiles();
+loadHiddenGames();
 
 (function(){
   const n = window.GYMUI.savedName();
@@ -1041,16 +1070,22 @@ async function findGameByCode(c){
   const i = hits.indexOf(true);
   return i>=0 ? keys[i] : null;
 }
+async function isAdminCode(c){
+  try{
+    const r = await fetch(SB_URL+"/rest/v1/rpc/gr_admin_ok", { method:"POST", headers:HEADERS, body: JSON.stringify({ pin: c }) });
+    return r.ok && (await r.json()) === true;
+  }catch(e){ return false; }
+}
 async function homeJoin(){
   const input = $('home-code'), err = $('home-join-err'), btn = $('home-join-btn');
   const c = input.value.trim().toUpperCase();
   if(!/^[A-Z]{4}$/.test(c)){ err.textContent = "Le code fait 4 lettres."; input.focus(); return; }
   err.textContent = "";
-  // The history is hidden: only its secret code opens it.
-  if(btoa(c) === 'TUxZTQ=='){ try{ sessionStorage.setItem('gr-hist', '1'); }catch(e){} input.value = ''; location.href = 'historique.html'; return; }
   btn.disabled = true; btn.textContent = "…";
-  const game = await findGameByCode(c);
+  // The admin code (checked by the server) opens the admin page instead of a game.
+  const [admin, game] = await Promise.all([isAdminCode(c), findGameByCode(c)]);
   btn.disabled = false; btn.textContent = "Rejoindre";
+  if(admin){ try{ localStorage.setItem('gr-admin', c); }catch(e){} input.value = ''; location.href = 'admin.html'; return; }
   if(!game){ err.textContent = "Partie introuvable. Vérifie le code."; return; }
   if(game==='vt'){
     $('join-code').value = c;
