@@ -7,14 +7,10 @@
 <meta name="theme-color" content="#14171a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Games Room">
-<link rel="manifest" href="manifest.json?v=2">
-<link rel="apple-touch-icon" sizes="180x180" href="icons/gr-180.png">
-<link rel="icon" href="icons/gr-32.png">
-<script>
-  // Admin only: the code typed on the home page unlocks this page on this phone.
-  try{ if(!localStorage.getItem('gr-admin')) location.replace('index.html'); }catch(e){ location.replace('index.html'); }
-</script>
+<meta name="apple-mobile-web-app-title" content="GR Admin">
+<link rel="manifest" href="manifest-admin.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/admin-180.png">
+<link rel="icon" href="icons/admin-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -74,15 +70,36 @@
   .card-link span{font-size:13px;color:var(--dim)}
   .card-link i{margin-left:auto;font-style:normal;color:var(--dim);font-size:20px}
   .note{font-size:12.5px;color:var(--dim);line-height:1.45;padding:0 4px}
+  .logo{width:44px;height:44px;border-radius:12px;flex:none}
+  .lock{position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px}
+  .lock img{width:150px;height:150px;border-radius:34px;box-shadow:0 12px 34px rgba(0,0,0,.45)}
+  .lock form{display:flex;flex-direction:column;gap:10px;width:100%;max-width:300px}
+  .lock input{width:100%;text-align:center;font:600 28px 'Space Mono',monospace;letter-spacing:.35em;text-transform:uppercase;padding:12px;border-radius:16px;border:none;background:var(--surface);color:var(--fg);outline:none}
+  .lock input:focus{box-shadow:0 0 0 2px var(--gold)}
+  .lock .go{padding:14px;border-radius:16px;background:var(--fg);color:var(--bg);font-weight:600;font-size:16px}
+  .lock .err{min-height:18px;text-align:center;color:#ff8a7a;font-size:14px}
+  .lock a{color:var(--dim);font-size:14px;text-decoration:none}
+  .row .mini{flex:none;align-self:center;font-size:12.5px;color:var(--dim);padding:7px 10px;border-radius:10px;background:#2c3136}
+  .clean{width:100%;padding:13px;border-radius:16px;background:#3a2620;color:#ffb199;font-weight:600;font-size:15px;margin-top:4px}
   .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#f3efe4;color:#14171a;font-weight:600;font-size:14px;padding:10px 16px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:9}
 </style>
 <link rel="stylesheet" href="responsive.css">
 </head>
 <body>
+<div class="lock" id="lock">
+  <img src="icons/admin-512.png" alt="Games Room Admin">
+  <form onsubmit="unlock();return false;">
+    <input type="text" id="lock-code" maxlength="4" placeholder="····" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Code admin">
+    <button type="submit" class="go" id="lock-go">Entrer</button>
+    <div class="err" id="lock-err"></div>
+  </form>
+  <a href="index.html">← Retour à l'accueil</a>
+</div>
 <div class="frame">
   <div class="top">
     <a class="icon-btn" href="index.html" aria-label="Retour à l'accueil">←</a>
-    <div class="ttl"><small>Games Room</small><h1>Mode admin</h1></div>
+    <img class="logo" src="icons/admin-180.png" alt="">
+    <div class="ttl"><small>Games Room</small><h1>Admin</h1></div>
     <button class="icon-btn" id="refresh-btn" onclick="loadLive(true)" aria-label="Actualiser"><span>↻</span></button>
   </div>
 
@@ -95,6 +112,7 @@
   <section id="t-live">
     <div class="label"><span id="live-title">Parties des dernières 24 h</span><button id="live-range" onclick="toggleRange()">Voir 7 jours</button></div>
     <div class="list" id="live-list" style="margin-top:8px"><div class="empty">Chargement…</div></div>
+    <button class="clean" onclick="cleanOld()">🧹 Nettoyer les parties inactives (+24 h)</button>
   </section>
 
   <section id="t-games" class="hidden">
@@ -117,6 +135,33 @@ const HEADERS = { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Conten
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s == null ? '' : s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
 let PIN = ''; try{ PIN = localStorage.getItem('gr-admin') || ''; }catch(e){}
+
+/* ---------- lock: the admin code is asked each time the page is opened ---------- */
+let started = false;
+function unlocked(){
+  $('lock').classList.add('hidden');
+  if(started) return;
+  started = true;
+  loadLive(false);
+  loadHidden();
+  setInterval(() => { if(!$('t-live').classList.contains('hidden')) loadLive(false); }, 20000);
+}
+async function unlock(){
+  const c = $('lock-code').value.trim().toUpperCase();
+  if(!/^[A-Z]{4}$/.test(c)){ $('lock-err').textContent = 'Le code fait 4 lettres.'; return; }
+  $('lock-go').disabled = true; $('lock-go').textContent = '…';
+  let ok = false;
+  try{
+    const r = await fetch(SB_URL + '/rest/v1/rpc/gr_admin_ok', { method:'POST', headers:HEADERS, body: JSON.stringify({ pin: c }) });
+    ok = r.ok && (await r.json()) === true;
+  }catch(e){}
+  $('lock-go').disabled = false; $('lock-go').textContent = 'Entrer';
+  if(!ok){ $('lock-err').textContent = 'Code incorrect.'; $('lock-code').select(); return; }
+  PIN = c;
+  try{ localStorage.setItem('gr-admin', c); sessionStorage.setItem('gr-admin-ok', '1'); }catch(e){}
+  unlocked();
+}
+$('lock-code').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, ''); $('lock-err').textContent = ''; });
 
 // Every game of the home page, with the colours of its tile (live: has a table of rooms).
 const GAMES = {
@@ -179,7 +224,8 @@ async function loadLive(isRefresh){
       '<div class="head"><span class="name">' + esc(g.name) + '</span><span class="code">' + esc(r.code) + '</span>' +
       '<span class="pill ' + (r.status === 'waiting' ? 'wait">En attente' : 'play">En cours') + '</span></div>' +
       '<div class="who">' + (r.players.length ? r.players.map(esc).join(', ') : 'Personne') + '</div>' +
-      '<div class="ago">Dernière action ' + ago(r.ts) + '</div></div></div>';
+      '<div class="ago">Dernière action ' + ago(r.ts) + '</div></div>' +
+      '<button class="mini" onclick="archiveOne(\'' + r.game + '\', \'' + esc(r.code) + '\')">Archiver</button></div>';
   }).join('') : '<div class="empty">Aucune partie en cours.</div>';
   if(isRefresh) setTimeout(() => $('refresh-btn').classList.remove('spin'), 700);
 }
@@ -218,13 +264,29 @@ async function toggleGame(k){
 
 function leaveAdmin(){
   if(!confirm('Quitter le mode admin sur ce téléphone ?')) return;
-  try{ localStorage.removeItem('gr-admin'); }catch(e){}
+  try{ localStorage.removeItem('gr-admin'); sessionStorage.removeItem('gr-admin-ok'); }catch(e){}
   location.href = 'index.html';
 }
 
-loadLive(false);
-loadHidden();
-setInterval(() => { if(!$('t-live').classList.contains('hidden')) loadLive(false); }, 20000);
+/* ---------- cleaning: stale rooms are archived (marked abandoned), never erased ---------- */
+async function archive(body){
+  const r = await fetch(SB_URL + '/rest/v1/rpc/gr_admin_archive', { method:'POST', headers:HEADERS, body: JSON.stringify(Object.assign({ pin: PIN, older_than_hours: 24 }, body)) });
+  if(!r.ok) throw new Error();
+  return await r.json();
+}
+async function cleanOld(){
+  if(!confirm('Archiver toutes les parties sans action depuis plus de 24 h ?')) return;
+  try{ const n = await archive({}); toast(n ? n + ' partie' + (n > 1 ? 's archivées' : ' archivée') : 'Rien à nettoyer'); loadLive(false); }
+  catch(e){ toast('Pas réussi, réessaie'); }
+}
+async function archiveOne(game, code){
+  if(!confirm('Archiver la partie ' + code + ' ? Les joueurs ne pourront plus la reprendre.')) return;
+  try{ await archive({ game, game_code: code }); toast('Partie ' + code + ' archivée'); loadLive(false); }
+  catch(e){ toast('Pas réussi, réessaie'); }
+}
+
+let ok = false; try{ ok = sessionStorage.getItem('gr-admin-ok') === '1' && !!PIN; }catch(e){}
+if(ok) unlocked(); else setTimeout(() => $('lock-code').focus(), 300);
 </script>
 </body>
 </html>

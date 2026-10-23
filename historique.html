@@ -13,7 +13,7 @@
 <link rel="icon" href="icons/gr-32.png">
 <script>
   // Hidden page: opened only through its code on the home page.
-  try{ if(!localStorage.getItem('gr-admin')) location.replace('index.html'); }catch(e){ location.replace('index.html'); }
+  try{ if(sessionStorage.getItem('gr-admin-ok') !== '1') location.replace('admin.html'); }catch(e){ location.replace('admin.html'); }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
