@@ -104,6 +104,7 @@
     font-size:18px;text-decoration:none;cursor:pointer;
   }
   .h-icon-btn:active{transform:scale(.94)}
+  .h-ava{font-size:24px}
   .h-label{font-size:12px;color:#8e918f;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
   .h-recent{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none}
   .h-recent::-webkit-scrollbar{display:none}
@@ -299,6 +300,7 @@
         <h1 class="h-title">Games Room</h1>
       </div>
       <div class="h-actions">
+        <a class="h-icon-btn h-ava" id="profil-btn" href="profil.html" aria-label="Mon profil">🙂</a>
         <a class="h-icon-btn" href="classement.html" aria-label="Classement">🏆</a>
         <a class="h-icon-btn hidden" id="admin-btn" href="admin.html" aria-label="Mode admin">🛠️</a>
       </div>
@@ -1062,6 +1064,7 @@ loadHiddenGames();
 (function(){
   const n = window.GYMUI.savedName();
   if(n) $('h-hello').textContent = 'Salut '+n+' 👋';
+  try{ const a = window.GYMUI && GYMUI.savedAvatar(); if(a) $('profil-btn').textContent = a; }catch(e){}
   window.GYMUI.prefillNames(['create-name','join-name']);
 })();
 

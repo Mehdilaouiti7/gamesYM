@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Games Room · Mon profil</title>
+<meta name="theme-color" content="#14171a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Games Room">
+<link rel="manifest" href="manifest.json?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/gr-180.png">
+<link rel="icon" href="icons/gr-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#14171a; --surface:#22262a; --surface2:#1d2024; --fg:#f3efe4; --dim:#8e918f; --gold:#e9c46a; --accent:#f3efe4; --bg-solid:#14171a; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%}
+  body{font-family:'Fredoka',system-ui,sans-serif;background:var(--bg);color:var(--fg);min-height:100dvh;
+    display:flex;flex-direction:column;align-items:center;
+    padding:calc(14px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom))}
+  .frame{width:100%;max-width:460px;display:flex;flex-direction:column;gap:14px}
+  button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
+
+  .top{display:flex;align-items:center;gap:12px}
+  .icon-btn{width:44px;height:44px;border-radius:14px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:18px;text-decoration:none;color:var(--fg);flex:none}
+  .icon-btn:active{transform:scale(.94)}
+  .top .ttl{flex:1;min-width:0}
+  .top small{display:block;font-size:13px;color:var(--dim)}
+  .top h1{font-size:26px;font-weight:700;letter-spacing:-.3px;line-height:1.2}
+
+  .card{background:var(--surface);border-radius:20px;padding:18px}
+  .me{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+  .me .big{font-size:64px;line-height:1}
+  .me .nm{font-size:22px;font-weight:700}
+  .me .nm.empty{color:var(--dim);font-weight:500;font-size:16px}
+
+  label{display:block;font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin:14px 2px 8px}
+  input[type=text]{width:100%;background:var(--surface2);border:1.5px solid rgba(243,239,228,.1);border-radius:14px;color:var(--fg);font:600 17px 'Fredoka',sans-serif;padding:12px 14px;outline:none}
+  input[type=text]:focus{border-color:var(--gold)}
+  .avatar-row{display:flex;gap:8px;overflow-x:auto;padding:5px;margin:-5px;scrollbar-width:none}
+  .avatar-row::-webkit-scrollbar{display:none}
+  .avatar-opt{flex:none;width:52px;height:52px;border-radius:14px;background:var(--surface2);font-size:26px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .avatar-opt.sel{background:var(--gold)}
+  .avatar-opt:active{transform:scale(.92)}
+  .save{width:100%;margin-top:16px;padding:14px;border-radius:16px;background:var(--fg);color:var(--bg);font-weight:600;font-size:16px}
+  .save:active{transform:scale(.98)}
+  .saved{text-align:center;color:var(--gold);font-size:13px;min-height:16px;margin-top:8px}
+
+  .label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin:4px 2px -2px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .stat{background:var(--surface);border-radius:16px;padding:14px 10px;text-align:center}
+  .stat b{display:block;font-family:'Space Mono',monospace;font-size:26px;color:var(--gold)}
+  .stat span{font-size:12px;color:var(--dim)}
+  .fav{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:16px;padding:14px}
+  .fav .e{font-size:30px}
+  .fav b{display:block;font-size:16px}
+  .fav span{font-size:12.5px;color:var(--dim)}
+  .muted{color:var(--dim);font-size:13.5px;text-align:center;line-height:1.5;padding:4px 8px}
+  a.link{color:var(--gold);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="top">
+    <a class="icon-btn" href="index.html" aria-label="Accueil">←</a>
+    <div class="ttl"><small>Games Room</small><h1>Mon profil</h1></div>
+  </div>
+
+  <div class="card">
+    <div class="me">
+      <div class="big" id="me-ava">🙂</div>
+      <div class="nm empty" id="me-name">Pas encore de prénom</div>
+    </div>
+
+    <label for="name-in">Ton prénom</label>
+    <input type="text" id="name-in" maxlength="16" placeholder="Mehdi" autocomplete="off" spellcheck="false">
+    <label>Ton avatar</label>
+    <div class="avatar-row" id="avatar-row"></div>
+
+    <button class="save" id="save-btn" onclick="save()">Enregistrer</button>
+    <div class="saved" id="saved-msg"></div>
+  </div>
+
+  <div class="label">Mes stats</div>
+  <div id="stats-wrap"><div class="muted">Chargement…</div></div>
+
+  <p class="muted">Tu es reconnu par ton prénom. Garde le même partout pour que tes victoires comptent dans le <a class="link" href="classement.html">classement</a>.</p>
+</div>
+
+<script src="avatar-picker.js"></script>
+<script src="gym-ui.js"></script>
+<script>
+const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
+const HEADERS = { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json" };
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s == null ? '' : s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
+
+const GAMES = {
+  sko:{name:'Skonopoly',emoji:'🎲'}, bw:{name:'Bent Walad',emoji:'📖'}, cb:{name:'Chkobba',emoji:'🃏'},
+  vt:{name:'Vache & Taureau',emoji:'🐄'}, sk:{name:'Skyjo',emoji:'🎴'}, bl:{name:'Bluff',emoji:'👑'},
+  kl:{name:'EKLB',emoji:'🔄'}, in:{name:"L'Intrus",emoji:'🕵️'}, ttt:{name:'Morpion',emoji:'⭕'}, mot:{name:'1, 2, 3 Mot !',emoji:'🔤'}
+};
+
+const picker = window.GYMAvatarPicker.render('avatar-row');
+function refreshMe(){
+  const n = GYMUI.savedName(), a = GYMUI.savedAvatar();
+  $('me-ava').textContent = a || '🙂';
+  const el = $('me-name');
+  el.textContent = n || 'Pas encore de prénom';
+  el.classList.toggle('empty', !n);
+}
+$('name-in').value = GYMUI.savedName();
+refreshMe();
+
+function save(){
+  const n = $('name-in').value.trim();
+  GYMUI.rememberName(n);
+  GYMUI.rememberAvatar(picker.get());
+  GYMUI.uid();
+  refreshMe();
+  $('saved-msg').textContent = 'Enregistré ✓';
+  setTimeout(() => { $('saved-msg').textContent = ''; }, 1800);
+  loadStats();
+}
+
+/* ---------- my stats, from the game results (by prénom) ---------- */
+const norm = s => String(s || '').trim().toLowerCase();
+const arr = a => Array.isArray(a) ? a.filter(Boolean) : [];
+async function fetchRows(t){ try{ const r = await fetch(SB_URL + '/rest/v1/' + t + '?select=*&order=finished_at.desc&limit=1000', {headers:HEADERS}); return r.ok ? await r.json() : []; }catch(e){ return []; } }
+function build(d){
+  const out = [];
+  const E = (g, players, winners) => out.push({ game:g, players:arr(players).map(norm), winners:arr(winners).map(norm) });
+  d.vt.forEach(r => E('vt', [r.p1_name, r.p2_name], [r.winner_name]));
+  d.sk.forEach(r => E('sk', r.players, [r.winner_name]));
+  d.cb.forEach(r => { const a = arr(r.side_a_names), b = arr(r.side_b_names); E('cb', a.concat(b), r.winner_side === 'a' ? a : r.winner_side === 'b' ? b : []); });
+  d.bw.forEach(r => E('bw', r.players, [r.winner_name]));
+  d.ttt.forEach(r => E('ttt', [r.x_name, r.o_name], r.winner_name && r.winner_name !== 'draw' ? [r.winner_name] : []));
+  d.mot.forEach(r => E('mot', [r.p1_name, r.p2_name], r.winner_name ? [r.winner_name] : []));
+  d.gr.forEach(r => { if(GAMES[r.game]) E(r.game, r.players, r.winner && !/[,()]/.test(r.winner) ? [r.winner] : []); });
+  return out;
+}
+async function loadStats(){
+  const me = norm(GYMUI.savedName());
+  if(!me){ $('stats-wrap').innerHTML = '<div class="muted">Mets ton prénom pour suivre tes stats.</div>'; return; }
+  const t = ['vt', 'sk', 'cb', 'bw', 'ttt', 'mot'];
+  const rows = await Promise.all(t.map(k => fetchRows(k + '_results')).concat([fetchRows('game_results')]));
+  const d = {}; t.forEach((k, i) => d[k] = rows[i]); d.gr = rows[t.length];
+  const all = build(d);
+  let wins = 0, played = 0; const byGame = {};
+  all.forEach(e => {
+    if(e.players.indexOf(me) < 0 && e.winners.indexOf(me) < 0) return;
+    played++; const won = e.winners.indexOf(me) >= 0; if(won) wins++;
+    const g = byGame[e.game] = byGame[e.game] || { played:0, wins:0 }; g.played++; if(won) g.wins++;
+  });
+  if(!played){ $('stats-wrap').innerHTML = '<div class="muted">Pas encore de partie enregistrée sous « ' + esc(GYMUI.savedName()) + ' ». Joue une partie et reviens !</div>'; return; }
+  const rate = Math.round(wins / played * 100);
+  const favKey = Object.keys(byGame).sort((a, b) => byGame[b].played - byGame[a].played)[0];
+  const fav = favKey ? GAMES[favKey] : null;
+  $('stats-wrap').innerHTML =
+    '<div class="stats" style="margin-bottom:10px">' +
+      '<div class="stat"><b>' + wins + '</b><span>victoire' + (wins > 1 ? 's' : '') + '</span></div>' +
+      '<div class="stat"><b>' + played + '</b><span>partie' + (played > 1 ? 's' : '') + '</span></div>' +
+      '<div class="stat"><b>' + rate + '%</b><span>de réussite</span></div>' +
+    '</div>' +
+    (fav ? '<div class="fav"><span class="e">' + fav.emoji + '</span><div><b>' + esc(fav.name) + '</b><span>Ton jeu préféré · ' + byGame[favKey].played + ' partie' + (byGame[favKey].played > 1 ? 's' : '') + '</span></div></div>' : '');
+}
+loadStats();
+</script>
+</body>
+</html>
