@@ -1062,9 +1062,9 @@ async function findGameByCode(c){
   const keys = Object.keys(RECENT_META);
   const hits = await Promise.all(keys.map(async k => {
     try{
-      const r = await fetch(SB_URL+"/rest/v1/"+k+"_games?code=eq."+encodeURIComponent(c)+"&select=code", {headers:HEADERS});
+      const r = await fetch(SB_URL+"/rest/v1/"+k+"_games?code=eq."+encodeURIComponent(c)+"&select=code,status:state->>status", {headers:HEADERS});
       if(!r.ok) return false;
-      return (await r.json()).length > 0;
+      return (await r.json()).some(x => x.status !== 'abandoned');
     }catch(e){ return false; }
   }));
   const i = hits.indexOf(true);
@@ -1085,7 +1085,7 @@ async function homeJoin(){
   // The admin code (checked by the server) opens the admin page instead of a game.
   const [admin, game] = await Promise.all([isAdminCode(c), findGameByCode(c)]);
   btn.disabled = false; btn.textContent = "Rejoindre";
-  if(admin){ try{ localStorage.setItem('gr-admin', c); }catch(e){} input.value = ''; location.href = 'admin.html'; return; }
+  if(admin){ try{ localStorage.setItem('gr-admin', c); sessionStorage.setItem('gr-admin-ok', '1'); }catch(e){} input.value = ''; location.href = 'admin.html'; return; }
   if(!game){ err.textContent = "Partie introuvable. Vérifie le code."; return; }
   if(game==='vt'){
     $('join-code').value = c;
