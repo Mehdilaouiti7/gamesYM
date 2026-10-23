@@ -86,30 +86,6 @@
   .vt-h2h .n{font-family:'Space Mono',monospace;font-weight:700;font-size:20px}
 
   /* Header menu (home) */
-  .menu-overlay{
-    position:fixed;inset:0;z-index:40;background:transparent;
-    opacity:0;pointer-events:none;transition:opacity .2s ease;
-  }
-  .menu-overlay.open{opacity:1;pointer-events:auto}
-  .menu-panel{
-    position:absolute;top:52px;right:0;z-index:41;width:230px;
-    background:rgba(34,38,42,.85);
-    backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
-    border:1px solid rgba(243,239,228,.16);
-    border-radius:16px;
-    padding:8px;
-    box-shadow:0 14px 34px rgba(0,0,0,.35);
-    opacity:0;transform:translateY(-6px) scale(.97);pointer-events:none;
-    transition:opacity .18s ease, transform .18s cubic-bezier(.22,1,.36,1);
-  }
-  .menu-panel.open{opacity:1;transform:none;pointer-events:auto}
-  .menu-item{
-    display:flex;align-items:center;gap:10px;width:100%;
-    background:transparent;border:none;border-radius:10px;
-    padding:11px 10px;font-family:'Fredoka',sans-serif;font-size:.92rem;
-    color:var(--chalk);text-align:left;cursor:pointer;
-  }
-  .menu-item:active{background:rgba(255,255,255,.08)}
   /* ---------- Accueil ---------- */
   body.home{
     --bg:#14171a; --bg-solid:#14171a; --fg:#f3efe4; --dim:#8e918f; --accent:#f3efe4; --surface:#22262a;
@@ -319,12 +295,6 @@
       </div>
       <div class="h-actions">
         <a class="h-icon-btn" href="historique.html" aria-label="Historique">📊</a>
-        <button class="h-icon-btn" id="menu-btn" aria-label="Réglages" onclick="toggleMenu()">⚙️</button>
-        <div class="menu-overlay" id="menu-overlay" onclick="closeMenu()"></div>
-        <div class="menu-panel" id="menu-panel">
-          <button class="menu-item" onclick="location.href='historique.html'">📊 Historique</button>
-          <button class="menu-item" onclick="closeMenu(); window.showInstallTutorial && window.showInstallTutorial();">📲 Installer l'app</button>
-        </div>
       </div>
     </div>
 
@@ -614,14 +584,6 @@ function show(name){
   window.GYMUI.screen(name);
 }
 
-function toggleMenu(){
-  $('menu-panel').classList.toggle('open');
-  $('menu-overlay').classList.toggle('open');
-}
-function closeMenu(){
-  $('menu-panel').classList.remove('open');
-  $('menu-overlay').classList.remove('open');
-}
 
 function validSecret(s){
   if(!/^[0-9]{4}$/.test(s)) return "Il faut exactement 4 chiffres.";

@@ -16,6 +16,7 @@
      renderWait(st)      optional extra rendering in the waiting room
      render(st)          draw the game; called on every update while playing / finished
      onJoin(st, idx)     optional: set up a newly joined player (e.g. team)
+     result(st)          optional: { winner, result, detail } saved once to the history when the game ends
    })
 */
 window.GYMRoom = (function(){
@@ -167,8 +168,24 @@ window.GYMRoom = (function(){
       window.GYMLeaveGuard.disable();
       if(window.GYMRecent) window.GYMRecent.remove(G.key, R.code);
       if(lastScreen!=='end') show('end');
+      recordResult(st);
     }
     G.render(st);
+  }
+  // Every phone that sees the end tries to save it; the id makes the first one win.
+  const recorded = {};
+  function recordResult(st){
+    if(!G.result) return;
+    const id = G.key + ':' + st.code + ':' + (st.startedAt || 0);
+    if(recorded[id]) return;
+    recorded[id] = true;
+    let r = null;
+    try{ r = G.result(st); }catch(e){ return; }
+    if(!r) return;
+    const row = { id, game: G.key, players: st.players.map(p => p.name), winner: r.winner || null, result: r.result || null, detail: r.detail || null };
+    fetch(SB_URL+"/rest/v1/game_results", {
+      method:"POST", headers:{...HEADERS, "Prefer":"return=minimal,resolution=ignore-duplicates"}, body: JSON.stringify(row)
+    }).catch(() => {});
   }
   // Run one game action against the latest saved state, then redraw.
   // The move is first applied to a local copy and shown at once (unless it depends
@@ -214,6 +231,7 @@ window.GYMRoom = (function(){
       if(st.status!=='waiting' || st.players.length < G.min) return false;
       if(G.canStart && G.canStart(st)) return false;
       st.status = 'playing';
+      st.startedAt = Date.now();
       G.start(st);
     });
   }

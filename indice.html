@@ -365,6 +365,7 @@ function renderEnd(st){
 
 R.init({
   key:'ui', table:'ui_games', title:'Un indice chacun', page:'indice.html', min:3, max:7,
+  result: st => ({ result: (st.score >= 10 ? '✅ ' : '🃏 ') + st.score + ' / ' + TOTAL + ' cartes trouvées' }),
   start: setupGame,
   render
 });

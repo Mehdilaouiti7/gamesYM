@@ -443,6 +443,10 @@ function renderEnd(st){
 
 R.init({
   key:'in', table:'in_games', title:"L'Intrus", page:'intrus.html', min:3, max:8,
+  result(st){
+    const best = Math.max(...st.scores), top = st.players.filter((p,i) => st.scores[i]===best).map(p => p.name).join(' & ');
+    return { winner: top, result: '🏆 ' + top + ' · ' + best + ' pts', detail: st.players.map((p,i) => p.name + ' ' + st.scores[i]).join(', ') };
+  },
   newState(st){ st.scores = [0]; st.round = 0; st.used = []; },
   onJoin(st){ st.scores.push(0); },
   start(st){ newRound(st); },
