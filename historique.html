@@ -41,6 +41,14 @@
   .day{flex:1;position:relative;height:40px;border-radius:11px;background:var(--fg);color:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;overflow:hidden}
   .day input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
 
+  .modes{display:flex;gap:4px;background:var(--surface2);border-radius:14px;padding:4px}
+  .modes button{flex:1;padding:9px 0;border-radius:11px;color:#a9aca9;font-weight:500;font-size:14px}
+  .modes button.on{background:var(--fg);color:var(--bg);font-weight:600}
+  .range{display:flex;gap:8px}
+  .range label{flex:1;background:var(--surface);border-radius:14px;padding:7px 12px;font-size:12px;color:var(--dim);display:flex;flex-direction:column;gap:2px}
+  .range input{background:none;border:none;color:var(--fg);font:600 15px 'Fredoka',sans-serif;color-scheme:dark;outline:none;width:100%}
+  .dayhead{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin:8px 2px 0}
+  .dayhead:first-child{margin-top:0}
   .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   .stat{background:var(--surface);border-radius:16px;padding:10px 12px}
   .stat b{display:block;font-size:22px;font-weight:700;line-height:1.1}
@@ -77,16 +85,21 @@
     <button class="icon-btn" id="refresh-btn" onclick="loadAll(true)" aria-label="Actualiser"><span>↻</span></button>
   </div>
 
-  <div class="days">
-    <button class="arrow" onclick="shiftDay(-1)" aria-label="Jour précédent">‹</button>
+  <div class="modes" id="modes"></div>
+  <div class="days" id="days">
+    <button class="arrow" onclick="shiftDay(-1)" aria-label="Précédent">‹</button>
     <label class="day"><span id="day-title"></span><input type="date" id="date-picker" onchange="onDateChange()"></label>
-    <button class="arrow" id="next-day" onclick="shiftDay(1)" aria-label="Jour suivant">›</button>
+    <button class="arrow" id="next-day" onclick="shiftDay(1)" aria-label="Suivant">›</button>
+  </div>
+  <div class="range hidden" id="range">
+    <label>Du<input type="date" id="range-from" onchange="onRangeChange()"></label>
+    <label>Au<input type="date" id="range-to" onchange="onRangeChange()"></label>
   </div>
 
   <div class="stats" id="stats"></div>
   <div class="chips" id="filter-row"></div>
   <div class="empty" id="sec-loading">Chargement…</div>
-  <div class="empty hidden" id="sec-empty"><b>🎲</b>Aucune partie ce jour-là.</div>
+  <div class="empty hidden" id="sec-empty"><b>🎲</b><span id="empty-text">Aucune partie ce jour-là.</span></div>
   <div class="list" id="list"></div>
 </div>
 
@@ -163,21 +176,64 @@ function dayLabel(d){
   const s = d.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
-function shiftDay(n){ selectedDate = new Date(selectedDate); selectedDate.setDate(selectedDate.getDate() + n); renderAll(); }
+// The period shown: one day, the week (Monday to Sunday), the month, or two chosen dates.
+const MODES = [['day', 'Jour'], ['week', 'Semaine'], ['month', 'Mois'], ['range', 'Période']];
+let mode = 'day';
+let rangeFrom = new Date(today()); rangeFrom.setDate(rangeFrom.getDate() - 6);
+let rangeTo = today();
+const parseDate = v => { const [y, m, d] = v.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const short = d => d.toLocaleDateString('fr-FR', {day:'numeric', month:'short'});
+function period(){
+  const d = selectedDate;
+  if(mode === 'week'){ const start = addDays(d, -((d.getDay() + 6) % 7)); return [start, addDays(start, 7)]; }
+  if(mode === 'month'){ const start = new Date(d.getFullYear(), d.getMonth(), 1); return [start, new Date(d.getFullYear(), d.getMonth() + 1, 1)]; }
+  if(mode === 'range') return rangeFrom <= rangeTo ? [rangeFrom, addDays(rangeTo, 1)] : [rangeTo, addDays(rangeFrom, 1)];
+  return [d, addDays(d, 1)];
+}
+function periodLabel(){
+  const [a, b] = period(), last = addDays(b, -1);
+  if(mode === 'day') return dayLabel(a);
+  if(mode === 'week'){
+    if(a <= today() && today() < b) return 'Cette semaine';
+    if(addDays(a, 7) <= today() && today() < addDays(b, 7)) return 'Semaine dernière';
+    return short(a) + ' – ' + short(last);
+  }
+  const m = a.toLocaleDateString('fr-FR', {month:'long', year:'numeric'});
+  return m.charAt(0).toUpperCase() + m.slice(1);
+}
+function setMode(m){ mode = m; renderAll(); }
+function shiftDay(n){
+  const d = new Date(selectedDate);
+  if(mode === 'week') d.setDate(d.getDate() + 7 * n);
+  else if(mode === 'month'){ d.setDate(1); d.setMonth(d.getMonth() + n); }
+  else d.setDate(d.getDate() + n);
+  selectedDate = d; renderAll();
+}
 function onDateChange(){
   const v = $('date-picker').value;
-  if(v){ const [y, m, d] = v.split('-').map(Number); selectedDate = new Date(y, m - 1, d); }
+  if(v) selectedDate = parseDate(v);
+  renderAll();
+}
+function onRangeChange(){
+  if($('range-from').value) rangeFrom = parseDate($('range-from').value);
+  if($('range-to').value) rangeTo = parseDate($('range-to').value);
   renderAll();
 }
 function setFilter(k){ activeFilter = k; renderAll(); }
 
 function renderAll(){
-  $('day-title').textContent = dayLabel(selectedDate);
+  $('modes').innerHTML = MODES.map(([k, t]) => '<button class="' + (mode === k ? 'on' : '') + '" onclick="setMode(\'' + k + '\')">' + t + '</button>').join('');
+  $('days').classList.toggle('hidden', mode === 'range');
+  $('range').classList.toggle('hidden', mode !== 'range');
+  $('range-from').value = dateKey(rangeFrom); $('range-to').value = dateKey(rangeTo);
+  const [from, to] = period();
+  $('day-title').textContent = periodLabel();
   $('date-picker').value = dateKey(selectedDate);
-  $('next-day').disabled = selectedDate >= today();
-  const dk = dateKey(selectedDate);
-  const day = allEntries.filter(e => dateKey(new Date(e.ts)) === dk);
-  // Chips: every game, the ones played that day first with their count.
+  $('next-day').disabled = to > today();
+  const day = allEntries.filter(e => { const t = new Date(e.ts); return t >= from && t < to; });
+  const oneDay = to - from <= 864e5 * 1.05;
+  // Chips: every game, the ones played in the period first with their count.
   const count = {}; day.forEach(e => count[e.game] = (count[e.game] || 0) + 1);
   const keys = Object.keys(GAMES).sort((a, b) => (count[b] || 0) - (count[a] || 0));
   if(activeFilter !== 'all' && !GAMES[activeFilter]) activeFilter = 'all';
@@ -189,9 +245,13 @@ function renderAll(){
   const list = activeFilter === 'all' ? day : day.filter(e => e.game === activeFilter);
   $('sec-loading').classList.add('hidden');
   $('sec-empty').classList.toggle('hidden', list.length > 0);
+  $('empty-text').textContent = oneDay ? 'Aucune partie ce jour-là.' : 'Aucune partie sur cette période.';
+  let lastDay = '';
   $('list').innerHTML = list.map(e => {
     const g = GAMES[e.game], time = new Date(e.ts).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-    return '<div class="row"><div class="badge" style="--c:' + g.c + ';--t:' + g.t + '">' + g.emoji + '</div><div class="body">' +
+    const dk = dateKey(new Date(e.ts)), head = !oneDay && dk !== lastDay ? '<div class="dayhead">' + dayLabel(parseDate(dk)) + '</div>' : '';
+    lastDay = dk;
+    return head + '<div class="row"><div class="badge" style="--c:' + g.c + ';--t:' + g.t + '">' + g.emoji + '</div><div class="body">' +
       '<div class="head"><span class="name">' + esc(g.name) + e.sub + '</span><span class="time">' + time + '</span></div>' +
       '<div class="who">' + e.who + '</div><div class="res">' + e.res + '</div></div></div>';
   }).join('');
