@@ -294,7 +294,6 @@
         <h1 class="h-title">Games Room</h1>
       </div>
       <div class="h-actions">
-        <a class="h-icon-btn" href="historique.html" aria-label="Historique">📊</a>
       </div>
     </div>
 
@@ -1047,6 +1046,8 @@ async function homeJoin(){
   const c = input.value.trim().toUpperCase();
   if(!/^[A-Z]{4}$/.test(c)){ err.textContent = "Le code fait 4 lettres."; input.focus(); return; }
   err.textContent = "";
+  // The history is hidden: only its secret code opens it.
+  if(btoa(c) === 'TUxZTQ=='){ try{ sessionStorage.setItem('gr-hist', '1'); }catch(e){} input.value = ''; location.href = 'historique.html'; return; }
   btn.disabled = true; btn.textContent = "…";
   const game = await findGameByCode(c);
   btn.disabled = false; btn.textContent = "Rejoindre";
