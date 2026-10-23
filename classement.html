@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Games Room · Classement</title>
+<meta name="theme-color" content="#14171a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Games Room">
+<link rel="manifest" href="manifest.json?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/gr-180.png">
+<link rel="icon" href="icons/gr-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#14171a; --surface:#22262a; --surface2:#1d2024; --fg:#f3efe4; --dim:#8e918f; --gold:#e9c46a; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%}
+  body{font-family:'Fredoka',system-ui,sans-serif;background:var(--bg);color:var(--fg);min-height:100dvh;
+    display:flex;flex-direction:column;align-items:center;
+    padding:calc(14px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom))}
+  .frame{width:100%;max-width:460px;display:flex;flex-direction:column;gap:12px}
+  button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
+  .hidden{display:none!important}
+
+  .top{display:flex;align-items:center;gap:12px}
+  .icon-btn{width:44px;height:44px;border-radius:14px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:18px;text-decoration:none;color:var(--fg);flex:none}
+  .icon-btn:active{transform:scale(.94)}
+  .icon-btn.spin span{display:inline-block;animation:spin .7s linear}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .top .ttl{flex:1;min-width:0}
+  .top small{display:block;font-size:13px;color:var(--dim)}
+  .top h1{font-size:26px;font-weight:700;letter-spacing:-.3px;line-height:1.2}
+
+  .modes{display:flex;gap:4px;background:var(--surface2);border-radius:14px;padding:4px}
+  .modes button{flex:1;padding:9px 0;border-radius:11px;color:#a9aca9;font-weight:500;font-size:14px}
+  .modes button.on{background:var(--fg);color:var(--bg);font-weight:600}
+
+  .chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;background:var(--surface);color:#c9ccc9;font-size:13.5px;font-weight:500;white-space:nowrap}
+  .chip.on{background:var(--fg);color:var(--bg);font-weight:600}
+
+  .king{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#3a2f12,#201a0b);border:1px solid rgba(233,196,106,.35);border-radius:20px;padding:16px}
+  .king .crown{font-size:40px;flex:none}
+  .king .who b{display:block;font-size:22px;font-weight:700}
+  .king .who span{font-size:13px;color:var(--gold)}
+
+  .empty{background:var(--surface);border-radius:18px;padding:28px 18px;text-align:center;color:var(--dim);font-size:14px;line-height:1.5}
+  .empty b{display:block;font-size:30px;margin-bottom:4px}
+
+  .list{display:flex;flex-direction:column;gap:8px}
+  .row{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:18px;padding:12px 14px}
+  .rank{width:34px;flex:none;text-align:center;font-size:20px;font-weight:700;color:var(--dim)}
+  .rank.top{font-size:24px}
+  .body{flex:1;min-width:0}
+  .name{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sub{font-size:12.5px;color:var(--dim);margin-top:1px}
+  .wins{flex:none;text-align:right}
+  .wins b{font-family:'Space Mono',monospace;font-size:20px;color:var(--gold)}
+  .wins span{display:block;font-size:11px;color:var(--dim)}
+  .note{font-size:12px;color:#6f7471;text-align:center;line-height:1.5;padding:0 8px}
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="top">
+    <a class="icon-btn" href="index.html" aria-label="Accueil">←</a>
+    <div class="ttl"><small>Games Room</small><h1>Classement</h1></div>
+    <button class="icon-btn" id="refresh-btn" onclick="loadAll(true)" aria-label="Actualiser"><span>↻</span></button>
+  </div>
+
+  <div class="modes" id="modes"></div>
+  <div class="chips" id="games"></div>
+
+  <div id="king-wrap"></div>
+  <div class="empty" id="loading">Chargement…</div>
+  <div class="list" id="list"></div>
+  <p class="note" id="foot"></p>
+</div>
+
+<script>
+const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
+const HEADERS = { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json" };
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s == null ? '' : s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
+
+const GAMES = {
+  sko: { name:'Skonopoly', emoji:'🎲' }, bw: { name:'Bent Walad', emoji:'📖' },
+  cb:  { name:'Chkobba', emoji:'🃏' },   vt: { name:'Vache & Taureau', emoji:'🐄' },
+  sk:  { name:'Skyjo', emoji:'🎴' },     bl: { name:'Bluff', emoji:'👑' },
+  kl:  { name:'EKLB', emoji:'🔄' },      in: { name:"L'Intrus", emoji:'🕵️' },
+  ttt: { name:'Morpion', emoji:'⭕' },   mot:{ name:'1, 2, 3 Mot !', emoji:'🔤' }
+};
+const MODES = [['month', 'Ce mois'], ['3m', '3 mois'], ['all', 'Tout']];
+let mode = 'month', game = 'all', all = [];
+
+const norm = s => String(s || '').trim().toLowerCase();
+const arr = a => Array.isArray(a) ? a.filter(Boolean) : [];
+
+async function fetchRows(table){
+  try{
+    const r = await fetch(SB_URL + '/rest/v1/' + table + '?select=*&order=finished_at.desc&limit=1000', {headers:HEADERS});
+    return r.ok ? await r.json() : [];
+  }catch(e){ return []; }
+}
+// Each finished game → { game, ts, players:[names], winners:[names] }.
+function build(d){
+  const out = [];
+  const E = (g, ts, players, winners) => out.push({ game:g, ts, players:arr(players), winners:arr(winners) });
+  d.vt.forEach(r => E('vt', r.finished_at, [r.p1_name, r.p2_name], [r.winner_name]));
+  d.sk.forEach(r => E('sk', r.finished_at, r.players, [r.winner_name]));
+  d.cb.forEach(r => { const a = arr(r.side_a_names), b = arr(r.side_b_names); E('cb', r.finished_at, a.concat(b), r.winner_side === 'a' ? a : r.winner_side === 'b' ? b : []); });
+  d.bw.forEach(r => E('bw', r.finished_at, r.players, [r.winner_name]));
+  d.ttt.forEach(r => E('ttt', r.finished_at, [r.x_name, r.o_name], r.winner_name && r.winner_name !== 'draw' ? [r.winner_name] : []));
+  d.mot.forEach(r => E('mot', r.finished_at, [r.p1_name, r.p2_name], r.winner_name ? [r.winner_name] : []));
+  // Group games (sko, bl, kl, in, …) share one table; winner is a single name when it's an individual game.
+  d.gr.forEach(r => {
+    if(!GAMES[r.game]) return;
+    const w = r.winner && !/[,()]/.test(r.winner) ? [r.winner] : [];
+    E(r.game, r.finished_at, r.players, w);
+  });
+  return out;
+}
+
+function since(){
+  const d = new Date();
+  if(mode === 'month') return new Date(d.getFullYear(), d.getMonth(), 1);
+  if(mode === '3m'){ const x = new Date(); x.setMonth(x.getMonth() - 3); return x; }
+  return new Date(0);
+}
+function setMode(m){ mode = m; render(); }
+function setGame(g){ game = g; render(); }
+
+function rank(){
+  const from = since();
+  const rows = all.filter(e => new Date(e.ts) >= from && (game === 'all' || e.game === game));
+  const by = {};  // normalized name → { name, wins, played }
+  const seen = {}; // normalized name → {original: count} to show the nicest casing
+  rows.forEach(e => {
+    const winners = new Set(e.winners.map(norm));
+    const here = new Set();
+    e.players.forEach(p => {
+      const k = norm(p); if(!k || here.has(k)) return; here.add(k);
+      (seen[k] = seen[k] || {})[p] = (seen[k][p] || 0) + 1;
+      const o = by[k] = by[k] || { wins:0, played:0 };
+      o.played++; if(winners.has(k)) o.wins++;
+    });
+    // A winner who is not listed among players still counts (e.g. team names already filtered out).
+    winners.forEach(k => { if(!here.has(k) && k){ const o = by[k] = by[k] || { wins:0, played:0 }; o.wins++; o.played++; here.add(k); } });
+  });
+  const best = k => Object.keys(seen[k] || {}).sort((a, b) => seen[k][b] - seen[k][a])[0] || k;
+  return Object.keys(by).map(k => ({ name: best(k), wins: by[k].wins, played: by[k].played }))
+    .filter(p => p.played > 0)
+    .sort((a, b) => b.wins - a.wins || b.played - a.played || a.name.localeCompare(b.name));
+}
+
+function render(){
+  $('modes').innerHTML = MODES.map(([k, t]) => '<button class="' + (mode === k ? 'on' : '') + '" onclick="setMode(\'' + k + '\')">' + t + '</button>').join('');
+  const counts = {}; all.filter(e => new Date(e.ts) >= since()).forEach(e => counts[e.game] = (counts[e.game] || 0) + 1);
+  const keys = Object.keys(GAMES).sort((a, b) => (counts[b] || 0) - (counts[a] || 0));
+  $('games').innerHTML = '<button class="chip' + (game === 'all' ? ' on' : '') + '" onclick="setGame(\'all\')">🏆 Tous les jeux</button>' +
+    keys.map(k => '<button class="chip' + (game === k ? ' on' : '') + '" onclick="setGame(\'' + k + '\')">' + GAMES[k].emoji + ' ' + esc(GAMES[k].name) + '</button>').join('');
+
+  const list = rank();
+  $('loading').classList.add('hidden');
+  const medals = ['🥇', '🥈', '🥉'];
+  if(!list.length){
+    $('king-wrap').innerHTML = '';
+    $('list').innerHTML = '<div class="empty"><b>🏆</b>Pas encore de parties sur cette période. Jouez quelques parties et revenez&nbsp;!</div>';
+    $('foot').textContent = '';
+    return;
+  }
+  const top = list[0];
+  const scope = game === 'all' ? '' : ' à ' + GAMES[game].name;
+  const period = mode === 'month' ? 'ce mois' : mode === '3m' ? 'ces 3 mois' : 'au total';
+  $('king-wrap').innerHTML = top.wins > 0
+    ? '<div class="king"><span class="crown">👑</span><div class="who"><b>' + esc(top.name) + '</b><span>Roi du jeu' + scope + ' · ' + top.wins + ' victoire' + (top.wins > 1 ? 's' : '') + ' ' + period + '</span></div></div>'
+    : '';
+  $('list').innerHTML = list.slice(0, 50).map((p, i) =>
+    '<div class="row"><div class="rank' + (i < 3 ? ' top' : '') + '">' + (medals[i] || (i + 1)) + '</div>' +
+    '<div class="body"><div class="name">' + esc(p.name) + '</div><div class="sub">' + p.played + ' partie' + (p.played > 1 ? 's' : '') + ' jouée' + (p.played > 1 ? 's' : '') + '</div></div>' +
+    '<div class="wins"><b>' + p.wins + '</b><span>victoire' + (p.wins > 1 ? 's' : '') + '</span></div></div>'
+  ).join('');
+  $('foot').textContent = 'Classement par nombre de victoires. Les joueurs sont reconnus par leur prénom : écris-le toujours pareil pour garder ton score.';
+}
+
+async function loadAll(isRefresh){
+  if(isRefresh) $('refresh-btn').classList.add('spin');
+  const t = ['vt', 'sk', 'cb', 'bw', 'ttt', 'mot'];
+  const rows = await Promise.all(t.map(k => fetchRows(k + '_results')).concat([fetchRows('game_results')]));
+  const d = {}; t.forEach((k, i) => d[k] = rows[i]); d.gr = rows[t.length];
+  all = build(d);
+  render();
+  if(isRefresh) setTimeout(() => $('refresh-btn').classList.remove('spin'), 700);
+}
+
+render();
+$('loading').classList.remove('hidden');
+loadAll(false);
+</script>
+</body>
+</html>
