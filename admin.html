@@ -285,8 +285,11 @@ async function archiveOne(game, code){
   catch(e){ toast('Pas réussi, réessaie'); }
 }
 
-let ok = false; try{ ok = sessionStorage.getItem('gr-admin-ok') === '1' && !!PIN; }catch(e){}
-if(ok) unlocked(); else setTimeout(() => $('lock-code').focus(), 300);
+// Opened right after typing the code on the accueil → unlock once; every other open asks the code again.
+let justEntered = false;
+try{ justEntered = sessionStorage.getItem('gr-admin-enter') === '1'; sessionStorage.removeItem('gr-admin-enter'); }catch(e){}
+if(justEntered && PIN){ try{ sessionStorage.setItem('gr-admin-ok', '1'); }catch(e){} unlocked(); }
+else setTimeout(() => $('lock-code').focus(), 300);
 </script>
 </body>
 </html>
