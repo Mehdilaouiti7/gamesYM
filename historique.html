@@ -11,6 +11,10 @@
 <link rel="manifest" href="manifest.json?v=2">
 <link rel="apple-touch-icon" sizes="180x180" href="icons/gr-180.png">
 <link rel="icon" href="icons/gr-32.png">
+<script>
+  // Hidden page: opened only through its code on the home page.
+  try{ if(sessionStorage.getItem('gr-hist') !== '1') location.replace('index.html'); }catch(e){ location.replace('index.html'); }
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
