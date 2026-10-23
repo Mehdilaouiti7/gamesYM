@@ -11,7 +11,7 @@ window.GYMAuth = (function(){
   var URL_ = 'https://mqfyuprpztiyfpleannt.supabase.co';
   var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk';
   var LS = 'gym-auth';
-  var ENFORCE = false;   // ← flip to true to turn the wall on everywhere
+  var ENFORCE = true;    // wall ON: sign-in required on every page that includes this script
 
   var session = null, user = null, listeners = [];
   function enforced(){
