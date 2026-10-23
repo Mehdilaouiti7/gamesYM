@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Games Room · Admin</title>
+<meta name="theme-color" content="#14171a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Games Room">
+<link rel="manifest" href="manifest.json?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/gr-180.png">
+<link rel="icon" href="icons/gr-32.png">
+<script>
+  // Admin only: the code typed on the home page unlocks this page on this phone.
+  try{ if(!localStorage.getItem('gr-admin')) location.replace('index.html'); }catch(e){ location.replace('index.html'); }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#14171a; --surface:#22262a; --surface2:#1d2024; --fg:#f3efe4; --dim:#8e918f; --gold:#e9c46a; --green:#59c48a; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%}
+  body{
+    font-family:'Fredoka',system-ui,sans-serif;background:var(--bg);color:var(--fg);
+    min-height:100dvh;display:flex;flex-direction:column;align-items:center;
+    padding:calc(14px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
+  }
+  .frame{width:100%;max-width:460px;display:flex;flex-direction:column;gap:12px}
+  button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
+  .hidden{display:none!important}
+
+  .top{display:flex;align-items:center;gap:12px}
+  .icon-btn{width:44px;height:44px;border-radius:14px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:18px;text-decoration:none;color:var(--fg);flex:none}
+  .icon-btn:active{transform:scale(.94)}
+  .icon-btn.spin span{display:inline-block;animation:spin .7s linear}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .top .ttl{flex:1;min-width:0}
+  .top small{display:block;font-size:13px;color:var(--dim)}
+  .top h1{font-size:26px;font-weight:700;letter-spacing:-.3px;line-height:1.2}
+
+  .tabs{display:flex;gap:4px;background:var(--surface2);border-radius:14px;padding:4px}
+  .tabs button{flex:1;padding:9px 0;border-radius:11px;color:#a9aca9;font-weight:500;font-size:14px}
+  .tabs button.on{background:var(--fg);color:var(--bg);font-weight:600}
+
+  .label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin:6px 2px 0;display:flex;align-items:center;gap:8px}
+  .label button{margin-left:auto;text-transform:none;letter-spacing:0;font-size:13px;color:var(--gold)}
+  .empty{background:var(--surface);border-radius:18px;padding:24px 18px;text-align:center;color:var(--dim);font-size:14px;line-height:1.5}
+  .list{display:flex;flex-direction:column;gap:8px}
+
+  .row{display:flex;gap:12px;align-items:center;background:var(--surface);border-radius:18px;padding:10px}
+  .badge{width:48px;height:48px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--c);color:var(--t);position:relative}
+  .live{position:absolute;top:-3px;right:-3px;width:13px;height:13px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--surface);animation:pulse 1.6s infinite}
+  @keyframes pulse{50%{opacity:.45}}
+  .body{flex:1;min-width:0}
+  .head{display:flex;align-items:center;gap:8px}
+  .name{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .code{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.08em;padding:1px 7px;border-radius:7px;background:#2c3136;color:#cfd2cf}
+  .pill{margin-left:auto;flex:none;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:999px}
+  .pill.wait{background:#3a3220;color:var(--gold)}
+  .pill.play{background:#1f3a2c;color:var(--green)}
+  .who{font-size:12.5px;color:var(--dim);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ago{font-size:12px;color:#6f7471;margin-top:1px}
+
+  .switch{position:relative;width:50px;height:30px;flex:none;border-radius:999px;background:#3a3f44;transition:background .2s}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s}
+  .switch.on{background:var(--green)}
+  .switch.on::after{transform:translateX(20px)}
+  .state{font-size:12.5px;margin-top:2px;color:var(--dim)}
+  .state.off{color:#ff8a7a}
+
+  .card-link{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:18px;padding:14px;text-decoration:none;color:var(--fg)}
+  .card-link b{display:block;font-size:16px}
+  .card-link span{font-size:13px;color:var(--dim)}
+  .card-link i{margin-left:auto;font-style:normal;color:var(--dim);font-size:20px}
+  .note{font-size:12.5px;color:var(--dim);line-height:1.45;padding:0 4px}
+  .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#f3efe4;color:#14171a;font-weight:600;font-size:14px;padding:10px 16px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:9}
+</style>
+<link rel="stylesheet" href="responsive.css">
+</head>
+<body>
+<div class="frame">
+  <div class="top">
+    <a class="icon-btn" href="index.html" aria-label="Retour à l'accueil">←</a>
+    <div class="ttl"><small>Games Room</small><h1>Mode admin</h1></div>
+    <button class="icon-btn" id="refresh-btn" onclick="loadLive(true)" aria-label="Actualiser"><span>↻</span></button>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="on" data-t="live" onclick="tab('live')">En cours</button>
+    <button data-t="games" onclick="tab('games')">Jeux</button>
+    <button data-t="more" onclick="tab('more')">Plus</button>
+  </div>
+
+  <section id="t-live">
+    <div class="label"><span id="live-title">Parties des dernières 24 h</span><button id="live-range" onclick="toggleRange()">Voir 7 jours</button></div>
+    <div class="list" id="live-list" style="margin-top:8px"><div class="empty">Chargement…</div></div>
+  </section>
+
+  <section id="t-games" class="hidden">
+    <p class="note">Un jeu caché n'apparaît plus sur l'accueil des autres. Toi, tu le vois toujours (marqué 🔒) pour le tester. On peut quand même rejoindre une partie cachée avec son code.</p>
+    <div class="list" id="games-list" style="margin-top:10px"></div>
+  </section>
+
+  <section id="t-more" class="hidden">
+    <div class="list">
+      <a class="card-link" href="historique.html"><span style="font-size:26px">📊</span><div><b>Historique</b><span>Toutes les parties terminées</span></div><i>›</i></a>
+      <button class="card-link" onclick="leaveAdmin()" style="text-align:left;width:100%"><span style="font-size:26px">🚪</span><div><b>Quitter le mode admin</b><span>Sur ce téléphone</span></div><i>›</i></button>
+    </div>
+  </section>
+</div>
+
+<script>
+const SB_URL = "https://mqfyuprpztiyfpleannt.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZnl1cHJwenRpeWZwbGVhbm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjg3MjUsImV4cCI6MjA4OTkwNDcyNX0.4Fvc-fNlwhVp0HvOEL-Z92i9W4YvVSAgen0ihBzlGOk";
+const HEADERS = { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json" };
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s == null ? '' : s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }
+let PIN = ''; try{ PIN = localStorage.getItem('gr-admin') || ''; }catch(e){}
+
+// Every game of the home page, with the colours of its tile (live: has a table of rooms).
+const GAMES = {
+  vt:  { name:'Vache & Taureau', emoji:'🐄', c:'#f4ecd8', t:'#5a2a1c', live:true },
+  dm:  { name:'Dlilek Mlek', emoji:'💼', c:'#120f1f', t:'#f2c14e', live:true },
+  ttt: { name:'Morpion', emoji:'⭕', c:'#fbfaf4', t:'#1f3c88', live:true },
+  mot: { name:'1, 2, 3 Mot !', emoji:'🔤', c:'#ff6b2c', t:'#fff', live:true },
+  sk:  { name:'Skyjo', emoji:'🎴', c:'#dff1ff', t:'#123a6b', live:true },
+  tm:  { name:'The Mind', emoji:'🧠', c:'#2a2170', t:'#d9d0ff', live:true },
+  cb:  { name:'Chkobba', emoji:'🃏', c:'#1f5b43', t:'#fdf6e3', live:true },
+  bw:  { name:'Bent Walad', emoji:'📖', c:'#e8d5b0', t:'#2b2118', live:true },
+  in:  { name:"L'Intrus", emoji:'🕵️', c:'#1d2a2f', t:'#efe9dc', live:true },
+  ag:  { name:'Agents secrets', emoji:'🕶️', c:'#0c1726', t:'#e6eefc', live:true },
+  bl:  { name:'Bluff', emoji:'👑', c:'#4d1428', t:'#c9a227', live:true },
+  ui:  { name:'Un indice chacun', emoji:'💡', c:'#efeaff', t:'#2d2a4a', live:true },
+  kl:  { name:'EKLB', emoji:'🔄', c:'#2a1a55', t:'#f4efff', live:true },
+  sko: { name:'Skonopoly', emoji:'🎲', c:'#e9f2fa', t:'#0a4f9c', live:true },
+  tb:  { name:'Taboo', emoji:'🚫', c:'#b81d33', t:'#fff4e0', live:true },
+  ti:  { name:'Tirage au sort', emoji:'🎯', c:'#b81d33', t:'#fff4e0' }
+};
+
+function toast(t){ const el = document.createElement('div'); el.className = 'toast'; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 2200); }
+function tab(t){
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+  ['live', 'games', 'more'].forEach(k => $('t-' + k).classList.toggle('hidden', k !== t));
+  $('refresh-btn').classList.toggle('hidden', t !== 'live');
+}
+function ago(ts){
+  const m = Math.max(0, Math.round((Date.now() - new Date(ts)) / 60000));
+  if(m < 1) return "à l'instant";
+  if(m < 60) return 'il y a ' + m + ' min';
+  const h = Math.round(m / 60);
+  if(h < 24) return 'il y a ' + h + ' h';
+  return 'il y a ' + Math.round(h / 24) + ' j';
+}
+// Rooms store players as a list or as named seats ({p1, p2}, {banker, candidate}…).
+const playerNames = ps => Object.values(ps || {}).filter(p => p && p.name).map(p => p.name);
+
+/* ---------- live rooms ---------- */
+let rangeDays = 1;
+function toggleRange(){ rangeDays = rangeDays === 1 ? 7 : 1; loadLive(true); }
+async function fetchRooms(k, since){
+  try{
+    const r = await fetch(SB_URL + '/rest/v1/' + k + '_games?select=code,updated_at,state&updated_at=gte.' + encodeURIComponent(since) + '&order=updated_at.desc&limit=100', {headers:HEADERS});
+    if(!r.ok) return [];
+    return (await r.json()).map(x => ({ game:k, code:x.code, ts:x.updated_at, status:(x.state || {}).status, players:playerNames((x.state || {}).players) }));
+  }catch(e){ return []; }
+}
+async function loadLive(isRefresh){
+  if(isRefresh) $('refresh-btn').classList.add('spin');
+  $('live-title').textContent = rangeDays === 1 ? 'Parties des dernières 24 h' : 'Parties des 7 derniers jours';
+  $('live-range').textContent = rangeDays === 1 ? 'Voir 7 jours' : 'Voir 24 h';
+  const since = new Date(Date.now() - rangeDays * 864e5).toISOString();
+  const all = (await Promise.all(Object.keys(GAMES).filter(k => GAMES[k].live).map(k => fetchRooms(k, since)))).flat()
+    .filter(r => r.status === 'waiting' || r.status === 'playing')
+    .sort((a, b) => new Date(b.ts) - new Date(a.ts));
+  $('live-list').innerHTML = all.length ? all.map(r => {
+    const g = GAMES[r.game], fresh = Date.now() - new Date(r.ts) < 10 * 60000;
+    return '<div class="row"><div class="badge" style="--c:' + g.c + ';--t:' + g.t + '">' + g.emoji + (fresh ? '<span class="live"></span>' : '') + '</div><div class="body">' +
+      '<div class="head"><span class="name">' + esc(g.name) + '</span><span class="code">' + esc(r.code) + '</span>' +
+      '<span class="pill ' + (r.status === 'waiting' ? 'wait">En attente' : 'play">En cours') + '</span></div>' +
+      '<div class="who">' + (r.players.length ? r.players.map(esc).join(', ') : 'Personne') + '</div>' +
+      '<div class="ago">Dernière action ' + ago(r.ts) + '</div></div></div>';
+  }).join('') : '<div class="empty">Aucune partie en cours.</div>';
+  if(isRefresh) setTimeout(() => $('refresh-btn').classList.remove('spin'), 700);
+}
+
+/* ---------- visible / hidden games ---------- */
+let hidden = [];
+async function loadHidden(){
+  try{
+    const r = await fetch(SB_URL + '/rest/v1/gr_settings?key=eq.hidden_games&select=value', {headers:HEADERS});
+    const rows = r.ok ? await r.json() : [];
+    hidden = rows.length && Array.isArray(rows[0].value) ? rows[0].value : [];
+  }catch(e){}
+  renderGames();
+}
+function renderGames(){
+  $('games-list').innerHTML = Object.keys(GAMES).map(k => {
+    const g = GAMES[k], on = !hidden.includes(k);
+    return '<div class="row"><div class="badge" style="--c:' + g.c + ';--t:' + g.t + '">' + g.emoji + '</div><div class="body">' +
+      '<div class="name">' + esc(g.name) + '</div><div class="state' + (on ? '' : ' off') + '">' + (on ? 'Visible pour tout le monde' : '🔒 Caché, visible seulement pour toi') + '</div></div>' +
+      '<button class="switch' + (on ? ' on' : '') + '" onclick="toggleGame(\'' + k + '\')" aria-label="Afficher ' + esc(g.name) + '"></button></div>';
+  }).join('');
+}
+async function toggleGame(k){
+  const before = hidden.slice();
+  hidden = hidden.includes(k) ? hidden.filter(x => x !== k) : hidden.concat(k);
+  renderGames();
+  try{
+    const r = await fetch(SB_URL + '/rest/v1/rpc/gr_admin_set', { method:'POST', headers:HEADERS, body: JSON.stringify({ pin: PIN, k: 'hidden_games', v: hidden }) });
+    if(!r.ok) throw new Error();
+    try{ localStorage.setItem('gr-hidden', JSON.stringify(hidden)); }catch(e){}
+    toast(hidden.includes(k) ? GAMES[k].name + ' est caché' : GAMES[k].name + ' est visible');
+  }catch(e){
+    hidden = before; renderGames(); toast("Pas enregistré, réessaie");
+  }
+}
+
+function leaveAdmin(){
+  if(!confirm('Quitter le mode admin sur ce téléphone ?')) return;
+  try{ localStorage.removeItem('gr-admin'); }catch(e){}
+  location.href = 'index.html';
+}
+
+loadLive(false);
+loadHidden();
+setInterval(() => { if(!$('t-live').classList.contains('hidden')) loadLive(false); }, 20000);
+</script>
+</body>
+</html>

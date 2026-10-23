@@ -13,7 +13,7 @@
 <link rel="icon" href="icons/gr-32.png">
 <script>
   // Hidden page: opened only through its code on the home page.
-  try{ if(sessionStorage.getItem('gr-hist') !== '1') location.replace('index.html'); }catch(e){ location.replace('index.html'); }
+  try{ if(!localStorage.getItem('gr-admin')) location.replace('index.html'); }catch(e){ location.replace('index.html'); }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -84,7 +84,7 @@
 <body>
 <div class="frame">
   <div class="top">
-    <a class="icon-btn" href="index.html" aria-label="Retour à l'accueil">←</a>
+    <a class="icon-btn" href="admin.html" aria-label="Retour au mode admin">←</a>
     <div class="ttl"><small>Toutes les parties</small><h1>Historique</h1></div>
     <button class="icon-btn" id="refresh-btn" onclick="loadAll(true)" aria-label="Actualiser"><span>↻</span></button>
   </div>
