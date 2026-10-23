@@ -64,10 +64,15 @@ window.GYMUI = (function(){
   // Name remembered across games (shown on the home screen greeting too).
   function rememberName(n){ n = (n||'').trim(); if(n) try{ localStorage.setItem('gym-player-name', n); }catch(e){} }
   function savedName(){ try{ return localStorage.getItem('gym-player-name') || ''; }catch(e){ return ''; } }
+  // The avatar is now remembered across games (same identity everywhere).
+  function rememberAvatar(a){ if(a) try{ localStorage.setItem('gym-player-avatar', a); }catch(e){} }
+  function savedAvatar(){ try{ return localStorage.getItem('gym-player-avatar') || ''; }catch(e){ return ''; } }
+  // A stable per-device id, for future identity needs (kept even if the name changes).
+  function uid(){ try{ let v = localStorage.getItem('gym-uid'); if(!v){ v = 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); localStorage.setItem('gym-uid', v); } return v; }catch(e){ return ''; } }
   function prefillNames(ids){
     const n = savedName(); if(!n) return;
     ids.forEach(function(id){ const el = $(id); if(el && !el.value) el.value = n; });
   }
 
-  return { openRules, closeRules, screen, copyLink, share, renderCode, rememberName, savedName, prefillNames };
+  return { openRules, closeRules, screen, copyLink, share, renderCode, rememberName, savedName, prefillNames, rememberAvatar, savedAvatar, uid };
 })();
