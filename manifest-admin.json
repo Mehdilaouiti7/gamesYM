@@ -6,7 +6,22 @@
   "background_color": "#14171a",
   "theme_color": "#14171a",
   "icons": [
-    { "src": "icons/admin-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/admin-180.png", "sizes": "180x180", "type": "image/png" }
+    {
+      "src": "icons/gr-admin-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/gr-admin-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/gr-admin-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
   ]
 }
