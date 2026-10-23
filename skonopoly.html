@@ -320,6 +320,7 @@
   .pl-props span{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:#f2f7fc;font-size:13px}
   .pl-props span i{width:10px;height:10px;border-radius:3px;background:var(--g)}
 
+  .share-btn{background:#25d366!important;color:#07351f!important}
   .sko-end{display:flex;flex-direction:column;align-items:center;gap:12px;padding:30px 4px 0;text-align:center}
   .sko-end h2{font-family:'Titan One',sans-serif;font-weight:400;font-size:34px;line-height:1.1}
   .sko-end .ar{font-family:'Marhey',sans-serif;font-size:22px;color:#ffd7db}
@@ -430,6 +431,7 @@
       <div class="ui-rank" id="end-rank"></div>
     </div>
     <div class="ui-dock">
+      <button class="ui-btn share-btn" onclick="GYMShare.now()">📤 Partager le résultat</button>
       <div class="ui-dock-row">
         <a class="ui-sq" href="index.html" aria-label="Accueil" style="text-decoration:none">🏠</a>
         <button class="ui-btn" onclick="location.href='skonopoly.html'">🔁 Nouvelle partie</button>
@@ -472,6 +474,7 @@
 <script src="avatar-picker.js"></script>
 <script src="game-link.js"></script>
 <script src="gym-ui.js"></script>
+<script src="share-card.js"></script>
 <script src="gym-room.js"></script>
 <script>
 const R = GYMRoom, $ = id => document.getElementById(id), esc = R.esc;
@@ -1558,6 +1561,12 @@ function renderEnd(st){
   $('end-sub').textContent = 'Le dernier joueur qui n’a pas fait faillite gagne.';
   $('end-rank').innerHTML = order.map((i, pos) => '<div><span class="pos">' + (pos + 1) + '</span><span class="av">' + av(st.players[i]) + '</span><span class="nm">' + esc(nm(st, i)) + (i === R.me ? ' (toi)' : '') + '</span><span class="pts">' + (i === w ? DT(st.money[i]) : '💥') + '</span></div>').join('');
   if(w === R.me && window.GYMFeedback && !renderEnd.done){ renderEnd.done = true; window.GYMFeedback.win(); }
+  if(window.GYMShare) GYMShare.set({
+    game: 'Skonopoly', emoji: '🎲', color: '#0a4f9c',
+    winner: nm(st, w), sub: 'remporte la partie',
+    scoreLabel: 'DT',
+    podium: order.slice(0, 3).map(i => ({ name: nm(st, i), avatar: (st.players[i] && st.players[i].avatar) || '🙂', score: st.money[i], me: i === R.me }))
+  });
 }
 
 /* ---------- player photo: cut out the head on the phone (MediaPipe), nothing is uploaded but the small result ---------- */
