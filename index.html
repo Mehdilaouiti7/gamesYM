@@ -1085,7 +1085,7 @@ async function homeJoin(){
   // The admin code (checked by the server) opens the admin page instead of a game.
   const [admin, game] = await Promise.all([isAdminCode(c), findGameByCode(c)]);
   btn.disabled = false; btn.textContent = "Rejoindre";
-  if(admin){ try{ localStorage.setItem('gr-admin', c); sessionStorage.setItem('gr-admin-ok', '1'); }catch(e){} input.value = ''; location.href = 'admin.html'; return; }
+  if(admin){ try{ localStorage.setItem('gr-admin', c); sessionStorage.setItem('gr-admin-enter', '1'); }catch(e){} input.value = ''; location.href = 'admin.html'; return; }
   if(!game){ err.textContent = "Partie introuvable. Vérifie le code."; return; }
   if(game==='vt'){
     $('join-code').value = c;
