@@ -983,7 +983,7 @@ const faceTf = v => 'rotateX(' + FACE[v][0] + 'deg) rotateY(' + FACE[v][1] + 'de
 const RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const SND = name => { if(window.CafeSound && window.CafeSound[name]) window.CafeSound[name](); };
 let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;   // Math.random is stubbed during previews
-let shown = null, prev = null, busyUntil = 0, panelTimer = null, dying = {}, pendingOwn = {}, shownMoney = null, jailClosing = {};
+let shown = null, prev = null, busyUntil = 0, panelTimer = null, dying = {}, pendingOwn = {}, shownMoney = null, jailClosing = {}, moAnim = {};
 const STEP = 190;
 
 function placeTokens(st){
@@ -1063,7 +1063,7 @@ function bills(from, to, amount){
 }
 function countMoney(i, from, to){
   const el = $('mo-' + i); if(!el) return;
-  if(RM || from === to){ el.textContent = DT(to); return; }
+  if(RM || from === to){ el.textContent = DT(to); shownMoney[i] = to; moAnim[i] = false; return; }
   const t0 = performance.now(), dur = 900;
   const tick = now => {
     const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
@@ -1072,7 +1072,7 @@ function countMoney(i, from, to){
     else {
       // A newer move may have changed the balance meanwhile: always end on the real amount.
       const cur = R.state && R.state.money ? R.state.money[i] : to;
-      el.textContent = DT(cur); shownMoney[i] = cur;
+      el.textContent = DT(cur); shownMoney[i] = cur; moAnim[i] = false;
     }
   };
   requestAnimationFrame(tick);
@@ -1271,7 +1271,8 @@ function renderPlayers(st){
     el.classList.toggle('turn', i === st.turn && !st.out[i]);
     el.classList.toggle('out', !!st.out[i] && !dying[i]);
     el.querySelector('.jl').textContent = st.jail[i] ? '⛓️' : '';
-    if(shownMoney[i] === undefined || shownMoney[i] === st.money[i]){ shownMoney[i] = st.money[i]; $('mo-' + i).textContent = DT(st.money[i]); }
+    // A balance is either owned by a running count-up animation, or forced to the true amount.
+    if(!moAnim[i]){ shownMoney[i] = st.money[i]; $('mo-' + i).textContent = DT(st.money[i]); }
   });
 }
 function render(st){
@@ -1296,7 +1297,8 @@ function render(st){
       Object.keys(st.props).forEach(i => { if(!a.props[i] && !RM){ pendingOwn[i] = true; setTimeout(() => deedFx(st, +i), t); } });
       Object.keys(st.props).forEach(i => { const o = a.props[i]; if(o && st.props[i].h > o.h) setTimeout(() => houseFx(+i), t); });
       st.out.forEach((o, i) => { if(o && !a.out[i]) setTimeout(() => bankruptFx(i), t); });
-      if(st.money.some((m, i) => m !== a.money[i])){ const before = a; setTimeout(() => moneyFx(before, st), t); }
+      st.money.forEach((m, i) => { if(m !== a.money[i]) moAnim[i] = true; });
+      if(st.money.some((m, i) => m !== a.money[i])) setTimeout(() => moneyFx(a, st), t);
     }
     busyUntil = Math.max(busyUntil, Date.now() + t);
     schedulePanel();
