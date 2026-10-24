@@ -836,6 +836,7 @@ function aBuy(yes){
 function aEnd(){
   R.act(st => {
     if(!myTurn(st) || st.phase !== 'end') return false;
+    if(st.trade) return false;  // the pending trade must be resolved (accepted, refusé ou annulé) first
     if(st.again && !st.jail[R.me]){ st.again = false; st.phase = 'roll'; st.card = null; return; }
     nextTurn(st);
   });
@@ -1402,7 +1403,9 @@ function renderPanel(st){
     html += '<button class="ui-btn go" onclick="aPayDebt()"'+(ok ? '' : ' disabled')+'>' + 'Payer ' + DT(d.amount) + '</button><div class="row">' + manage + '<button class="ui-btn red small" onclick="aBankrupt()">' + 'Faillite' + '</button></div>';
   } else if(st.phase === 'end'){
     const again = st.again && !st.jail[me];
-    html += '<button class="ui-btn'+(again ? ' go' : '')+'" onclick="aEnd()">' + (again ? '🎲 ' + 'Double ! Relancer' : 'Fin du tour ›') + '</button><div class="row">' + manage + trade + '</div>';
+    const pend = !!st.trade;
+    if(pend) html += '<div class="msg">⏳ ' + 'Termine ton échange avec <b>' + esc(nm(st, st.trade.to)) + '</b> avant de finir ton tour (attends sa réponse ou annule ton offre).' + '</div>';
+    html += '<button class="ui-btn'+(again ? ' go' : '')+'" onclick="aEnd()"'+(pend ? ' disabled' : '')+'>' + (again ? '🎲 ' + 'Double ! Relancer' : 'Fin du tour ›') + '</button><div class="row">' + manage + trade + '</div>';
   } else html += '<div class="msg pulse">…</div>';
   p.innerHTML = html;
 }
