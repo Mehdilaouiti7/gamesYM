@@ -322,7 +322,8 @@
     <div class="ui-grab"></div>
     <div class="ui-sheet-title"><span>Comment jouer</span><span class="ar" lang="ar">شكبّة</span></div>
     <div class="ui-step"><b>1</b><span>3 cartes en main, 4 sur la table. À ton tour, touche ta carte puis la table, ou <b>lance-la</b> sur la table. Le bandeau en haut montre le dernier coup ; touche-le pour revoir toute la manche.</span></div>
-    <div class="ui-step"><b>2</b><span>Même valeur sur la table ? Tu la captures. Sinon une combinaison de même somme. Sans capture, ta carte reste posée.</span></div>
+    <div class="ui-step"><b>2</b><span>Même valeur sur la table ? Tu prends <b>une seule</b> carte. Sinon une combinaison de même somme. Sans capture, ta carte reste posée.</span></div>
+    <div class="ui-step"><b>🂫</b><span>Pas de 8-9-10 : <b>Dame</b> (D) vaut 8, <b>Valet</b> (V) vaut 9, <b>Roi</b> (R) vaut 10. Exemple : une Dame prend un 7 + un As.</span></div>
     <div class="ui-step"><b style="background:#f2c14e;color:#3a2c10">★</b><span>Vider la table d'un coup = <b>chkobba</b>, +1 point. Fin de manche : karta, dinari, haya (7♦) et bermila rapportent 1 point chacun.</span></div>
     <div class="ui-step"><b>👥</b><span>À 4 : tu joues avec la personne en face. Premier à 21 !</span></div>
     <button class="ui-btn" data-rules-close>Compris</button>
@@ -392,7 +393,7 @@ function genCode(){
 }
 function saveRole(c, idx){ try{ localStorage.setItem('cb-role-'+c, String(idx)); }catch(e){} }
 function loadRole(c){ try{ const v=localStorage.getItem('cb-role-'+c); return v===null?null:parseInt(v,10); }catch(e){ return null; } }
-function rankLabel(r){ return r===1 ? 'A' : String(r); }
+function rankLabel(r){ return r===1 ? 'A' : r===8 ? 'D' : r===9 ? 'V' : r===10 ? 'R' : String(r); }
 function sideOf(st, idx){ return st.maxPlayers===2 ? idx : idx % 2; }
 function mySide(){ return sideOf(state, me); }
 
@@ -469,7 +470,9 @@ function newHand(st){
 }
 function classifyPlay(table, rank){
   const directIdx = table.map((c,i)=>i).filter(i => table[i].r === rank);
-  if(directIdx.length > 0) return { type:'direct', idxs: directIdx };
+  // Same value on the table → take exactly ONE card (never several, never a combination).
+  if(directIdx.length === 1) return { type:'direct', idxs: directIdx };
+  if(directIdx.length > 1) return { type:'choice', options: directIdx.map(i => [i]) };
   const n = table.length;
   const combos = [];
   for(let mask=1; mask<(1<<n); mask++){
@@ -767,10 +770,18 @@ function endDrag(e){
 }
 document.addEventListener('pointerup', endDrag);
 document.addEventListener('pointercancel', endDrag);
+function captureIsLegal(table, rank, idxs){
+  const cls = classifyPlay(table, rank);
+  const opts = cls.type==='none' ? [] : cls.type==='choice' ? cls.options : [cls.idxs];
+  const key = a => a.slice().sort((x,y)=>x-y).join(',');
+  if(!idxs || idxs.length===0) return opts.length === 0;  // can only place when no capture is possible
+  return opts.some(o => key(o) === key(idxs));
+}
 async function commitPlay(handIdx, capturedIdx){
   busy = true;
   let st = await loadState(code) || state;
   if(st.turn!==me || st.phase!=='playing' || !st.hands[me] || !st.hands[me][handIdx]){ state=st; busy=false; renderCurrent(); return; }
+  if(!captureIsLegal(st.table, st.hands[me][handIdx].r, capturedIdx)){ state=st; busy=false; renderCurrent(); return; }
   playCard(st, me, handIdx, capturedIdx);
   await finalizeAction(st);
 }
